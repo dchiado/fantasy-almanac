@@ -1,0 +1,165 @@
+{
+  "players": [
+    {
+      "draftAuctionValue": 0,
+      "id": 16836,
+      "keeperValue": 0,
+      "keeperValueFuture": 0,
+      "lineupLocked": true,
+      "onTeamId": 0,
+      "player": {
+        "active": true,
+        "defaultPositionId": 3,
+        "draftRanksByRankType": {
+          "STANDARD": {
+            "auctionValue": 0,
+            "published": false,
+            "rank": 2191,
+            "rankSourceId": 0,
+            "rankType": "STANDARD",
+            "slotId": 0
+          },
+          "PPR": {
+            "auctionValue": 0,
+            "published": false,
+            "rank": 2192,
+            "rankSourceId": 0,
+            "rankType": "PPR",
+            "slotId": 0
+          }
+        },
+        "droppable": true,
+        "eligibleSlots": [3, 4, 5, 23, 7, 20, 21],
+        "firstName": "Jared",
+        "fullName": "Jared Abbrederis",
+        "id": 16836,
+        "injured": false,
+        "lastName": "Abbrederis",
+        "ownership": {
+          "activityLevel": null,
+          "auctionValueAverage": 0.0,
+          "auctionValueAverageChange": 0.0,
+          "averageDraftPosition": 0.0,
+          "averageDraftPositionPercentChange": 170.0,
+          "date": 1583758803303,
+          "leagueType": 0,
+          "percentChange": -3.407455014995883e-5,
+          "percentOwned": 0.00568871359223301,
+          "percentStarted": 9.481189320388349e-4
+        },
+        "proTeamId": 0,
+        "seasonOutlook": "",
+        "stats": [
+          {
+            "appliedAverage": 0.0,
+            "appliedTotal": 0.0,
+            "externalId": "2019",
+            "id": "102019",
+            "proTeamId": 0,
+            "scoringPeriodId": 0,
+            "seasonId": 2019,
+            "statSourceId": 1,
+            "statSplitTypeId": 0,
+            "stats": {}
+          },
+          {
+            "appliedAverage": 0.0,
+            "appliedTotal": 0.0,
+            "externalId": "2019",
+            "id": "002019",
+            "proTeamId": 0,
+            "scoringPeriodId": 0,
+            "seasonId": 2019,
+            "statSourceId": 0,
+            "statSplitTypeId": 0,
+            "stats": {}
+          }
+        ]
+      },
+      "ratings": {
+        "0": { "positionalRanking": 0, "totalRanking": 0, "totalRating": 0.0 }
+      },
+      "rosterLocked": true,
+      "status": "FREEAGENT",
+      "tradeLocked": false
+    }
+  ],
+  "positionAgainstOpponent": {
+    "positionalRatings": {
+      "16": {
+        "average": 7.494697093963623,
+        "ratingsByOpponent": {
+          "1": { "average": 8.5, "rank": 18 },
+          "2": { "average": 8.95, "rank": 23 },
+          "3": { "average": 8.575, "rank": 19 },
+          "4": { "average": 11.325, "rank": 30 },
+          "5": { "average": 8.9, "rank": 22 },
+          "6": { "average": 3.612499999999999, "rank": 3 },
+          "7": { "average": 9.225, "rank": 24 },
+          "8": { "average": 8.1875, "rank": 17 },
+          "9": { "average": 4.7875, "rank": 5 },
+          "10": { "average": 6.887499999999999, "rank": 11 },
+          "11": { "average": 7.3375, "rank": 13 },
+          "12": { "average": 3.7249999999999996, "rank": 4 },
+          "13": { "average": 7.225, "rank": 12 },
+          "14": { "average": 6.799999999999999, "rank": 9 },
+          "15": { "average": 11.05, "rank": 29 },
+          "16": { "average": 5.049999999999999, "rank": 7 },
+          "17": { "average": 5.399999999999999, "rank": 8 },
+          "18": { "average": 2.1875, "rank": 2 },
+          "19": { "average": 10.7625, "rank": 28 },
+          "20": { "average": 11.3875, "rank": 31 },
+          "21": { "average": 6.824999999999999, "rank": 10 },
+          "22": { "average": 7.85, "rank": 16 },
+          "23": { "average": 10.5375, "rank": 27 },
+          "24": { "average": 8.8875, "rank": 21 },
+          "25": { "average": 4.962499999999999, "rank": 6 },
+          "26": { "average": 7.824999999999999, "rank": 15 },
+          "27": { "average": 10.0125, "rank": 25 },
+          "28": { "average": 10.475, "rank": 26 },
+          "29": { "average": 11.625, "rank": 32 },
+          "30": { "average": 8.8, "rank": 20 },
+          "33": { "average": 2.112499999999999, "rank": 1 },
+          "34": { "average": 7.5375, "rank": 14 }
+        }
+      },
+      "1": {
+        "average": 16.819204330444336,
+        "ratingsByOpponent": {
+          "1": { "average": 20.661250000000003, "rank": 26 },
+          "2": { "average": 12.64625, "rank": 3 },
+          "3": { "average": 14.096250000000001, "rank": 6 },
+          "4": { "average": 21.11625, "rank": 29 },
+          "5": { "average": 18.36625, "rank": 21 },
+          "6": { "average": 16.215, "rank": 13 },
+          "7": { "average": 15.473749999999999, "rank": 9 },
+          "8": { "average": 20.345, "rank": 25 },
+          "9": { "average": 13.9425, "rank": 5 },
+          "10": { "average": 17.840000000000003, "rank": 18 },
+          "11": { "average": 18.735, "rank": 22 },
+          "12": { "average": 16.146250000000002, "rank": 12 },
+          "13": { "average": 20.950000000000003, "rank": 28 },
+          "14": { "average": 16.0575, "rank": 11 },
+          "15": { "average": 21.9325, "rank": 31 },
+          "16": { "average": 14.3525, "rank": 8 },
+          "17": { "average": 11.345, "rank": 1 },
+          "18": { "average": 18.25875, "rank": 20 },
+          "19": { "average": 21.1875, "rank": 30 },
+          "20": { "average": 17.1525, "rank": 16 },
+          "21": { "average": 17.262500000000003, "rank": 17 },
+          "22": { "average": 23.187500000000004, "rank": 32 },
+          "23": { "average": 12.963750000000001, "rank": 4 },
+          "24": { "average": 14.19125, "rank": 7 },
+          "25": { "average": 15.647499999999999, "rank": 10 },
+          "26": { "average": 16.78, "rank": 14 },
+          "27": { "average": 19.77625, "rank": 23 },
+          "28": { "average": 19.994999999999997, "rank": 24 },
+          "29": { "average": 17.0975, "rank": 15 },
+          "30": { "average": 18.245, "rank": 19 },
+          "33": { "average": 12.1475, "rank": 2 },
+          "34": { "average": 20.919999999999998, "rank": 27 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,75 @@
+.standings-content {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  padding: 20px 0;
+  align-items: center;
+}
+
+.filters {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  max-width: 80%;
+  min-width: 50%;
+  gap: 40px;
+}
+
+.year-filter {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 10px;
+  width: 50%;
+}
+
+.table-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 20px 0;
+  max-width: 100%;
+}
+
+.legend {
+  display: flex;
+  gap: 15px;
+  justify-content: space-around;
+  align-items: center;
+  color: black;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: white;
+  height: 80px;
+  padding: 0 10px;
+  border-radius: 2px;
+}
+
+.legend-champ {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: gold;
+  height: 40px;
+  width: 90px;
+}
+
+.legend-reg-season-champ {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: white;
+  border: 2px solid green;
+  height: 40px;
+  width: 90px;
+}
+
+.legend-last-place {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: white;
+  border: 2px solid saddlebrown;
+  height: 40px;
+  width: 90px;
+}

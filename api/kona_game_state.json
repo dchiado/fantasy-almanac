@@ -1,0 +1,29 @@
+{
+  "gameId": 1,
+  "id": 166975,
+  "members": [
+    {
+      "displayName": "vballer1",
+      "id": "{0E7C6379-971A-4BB3-B82C-736B6C739C0D}",
+      "isLeagueManager": false
+    }
+  ],
+  "scoringPeriodId": 18,
+  "seasonId": 2019,
+  "segmentId": 0,
+  "settings": { "name": "The Gridiron" },
+  "status": {
+    "currentMatchupPeriod": 16,
+    "isActive": true,
+    "latestScoringPeriod": 18
+  },
+  "teams": [
+    {
+      "abbrev": "DUDE",
+      "id": 1,
+      "location": "Little Lebowski",
+      "nickname": "Urban Achievers",
+      "owners": ["{ABCDEFG-1234-1G5T-AFCB-6344BC69A45B}"]
+    }
+  ]
+}

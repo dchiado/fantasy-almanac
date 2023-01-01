@@ -1,0 +1,25 @@
+.records-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 20px 0;
+  align-items: center;
+}
+
+.row-input {
+  max-width: 300px;
+  display: flex;
+  gap: 20px;
+}
+
+.table-container {
+  /* max-width: 80%; */
+  min-width: 50%;
+}
+
+.table-button-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+}

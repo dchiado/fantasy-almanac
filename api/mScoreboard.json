@@ -1,0 +1,1680 @@
+{
+  "draftDetail": {
+    "drafted": true,
+    "inProgress": false
+  },
+  "id": 166975,
+  "schedule": [
+    {
+      "away": {
+        "cumulativeScore": {
+          "losses": 0,
+          "scoreByStat": {
+            "3": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 13.0
+            },
+            "4": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "198": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "72": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "201": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "77": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "15": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "79": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "80": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "82": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "19": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "20": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "86": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 5.0
+            },
+            "24": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 95.0
+            },
+            "88": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "25": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "89": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "26": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "90": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "91": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "92": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "93": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "95": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "96": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "97": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "98": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "35": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "99": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 2.0
+            },
+            "101": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "102": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "103": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "104": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "42": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 343.0
+            },
+            "106": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "43": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 4.0
+            },
+            "44": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "45": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "53": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 32.0
+            },
+            "120": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 20.0
+            },
+            "121": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "122": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "123": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "124": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "125": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "63": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            }
+          },
+          "statBySlot": null,
+          "ties": 0,
+          "wins": 0
+        },
+        "teamId": 7,
+        "tiebreak": 0.0,
+        "totalPoints": 114.32
+      },
+      "home": {
+        "cumulativeScore": {
+          "losses": 0,
+          "scoreByStat": {
+            "3": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 235.0
+            },
+            "4": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "198": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "72": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 2.0
+            },
+            "201": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "77": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "15": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "79": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "80": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "82": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "19": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "20": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "86": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "24": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 189.0
+            },
+            "88": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "25": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "89": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "26": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "90": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "91": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "92": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "93": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "95": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "96": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "97": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "98": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "35": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "99": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 2.0
+            },
+            "101": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "102": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "103": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "104": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "42": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 193.0
+            },
+            "106": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "43": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "44": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "45": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "53": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 22.0
+            },
+            "120": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 17.0
+            },
+            "121": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "122": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "123": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "124": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "125": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "63": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            }
+          },
+          "statBySlot": null,
+          "ties": 0,
+          "wins": 0
+        },
+        "teamId": 18,
+        "tiebreak": 0.0,
+        "totalPoints": 83.8
+      },
+      "id": 1,
+      "winner": "AWAY"
+    },
+    {
+      "away": {
+        "cumulativeScore": {
+          "losses": 0,
+          "scoreByStat": {
+            "3": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 403.0
+            },
+            "4": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 3.0
+            },
+            "198": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "72": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "201": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "77": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "15": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "79": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "80": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "82": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "19": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "20": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "86": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 5.0
+            },
+            "24": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 154.0
+            },
+            "88": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "25": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "89": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "26": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "90": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "91": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "92": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "93": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "95": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "96": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "97": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "98": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "35": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "99": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 3.0
+            },
+            "101": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "102": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "103": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "104": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "42": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 450.0
+            },
+            "106": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "43": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 2.0
+            },
+            "44": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "45": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "53": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 38.0
+            },
+            "120": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 33.0
+            },
+            "121": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "122": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "123": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "124": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "125": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "63": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            }
+          },
+          "statBySlot": null,
+          "ties": 0,
+          "wins": 0
+        },
+        "teamId": 16,
+        "tiebreak": 0.0,
+        "totalPoints": 152.32
+      },
+      "home": {
+        "cumulativeScore": {
+          "losses": 0,
+          "scoreByStat": {
+            "3": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 321.0
+            },
+            "4": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 3.0
+            },
+            "198": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "72": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "201": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "77": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "15": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 2.0
+            },
+            "79": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "80": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "82": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "19": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "20": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "86": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 3.0
+            },
+            "24": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 235.0
+            },
+            "88": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "25": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "89": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "26": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "90": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "91": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "92": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "93": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "95": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "96": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "97": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "98": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "35": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "99": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 3.0
+            },
+            "101": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "102": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "103": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "104": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "42": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 234.0
+            },
+            "106": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "43": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 2.0
+            },
+            "44": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "45": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "53": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 19.0
+            },
+            "120": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 28.0
+            },
+            "121": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "122": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "123": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 1.0
+            },
+            "124": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "125": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            },
+            "63": {
+              "ineligible": false,
+              "rank": 0.0,
+              "result": null,
+              "score": 0.0
+            }
+          },
+          "statBySlot": null,
+          "ties": 0,
+          "wins": 0
+        },
+        "teamId": 9,
+        "tiebreak": 0.0,
+        "totalPoints": 119.54
+      },
+      "id": 2,
+      "winner": "AWAY"
+    },
+    {
+      "away": {
+        "teamId": 7,
+        "tiebreak": 0.0,
+        "totalPoints": 0.0
+      },
+      "home": {
+        "teamId": 20,
+        "tiebreak": 0.0,
+        "totalPoints": 0.0
+      },
+      "id": 19,
+      "winner": "UNDECIDED"
+    },
+    {
+      "away": {
+        "teamId": 4,
+        "tiebreak": 0.0,
+        "totalPoints": 0.0
+      },
+      "home": {
+        "teamId": 1,
+        "tiebreak": 0.0,
+        "totalPoints": 0.0
+      },
+      "id": 84,
+      "winner": "UNDECIDED"
+    }
+  ],
+  "settings": {
+    "isCustomizable": true,
+    "isPublic": true,
+    "scheduleSettings": {
+      "divisions": [
+        {
+          "id": 0,
+          "name": "Nam's Nefarious Narwhals"
+        },
+        {
+          "id": 1,
+          "name": "Josh Allen Extensions"
+        },
+        {
+          "id": 2,
+          "name": "Chris's Candid Camels"
+        }
+      ],
+      "matchupPeriods": {
+        "1": [
+          1
+        ],
+        "2": [
+          2
+        ],
+        "3": [
+          3
+        ],
+        "4": [
+          4
+        ],
+        "5": [
+          5
+        ],
+        "6": [
+          6
+        ],
+        "7": [
+          7
+        ],
+        "8": [
+          8
+        ],
+        "9": [
+          9
+        ],
+        "10": [
+          10
+        ],
+        "11": [
+          11
+        ],
+        "12": [
+          12
+        ],
+        "13": [
+          13
+        ],
+        "14": [
+          14
+        ],
+        "15": [
+          15
+        ],
+        "16": [
+          16
+        ],
+        "17": [
+          17
+        ]
+      },
+      "periodTypeId": 1
+    },
+    "scoringSettings": {
+      "scoringItems": [
+        {
+          "isReverseItem": false,
+          "points": -1.0,
+          "statId": 79
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 93
+        },
+        {
+          "isReverseItem": false,
+          "points": 6.0,
+          "statId": 25
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 122
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 123
+        },
+        {
+          "isReverseItem": false,
+          "points": 1.0,
+          "statId": 53
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 121
+        },
+        {
+          "isReverseItem": false,
+          "points": -2.0,
+          "statId": 72
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 106
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 95
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 120
+        },
+        {
+          "isReverseItem": false,
+          "points": 2.0,
+          "statId": 15
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 98
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 124
+        },
+        {
+          "isReverseItem": false,
+          "points": 6.0,
+          "statId": 104
+        },
+        {
+          "isReverseItem": false,
+          "points": -2.0,
+          "statId": 82
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 125
+        },
+        {
+          "isReverseItem": false,
+          "points": 2.0,
+          "statId": 19
+        },
+        {
+          "isReverseItem": false,
+          "points": 6.0,
+          "statId": 43
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 97
+        },
+        {
+          "isReverseItem": false,
+          "points": 6.0,
+          "statId": 102
+        },
+        {
+          "isReverseItem": false,
+          "points": 4.0,
+          "statId": 4
+        },
+        {
+          "isReverseItem": false,
+          "points": -2.0,
+          "statId": 20
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.1,
+          "statId": 24
+        },
+        {
+          "isReverseItem": false,
+          "points": 6.0,
+          "statId": 101
+        },
+        {
+          "isReverseItem": false,
+          "points": 6.0,
+          "statId": 63
+        },
+        {
+          "isReverseItem": false,
+          "points": 3.0,
+          "statId": 80
+        },
+        {
+          "isReverseItem": false,
+          "points": -2.0,
+          "statId": 88
+        },
+        {
+          "isReverseItem": false,
+          "points": 2.0,
+          "statId": 26
+        },
+        {
+          "isReverseItem": false,
+          "points": 4.0,
+          "statId": 77
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 99
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 96
+        },
+        {
+          "isReverseItem": false,
+          "points": 2.0,
+          "statId": 35
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 90
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 91
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.04,
+          "statId": 3
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 103
+        },
+        {
+          "isReverseItem": false,
+          "points": 1.0,
+          "statId": 86
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 89
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.1,
+          "statId": 42
+        },
+        {
+          "isReverseItem": false,
+          "points": 2.0,
+          "statId": 44
+        },
+        {
+          "isReverseItem": false,
+          "points": 2.0,
+          "statId": 45
+        },
+        {
+          "isReverseItem": false,
+          "points": 5.0,
+          "statId": 201
+        },
+        {
+          "isReverseItem": false,
+          "points": 0.0,
+          "statId": 92
+        },
+        {
+          "isReverseItem": false,
+          "points": 5.0,
+          "statId": 198
+        }
+      ]
+    }
+  },
+  "status": {
+    "currentMatchupPeriod": 3,
+    "finalScoringPeriod": 17,
+    "isActive": true,
+    "latestScoringPeriod": 3
+  },
+  "teams": [
+    {
+      "abbrev": "FFT",
+      "divisionId": 1,
+      "id": 1,
+      "location": "Fantasy",
+      "logo": "https://g.espncdn.com/lm-static/logo-packs/ffl/HelmetAlphabet-ESPN/Helmet-F.svg",
+      "nickname": "Football Team",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 2,
+          "ties": 0,
+          "wins": 0
+        }
+      }
+    },
+    {
+      "abbrev": "Cyah",
+      "divisionId": 2,
+      "id": 2,
+      "location": "C yah",
+      "logo": "https://g.espncdn.com/s/ffllm/logos/SmackTalk-LeoEspinosa/Boom-10.svg",
+      "nickname": "Peasants",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 1,
+          "ties": 0,
+          "wins": 1
+        }
+      }
+    },
+    {
+      "abbrev": "MF",
+      "divisionId": 1,
+      "id": 4,
+      "location": "Bleep",
+      "logo": "http://giphygifs.s3.amazonaws.com/media/FU5OQHktDCN4A/giphy.gif",
+      "nickname": "Off",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 1,
+          "ties": 0,
+          "wins": 1
+        }
+      }
+    },
+    {
+      "abbrev": "QUAK",
+      "divisionId": 0,
+      "id": 7,
+      "location": "Gordon and The",
+      "logo": "https://i.imgur.com/ppNTlcs.jpg",
+      "nickname": "Mighty Ducks",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 1,
+          "ties": 0,
+          "wins": 1
+        }
+      }
+    },
+    {
+      "abbrev": "STEG",
+      "divisionId": 0,
+      "id": 9,
+      "location": ".",
+      "logo": "https://g.espncdn.com/lm-static/logo-packs/core/Solo/ESPN_Star_Wars_Chebacca-01.svg",
+      "nickname": "Giggity",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 2,
+          "ties": 0,
+          "wins": 0
+        }
+      }
+    },
+    {
+      "abbrev": "JAB!",
+      "divisionId": 1,
+      "id": 11,
+      "location": "Josh",
+      "logo": "https://g.espncdn.com/s/ffllm/logos/StarWarsTheForceAwakens-ToddDetwiler/ESPN_Star_Wars_14a.svg",
+      "nickname": "Allen",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 0,
+          "ties": 0,
+          "wins": 2
+        }
+      }
+    },
+    {
+      "abbrev": "MATD",
+      "divisionId": 2,
+      "id": 12,
+      "location": "Mac and",
+      "logo": "https://i.imgur.com/OOPDsvR.jpg",
+      "nickname": "The Doughboys",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 2,
+          "ties": 0,
+          "wins": 0
+        }
+      }
+    },
+    {
+      "abbrev": "SHEE",
+      "divisionId": 0,
+      "id": 16,
+      "location": "Gridiron",
+      "logo": "https://g.espncdn.com/s/ffllm/logos/AtTheStadium-RobbHarskamp/At_The_Stadium_09.svg",
+      "nickname": "Shotgunner",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 0,
+          "ties": 0,
+          "wins": 2
+        }
+      }
+    },
+    {
+      "abbrev": "Mar",
+      "divisionId": 1,
+      "id": 17,
+      "location": "Gruden",
+      "logo": "https://g.espncdn.com/lm-static/logo-packs/ffl/Blockparty-RobbHars/blockplayers-10.svg",
+      "nickname": "Says",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 1,
+          "ties": 0,
+          "wins": 1
+        }
+      }
+    },
+    {
+      "abbrev": "KNOX",
+      "divisionId": 0,
+      "id": 18,
+      "location": "IC",
+      "logo": "https://g.espncdn.com/s/ffllm/logos/MatthewBerry-ChipWass/MatthewBerry-10.svg",
+      "nickname": "Light",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 1,
+          "ties": 0,
+          "wins": 1
+        }
+      }
+    },
+    {
+      "abbrev": "JNES",
+      "divisionId": 2,
+      "id": 19,
+      "location": "Dalvin and",
+      "logo": "https://upload.wikimedia.org/wikipedia/en/7/7a/Hobbes_comic_strip_character.jpg",
+      "nickname": "Cobbes",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 0,
+          "ties": 0,
+          "wins": 2
+        }
+      }
+    },
+    {
+      "abbrev": "UAL",
+      "divisionId": 2,
+      "id": 20,
+      "location": "Chairman's",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Smisek%2C_Jeff.jpg/320px-Smisek%2C_Jeff.jpg",
+      "nickname": "Flight",
+      "rankCalculatedFinal": 0,
+      "record": {
+        "overall": {
+          "losses": 1,
+          "ties": 0,
+          "wins": 1
+        }
+      }
+    }
+  ]
+}

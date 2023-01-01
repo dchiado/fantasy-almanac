@@ -1,0 +1,213 @@
+{
+  "draftDetail": { "drafted": true, "inProgress": false },
+  "gameId": 1,
+  "id": 166975,
+  "members": [
+    {
+      "displayName": "vballer139",
+      "firstName": "joe",
+      "id": "{0E7C6379-971A-4BB3-B82C-736B6C739C0D}",
+      "lastName": "blow",
+      "notificationSettings": [
+        {
+          "enabled": true,
+          "id": "4d8778aa-8973-4c59-80a4-73ce9e97de0f",
+          "type": "TEAM_PLAYER_INJURY"
+        },
+        {
+          "enabled": true,
+          "id": "9c2c03bc-9638-4e92-a1fa-5b255c855045",
+          "type": "DRAFT"
+        },
+        {
+          "enabled": true,
+          "id": "6f840bcd-3301-45e0-ad6c-7be30684e9c1",
+          "type": "TEAM_PLAYER_NEWS"
+        },
+        {
+          "enabled": true,
+          "id": "5777b2e5-8ddc-4991-9d6d-9d2bdaabe843",
+          "type": "TEAM_PLAYER_STARTBENCH"
+        },
+        {
+          "enabled": true,
+          "id": "3e33db4d-3af2-46fe-8b60-bcf883604b72",
+          "type": "TEAM_TRADE_OFFER"
+        },
+        {
+          "enabled": true,
+          "id": "3f8d2742-93f9-4fce-8493-99d09a92da59",
+          "type": "TEAM_PLAYER_AVAILABILITY"
+        }
+      ]
+    }
+  ],
+  "scoringPeriodId": 18,
+  "seasonId": 2019,
+  "segmentId": 0,
+  "status": {
+    "activatedDate": 1563824151595,
+    "createdAsLeagueType": 0,
+    "currentLeagueType": 0,
+    "currentMatchupPeriod": 16,
+    "finalScoringPeriod": 16,
+    "firstScoringPeriod": 1,
+    "isActive": true,
+    "isExpired": false,
+    "isFull": true,
+    "isPlayoffMatchupEdited": false,
+    "isToBeDeleted": false,
+    "isViewable": true,
+    "isWaiverOrderEdited": false,
+    "latestScoringPeriod": 18,
+    "previousSeasons": [
+      2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+      2017, 2018
+    ],
+    "standingsUpdateDate": 1583313160111,
+    "teamsJoined": 12,
+    "transactionScoringPeriod": 18,
+    "waiverLastExecutionDate": 1583911450422,
+    "waiverProcessStatus": {
+      "2019-08-22T07:41:29.131+0000": 2,
+      "2019-09-11T09:50:52.600+0000": 2,
+      "2019-09-18T07:17:27.265+0000": 3,
+      "2019-09-25T08:06:00.246+0000": 3,
+      "2019-10-02T07:45:15.079+0000": 2,
+      "2019-10-03T07:39:43.693+0000": 1,
+      "2019-10-05T07:03:34.929+0000": 1,
+      "2019-10-09T08:13:16.980+0000": 4,
+      "2019-10-16T07:49:17.308+0000": 4,
+      "2019-10-19T07:02:40.145+0000": 1,
+      "2019-10-23T08:06:26.152+0000": 3,
+      "2019-10-25T07:39:09.864+0000": 1,
+      "2019-10-30T07:01:13.794+0000": 5,
+      "2019-10-31T08:42:16.010+0000": 1,
+      "2019-11-06T09:17:48.945+0000": 5,
+      "2019-11-07T09:16:40.484+0000": 1,
+      "2019-11-08T08:41:52.551+0000": 1,
+      "2019-11-13T09:19:24.367+0000": 2,
+      "2019-11-20T08:44:23.776+0000": 4,
+      "2019-11-22T08:53:50.031+0000": 1,
+      "2019-11-27T08:17:20.769+0000": 4,
+      "2019-12-04T08:03:00.077+0000": 1,
+      "2019-12-11T09:03:25.655+0000": 5,
+      "2019-12-18T08:18:43.287+0000": 2,
+      "2019-12-19T09:17:24.415+0000": 1
+    }
+  },
+  "teams": [
+    {
+      "abbrev": "DUDE",
+      "currentProjectedRank": 5,
+      "divisionId": 3,
+      "draftDayProjectedRank": 3,
+      "draftStrategy": {
+        "draftList": [
+          { "auctionValue": 0, "playerId": 3117251 },
+          { "auctionValue": 0, "playerId": 2587819 }
+        ],
+        "futureKeeperPlayerIds": [],
+        "keeperPlayerIds": []
+      },
+      "id": 1,
+      "isActive": false,
+      "location": "Little Lebowski",
+      "logo": "http://shirtoid.com/wp-content/uploads/2009/06/urban-achievers.jpg",
+      "logoType": "CUSTOM_VALID",
+      "nickname": "Urban Achievers",
+      "owners": ["{AB3DD4A6-3944-4D17-AFCB-6344BC69A45B}"],
+      "playoffSeed": 6,
+      "points": 1698.02,
+      "pointsAdjusted": 0.0,
+      "pointsDelta": 0.0,
+      "primaryOwner": "{AB3DD4A6-3944-4D17-AFCB-6344BC69A45B}",
+      "rankCalculatedFinal": 4,
+      "rankFinal": 0,
+      "record": {
+        "away": {
+          "gamesBack": 0.0,
+          "losses": 4,
+          "percentage": 0.42857142857142855,
+          "pointsAgainst": 0.0,
+          "pointsFor": 0.0,
+          "streakLength": 2,
+          "streakType": "LOSS",
+          "ties": 0,
+          "wins": 3
+        },
+        "division": {
+          "gamesBack": 3.0,
+          "losses": 3,
+          "percentage": 0.25,
+          "pointsAgainst": 0.0,
+          "pointsFor": 0.0,
+          "streakLength": 3,
+          "streakType": "LOSS",
+          "ties": 0,
+          "wins": 1
+        },
+        "home": {
+          "gamesBack": 0.0,
+          "losses": 2,
+          "percentage": 0.6666666666666666,
+          "pointsAgainst": 0.0,
+          "pointsFor": 0.0,
+          "streakLength": 2,
+          "streakType": "LOSS",
+          "ties": 0,
+          "wins": 4
+        },
+        "overall": {
+          "gamesBack": 5.0,
+          "losses": 6,
+          "percentage": 0.5384615384615384,
+          "pointsAgainst": 1551.04,
+          "pointsFor": 1698.02,
+          "streakLength": 4,
+          "streakType": "LOSS",
+          "ties": 0,
+          "wins": 7
+        }
+      },
+      "tradeBlock": {},
+      "transactionCounter": {
+        "acquisitionBudgetSpent": 0,
+        "acquisitions": 39,
+        "drops": 38,
+        "matchupAcquisitionTotals": {
+          "1": 1,
+          "3": 3,
+          "4": 1,
+          "6": 2,
+          "7": 3,
+          "8": 3,
+          "9": 3,
+          "10": 1,
+          "11": 2,
+          "12": 2,
+          "13": 4,
+          "14": 5,
+          "15": 5,
+          "16": 1
+        },
+        "misc": 0,
+        "moveToActive": 84,
+        "moveToIR": 10,
+        "paid": 0.0,
+        "teamCharges": 0.0,
+        "trades": 4
+      },
+      "valuesByStat": {
+        "3": 4669.0,
+        "4": 22.0,
+        "72": 11.0,
+        "63": 0.0
+      },
+      "waiverRank": 10,
+      "watchList": [
+        3051806, 2579604, 3127211, 2971718, 16732, 3917846, 15966, 2971618
+      ]
+    }
+  ]
+}

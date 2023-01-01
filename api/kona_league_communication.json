@@ -1,0 +1,51 @@
+{
+  "communication": {
+    "topics": [
+      {
+        "author": "{ABCDEFG-1234-1G5T-AFCB-6344BC69A45B}",
+        "creationInfo": {
+          "clientAddress": null,
+          "date": 1577471804958,
+          "platform": "cinco_9515",
+          "source": "{ABCDEFG-1234-1G5T-AFCB-6344BC69A45B}"
+        },
+        "date": 1577471804958,
+        "dateEdited": 1577471804958,
+        "id": "1234543-dad5-426b-92c3-71591f83db07",
+        "isDeleted": false,
+        "isEdited": true,
+        "lastUpdateInfo": {
+          "clientAddress": null,
+          "date": 1577471804958,
+          "platform": "cinco_9515",
+          "source": "{ABCDEFG-1234-1G5T-AFCB-6344BC69A45B}"
+        },
+        "messages": [
+          {
+            "author": "{ABCDEFG-1234-1G5T-AFCB-6344BC69A45B}",
+            "creationInfo": {
+              "clientAddress": null,
+              "date": 1577471804958,
+              "platform": "cinco_9515",
+              "source": "{ABCDEFG-1234-1G5T-AFCB-6344BC69A45B}"
+            },
+            "date": 1577471804958,
+            "for": 7,
+            "from": 3,
+            "id": "13tg243h3-aac0-46dd-9719-47584e41a565",
+            "isAlternateFormat": false,
+            "isDeleted": false,
+            "isEdited": false,
+            "messageTypeId": 188,
+            "targetId": 3139033,
+            "to": 20,
+            "topicId": "43cc2103-dad5-426b-92c3-71591f83db07"
+          }
+        ],
+        "targetId": 17,
+        "totalMessageCount": 5,
+        "type": "ACTIVITY_TRANSACTIONS"
+      }
+    ]
+  }
+}
