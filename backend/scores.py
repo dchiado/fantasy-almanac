@@ -35,7 +35,7 @@ async def best_and_worst_weeks(start_year, end_year, playoffs, count, highest):
     """
     async with aiohttp.ClientSession() as http_session:
         all_scores = []
-        start_year = check_start_year(start_year)
+        start_year = await check_start_year(start_year, http_session)
         end_year = await check_end_year(end_year, http_session)
 
         for year in range(start_year, end_year + 1):
@@ -139,7 +139,7 @@ async def best_and_worst_seasons(start_year, end_year, count, best):
     async with aiohttp.ClientSession() as http_session:
         all_seasons_all_time = []
 
-        start_year = check_start_year(start_year)
+        start_year = await check_start_year(start_year, http_session)
         end_year = await check_end_year(end_year, http_session)
 
         for year in range(int(start_year), int(end_year) + 1):

@@ -34,18 +34,19 @@ async def results(start_year, end_year, playoffs, count, blowouts):
             {...}
         ]
     """
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession() as http_session:
         all_matchups = []
-        start_year = check_start_year(start_year)
-        end_year = await check_end_year(end_year, session)
+
+        end_year = await check_end_year(end_year, http_session)
+        start_year = await check_start_year(start_year, http_session)
 
         for year in range(int(start_year), int(end_year) + 1):
-            weeks = await number_of_weeks(year, playoffs, session)
+            weeks = await number_of_weeks(year, playoffs, http_session)
             if weeks == 0:
                 continue
 
-            season = await load_data(year, 'mNav', session)
-            matchups = await load_matchups(year, session)
+            season = await load_data(year, 'mNav', http_session)
+            matchups = await load_matchups(year, http_session)
 
             for _idx, matchup in enumerate(matchups):
                 matchup_result = {}

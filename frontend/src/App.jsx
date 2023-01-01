@@ -31,7 +31,14 @@ const App = () => {
 
 	const fetchLeagueInfo = useCallback(() => {
 		if (leagueId) {
-			fetch(`/info?leagueId=${leagueId}`).then((res) =>
+			fetch(
+				`${process.env.REACT_APP_API_URL}/info?leagueId=${leagueId}`,
+				{
+					crossDomain: true,
+					method: 'GET',
+					headers: { 'Content-Type':'application/json' },
+				}
+			).then((res) =>
 				res.json().then((data) => {
 					if (data.error) {
 						console.log(data.error)

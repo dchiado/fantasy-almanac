@@ -1,9 +1,12 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import './PowerRankings.css';
 
 const PowerRankings = () => {
+	const leagueId = useSelector((state) => state.leagueInfo.id)
+
 	const [loading, setLoading] = useState(true);
 	const [rankingsData, setRankingsData] = useState([]);
 	const [parsedRankings, setParsedRankings] = useState([]);
@@ -18,15 +21,21 @@ const PowerRankings = () => {
 	const columns = ['#', 'Team', 'PR Score', 'Wins', 'Overall Wins', 'Points', 'Consistency', 'Wins Last Five']
 
 	useEffect(() => {
-		if (rankingsData.length === 0) {
-			fetch('/power-rankings').then((res) => {
-				res.json().then((data) => {
-					setRankingsData(data);
-					setLoading(false);
-				})}
-			);
+		if (rankingsData.length === 0 && leagueId) {
+			fetch(`${process.env.REACT_APP_API_URL}/power-rankings?leagueId=${leagueId}`,
+				{
+					crossDomain: true,
+					method: 'GET',
+					headers: { 'Content-Type':'application/json' },
+				}
+			).then((res) => {
+					res.json().then((data) => {
+						setRankingsData(data);
+						setLoading(false);
+					})}
+				);
 		}
-	}, [rankingsData]);
+	}, [rankingsData, leagueId]);
 
 	useEffect(() => {
 		if (rankingsData.length !== 0) {
@@ -121,7 +130,7 @@ const PowerRankings = () => {
 						>
 						Power Rankings
 					</Typography>
-					<TableContainer component={Paper} sx={{ marginBottom: '30px', maxWidth: '80%' }}>
+					<TableContainer component={Paper} sx={{ marginBottom: '30px', maxWidth: '90%' }}>
 						<Table sx={{ width: '100%', fontSize: 13 }} size="small" aria-label="standings table">
 							<TableHead>
 								<TableRow 

@@ -1,5 +1,4 @@
 import aiohttp
-from flask import session
 from utils import (
     is_bye_week,
     latest_season,
@@ -151,9 +150,10 @@ async def all_time(owner_id_1, owner_id_2):
 
         end_year = await latest_season(http_session)
         current_info = await load_data(end_year, 'mNav', http_session)
+        start_year = current_info["status"]["previousSeasons"][0]
         winners = []
 
-        for year in range(session['start_year'], end_year + 1):
+        for year in range(start_year, end_year + 1):
             weeks = await number_of_weeks(year, True, http_session)
             if weeks == 0:
                 continue

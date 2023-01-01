@@ -3,7 +3,7 @@
 This program compiles data on an ESPN fantasy football league using the public ESPN API. The backend uses python scripts to retrieve and organize the data and is built on [flask](https://flask.palletsprojects.com/en/2.0.x/). The frontend is built with React and was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 
-## Prerequisites
+## Setup
 1. Python 3 is required, which can be obtained [here](https://www.python.org/downloads).
 1. Navigate into the backend directory with `cd backend`
 1. Set up your virtual environment. If you name it something other than `env`, make sure to gitignore that dir.
@@ -26,6 +26,10 @@ This program compiles data on an ESPN fantasy football league using the public E
 1. Install frontend dependencies. Navigate into the frontend directory with `cd frontend` and run:
     ```
     npm install
+    ```
+1. In the `frontend` dir, create a `.env` file that looks like this:
+    ```
+    REACT_APP_API_URL=http://localhost:5000
     ```
 
 

@@ -80,6 +80,7 @@ const LeagueInfo = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
 							</Tooltip>
 						</div>
           </ClickAwayListener>
+					Proxy: {process.env.REACT_APP_API_URL}
 
 					<TextField
 						id="outlined-name"

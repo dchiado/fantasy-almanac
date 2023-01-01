@@ -15,10 +15,13 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import './Standings.css';
+import { useSelector } from "react-redux";
 
 const headers = [ 'Wins', 'Losses', 'Ties', 'Win %' ]
 
 const Standings = () => {
+	const leagueId = useSelector((state) => state.leagueInfo.id)
+
 	const [standingsData, setStandingsData] = useState({});
 	const [seasons, setSeasons] = useState([]);
 	const [allSeasons, setAllSeasons] = useState([]);
@@ -32,14 +35,20 @@ const Standings = () => {
 	const [activeTeams, setActiveTeams] = useState(false);
 
 	useEffect(() => {
-		if (Object.keys(standingsData).length === 0) {
-			fetch('/standings').then((res) =>
+		if (Object.keys(standingsData).length === 0 && leagueId) {
+			fetch(`${process.env.REACT_APP_API_URL}/standings?leagueId=${leagueId}`,
+				{
+					crossDomain: true,
+					method: 'GET',
+					headers: { 'Content-Type':'application/json' },
+				}
+			).then((res) =>
 				res.json().then((data) => {
 					setStandingsData(data);
 				})
 			);
 		}
-	}, [standingsData]);
+	}, [standingsData, leagueId]);
 
 	useEffect(() => {
 		if (Object.keys(standingsData).length > 0 && standingsRows.length === 0) {

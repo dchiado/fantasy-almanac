@@ -1,9 +1,12 @@
 import { Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import './HeadToHead.css';
 
 const HeadToHead = () => {
+	const leagueId = useSelector((state) => state.leagueInfo.id)
+
 	const [loading, setLoading] = useState(false);
 	const [teams, setTeams] = useState([]);
 	const [teamsSubmitted, setTeamsSubmitted] = useState(false);
@@ -12,28 +15,40 @@ const HeadToHead = () => {
 	const [matchupData, setMatchupData] = useState({});
 
 	useEffect(() => {
-		if (teams.length === 0) {
-			fetch('/head-to-head-form').then((res) =>
+		if (teams.length === 0 && leagueId) {
+			fetch(
+				`${process.env.REACT_APP_API_URL}/head-to-head-form?leagueId=${leagueId}`,
+				{
+					crossDomain: true,
+					method: 'GET',
+					headers: { 'Content-Type':'application/json' },
+				}
+			).then((res) =>
 				res.json().then((data) => {
 					setTeams(data);
 				})
 			);
 		}
-	}, [teams]);
+	}, [teams, leagueId]);
 
 	useEffect(() => {
-		if (Object.keys(matchupData).length === 0 && teamsSubmitted) {
+		if (Object.keys(matchupData).length === 0 && teamsSubmitted && leagueId) {
 			setLoading(true);
-			fetch(`/head-to-head?team1=${team1}&team2=${team2}`).then((res) =>
+			fetch(
+				`${process.env.REACT_APP_API_URL}/head-to-head?leagueId=${leagueId}&team1=${team1}&team2=${team2}`,
+				{
+					crossDomain: true,
+					method: 'GET',
+					headers: { 'Content-Type':'application/json' },
+				}
+			).then((res) =>
 				res.json().then((data) => {
-					console.log('got data')
-					console.log(data);
 					setMatchupData(JSON.parse(JSON.stringify(data)));
 					setLoading(false);
 				})
 			);
 		}
-	}, [matchupData, team1, team2, teamsSubmitted])
+	}, [matchupData, team1, team2, teamsSubmitted, leagueId])
 
 	const handleSelectTeam1 = (event) => {
 		setTeam1(event.target.value);

@@ -146,9 +146,14 @@ async def season_status(http_session):
     this_year = date.today().year
     resp = await load_data(this_year, 'mStatus', http_session)
     if "details" in resp:
-        return {
-            "error": resp["details"][0]
-        }
+        # try the year before because the season leaks into January
+        if resp["details"][0]["type"] == 'GENERAL_NOT_FOUND':
+            this_year = int(this_year) - 1
+            resp = await load_data(this_year, 'mStatus', http_session)
+            if "details" in resp:
+                return {
+                    "error": resp["details"][0]
+                }
 
     status = resp["status"]
     current_season = resp["seasonId"]
@@ -163,6 +168,7 @@ async def season_status(http_session):
         status = "postseason"
     else:
         status = "active"
+
     return {
         "season": current_season,
         "status": status
@@ -238,10 +244,20 @@ def win_pct(win, loss):
     return str(pct) + '%'
 
 
-def check_start_year(year):
-    """Check year is not earlier than first season"""
-    if year is None or int(year) < session['start_year']:
-        return session['start_year']
+async def check_start_year(year, http_session):
+    """Check year passed in is not earlier than first season"""
+    this_year = date.today().year
+    details = await load_data(this_year, 'mNav', http_session)
+    if "details" in details:
+        # try the year before because the season leaks into January
+        if details["details"][0]["type"] == 'GENERAL_NOT_FOUND':
+            this_year = int(this_year) - 1
+            details = await load_data(this_year, 'mNav', http_session)
+
+    actual_start_year = details["status"]["previousSeasons"][0]
+
+    if year is None or int(year) < actual_start_year:
+        return actual_start_year
     else:
         return int(year)
 

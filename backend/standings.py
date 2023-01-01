@@ -1,6 +1,5 @@
 import aiohttp
-from flask import session
-from utils import load_data, latest_season, win_pct
+from utils import load_data, latest_season
 
 async def list():
     """Calculate league standings by year and overall for all years.
@@ -35,8 +34,10 @@ async def list():
             "seasons": [],
             "teams": []
         }
-        start_year = session['start_year']
+
         end_year = await latest_season(http_session)
+        details = await load_data(end_year, 'mNav', http_session)
+        start_year = details["status"]["previousSeasons"][0]
 
         for year in range(int(start_year), int(end_year) + 1):
             team_details = await load_data(year, 'mTeam', http_session)

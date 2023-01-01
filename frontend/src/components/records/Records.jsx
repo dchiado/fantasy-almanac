@@ -19,10 +19,12 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { useEffect } from "react";
+import { useSelector } from "react-redux";
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import './Records.css';
 
 const Records = () => {
+	const leagueId = useSelector((state) => state.leagueInfo.id)
   const [loading, setLoading] = useState(false);
 
   const [bestWorst, setBestWorst] = useState('');
@@ -55,12 +57,18 @@ const Records = () => {
       endpoint = '/matchups'
     }
 
-    let params = `?bestworst=${bestWorst}&playoffs=${includePlayoffs}&count=${numRecords}`;
+    let params = `?leagueId=${leagueId}&bestworst=${bestWorst}&playoffs=${includePlayoffs}&count=${numRecords}`;
     if (scope === 'years') {
       params += `&startyear=${startYear}&endyear=${endYear}`
     }
 
-    fetch(endpoint + params).then((res) =>
+    fetch(`${process.env.REACT_APP_API_URL}/${endpoint + params}`,
+      {
+        crossDomain: true,
+        method: 'GET',
+        headers: { 'Content-Type':'application/json' },
+      }
+    ).then((res) =>
       res.json().then((data) => {
         if (object === 'week') {
           setHeaders(['Year', 'Week', 'Team', 'Score']);
