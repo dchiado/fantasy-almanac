@@ -92,7 +92,7 @@ const App = () => {
 			<BrowserRouter>
 				{width > breakpoint ? <Header /> : <div></div>}
 				<Switch>
-					<Route path="/home">
+					<Route exact path="/">
 						<LeagueInfo
 							onLeagueIdChange={onLeagueIdChange}
 							onLeagueInfoSubmit={onLeagueInfoSubmit}

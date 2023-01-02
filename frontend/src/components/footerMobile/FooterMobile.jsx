@@ -20,7 +20,7 @@ const FooterMobile = () => {
       >
         <BottomNavigationAction
           label="Home"
-          href="/home"
+          href="/"
           sx={{ color: 'lightgray' }}
           icon={<HomeIcon style={{ color: 'lightgray' }} />}
         />

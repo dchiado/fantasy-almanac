@@ -20,6 +20,11 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
 
+
+@app.route('/', methods=['GET'])
+def health():
+    return 'OK'
+
   
 @app.route('/info', methods=['GET'])
 # @cross_origin()

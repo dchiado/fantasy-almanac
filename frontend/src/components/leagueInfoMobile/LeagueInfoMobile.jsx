@@ -33,7 +33,7 @@ const LeagueInfoMobile = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
           <Button
             variant="contained"
             key='league-name'
-            href="/home"
+            href="/"
             onClick={handleRemoveCookie}
             sx={{ color: 'inherit', display: 'block', marginTop: '20px' }}
           >

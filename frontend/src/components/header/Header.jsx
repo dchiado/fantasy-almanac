@@ -51,14 +51,14 @@ const Header = () => {
     >
       <Container maxWidth="xxl" sx={{ marginLeft: 0 }}>
         <Toolbar disableGutters>
-          <Link to="/home">
+          <Link to="/">
             <SportsFootballIcon sx={{ display: { xs: 'none', sm: 'flex' }, mr: 1, color: 'white' }} />
           </Link>
           <Typography
             variant="h6"
             noWrap
             component={Link}
-            to="/home"
+            to="/"
             sx={{
               mr: 5,
               display: { xs: 'none', md: 'flex' },
@@ -112,7 +112,7 @@ const Header = () => {
               </Typography>
               <Button
                 key='league-name'
-                href="/home"
+                href="/"
                 onClick={handleRemoveCookie}
                 sx={{ color: 'inherit', display: 'block', fontSize: 11, padding: 0 }}
               >
