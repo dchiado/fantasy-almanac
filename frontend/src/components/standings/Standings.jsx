@@ -137,26 +137,19 @@ const Standings = () => {
 			}
 
 			{Object.keys(standingsRows).length > 0 &&
-				<div className="table-container">
-					<TableContainer component={Paper} sx={{ maxWidth: '80%' }}>
+				<div className="table-content">
+					<TableContainer component={Paper} className="table-container" sx={{ borderRadius: 3 }}>
 						<Table sx={{ minWidth: 650, fontSize: 13 }} size="small" aria-label="standings table">
 							<TableHead>
-								<TableRow 
-									sx={{
-										backgroundColor: 'gray',
-										color: 'white',
-										fontWeight: 700
-									}
-								}>
+								<TableRow className="table-header">
 									<TableCell 
 										sx={{
 											minWidth: 105,
 											fontSize: 'inherit',
-											color: 'inherit',
 											fontWeight: 'inherit',
-											position: "sticky",
+											position: 'sticky',
+											backgroundColor: 'inherit',
 											left: 0,
-											backgroundColor: 'inherit'	
 										}}
 									>
 										Owner
@@ -219,11 +212,12 @@ const Standings = () => {
 
 									return (
 										<TableRow
-										key={row.name}
-										sx={{
-											'&:last-child td, &:last-child th': { border: 0 },
-											backgroundColor: idx % 2 === 0 ? 'lightgray' : 'white'
-										}}
+											key={row.name}
+											sx={{
+												backgroundColor: idx % 2 === 0 ? '#5B697F' : '#283447',
+												borderColor: idx % 2 === 0 ? '#5B697F' : '#283447',
+												color: 'white',
+											}}
 										>
 											<TableCell
 												component="th"
@@ -232,23 +226,18 @@ const Standings = () => {
 													minWidth: 105,
 													fontSize: 'inherit',
 													fontWeight: 700,
-													position: "sticky",
+													position: 'sticky',
 													left: 0,
+													color: 'inherit',
 													backgroundColor: 'inherit',
+													borderColor: 'inherit'
 												}}
 											>
 												{row.name}
 											</TableCell>
 											{seasons.map((s) => {
 												const rec = row.seasons.find((r) => r.year === s)
-												let borderColor;
-												if (rec?.reg_season_champ) {
-													borderColor = 'green';
-												} else if (rec?.toilet_bowl) {
-													borderColor = 'SaddleBrown';
-												} else {
-													borderColor = 'inherit';
-												}
+												const borderColor = rec?.reg_season_champ ? 'lightgreen': 'inherit';
 												
 												return (
 													<TableCell
@@ -257,8 +246,9 @@ const Standings = () => {
 														sx={{
 															minWidth: 40,
 															fontSize: 'inherit',
+															color: rec?.playoff_champ ? 'black' : 'inherit',
 															background: rec?.playoff_champ ? 'gold' : 'inherit',
-															border: rec?.reg_season_champ || rec?.toilet_bowl? 'solid' : 'inherit',
+															border: rec?.reg_season_champ ? '2px solid' : 'inherit',
 															borderColor: borderColor
 														}}
 													>
@@ -271,7 +261,9 @@ const Standings = () => {
 												sx={{
 													minWidth: 40,
 													fontSize: 'inherit',
-													background: 'inherit',
+													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
 												}}
 											>
 												{tmWins}
@@ -281,7 +273,9 @@ const Standings = () => {
 												sx={{
 													minWidth: 40,
 													fontSize: 'inherit',
-													background: 'inherit',
+													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
 												}}
 											>
 												{tmLosses}
@@ -291,7 +285,9 @@ const Standings = () => {
 												sx={{
 													minWidth: 40,
 													fontSize: 'inherit',
-													background: 'inherit',
+													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
 												}}
 											>
 												{tmTies}
@@ -301,7 +297,9 @@ const Standings = () => {
 												sx={{
 													minWidth: 40,
 													fontSize: 'inherit',
-													background: 'inherit',
+													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
 												}}
 											>
 												{tmWinPct}
@@ -318,43 +316,6 @@ const Standings = () => {
 				<div className="legend">
 					<div className="legend-champ">League Champ</div>
 					<div className="legend-reg-season-champ">Reg Season Champ</div>
-					<div className="legend-last-place">Last Place</div>
-				{/* <TableContainer component={Paper} sx={{ maxWidth: '50%', margin: 4 }}>
-					<Table>
-						<TableRow>
-						<TableCell 
-								sx={{
-									background: 'gold',
-									fontSize: 11,
- 								}}
-							>
-								League Champ
-							</TableCell>
-							<div></div>
-							<TableCell 
-								sx={{ 
-									background: 'white',
-									border: '4px solid',
-									borderColor: 'green',
-									fontSize: 11,
- 								}}
-							>
-								Reg Season Champ
-							</TableCell>
-							<div></div>
-							<TableCell 
-								sx={{ 
-									background: 'white',
-									border: '4px solid',
-									borderColor: 'SaddleBrown',
-									fontSize: 11,
- 								}}
-							>
-								Last Place
-							</TableCell>
-						</TableRow>
-					</Table>
-				</TableContainer> */}
 				</div>
 			}
 

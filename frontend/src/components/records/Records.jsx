@@ -237,7 +237,7 @@ const Records = () => {
       }
 
       {records.length > 0 &&
-        <div className="table-container">
+        <div className="table-content">
           {records.length > 0 &&
             <div className="table-button-wrapper">
               <Typography
@@ -251,16 +251,10 @@ const Records = () => {
                 The {numRecords} {bestWorst} {object}s {scope === 'alltime' ? 'of all-time' : `from ${startYear} to ${endYear}`} 
               </Typography>
 
-              <TableContainer component={Paper}>
-                <Table sx={{ fontSize: 13 }} size="small" aria-label="records table">
+              <TableContainer component={Paper} className="table-container">
+                <Table sx={{ fontSize: 14 }} size="small" aria-label="records table">
                   <TableHead>
-                    <TableRow
-                      sx={{
-                        backgroundColor: 'gray',
-                        color: 'white',
-                        fontWeight: 700
-                      }
-                    }>
+                    <TableRow className="table-header">
                       <TableCell
                         align="center"
                         key='rank'
@@ -285,8 +279,9 @@ const Records = () => {
                       <TableRow
                         key={`row-${idx}`}
                         sx={{
-                          '&:last-child td, &:last-child th': { border: 0 },
-                          backgroundColor: idx % 2 === 0 ? 'lightgray' : 'white'
+                          backgroundColor: idx % 2 === 0 ? '#5B697F' : '#283447',
+                          borderColor: idx % 2 === 0 ? '#5B697F' : '#283447',
+                          color: 'white',
                         }}
                         >
                           <TableCell
@@ -294,9 +289,9 @@ const Records = () => {
                             key='rank'
                             sx={{
                               fontSize: 'inherit',
-                              background: 'inherit',
-                              border: 'inherit',
-                              borderColor: 'inherit'
+                              backgroundColor: 'inherit',
+                              color: 'inherit',
+                              borderColor: 'inherit',
                             }}
                           >
                             {idx + 1}
@@ -309,9 +304,9 @@ const Records = () => {
                               sx={{
                                 minWidth: 25,
                                 fontSize: 'inherit',
-                                background: 'inherit',
-                                border: 'inherit',
-                                borderColor: 'inherit'
+                                backgroundColor: 'inherit',
+                                color: 'inherit',
+                                borderColor: 'inherit',
                               }}
                             >
                               {cell}

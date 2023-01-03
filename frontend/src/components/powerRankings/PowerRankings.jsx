@@ -18,7 +18,7 @@ const PowerRankings = () => {
 		consistency: 1,
 })
 
-	const columns = ['#', 'Team', 'PR Score', 'Wins', 'Overall Wins', 'Points', 'Consistency', 'Wins Last Five']
+	const columns = ['#', 'Team', 'PR Score', 'Wins', 'Overall Wins', 'Points', 'Consistency', 'Last 5 Wins']
 
 	useEffect(() => {
 		if (rankingsData.length === 0 && leagueId) {
@@ -130,21 +130,15 @@ const PowerRankings = () => {
 						>
 						Power Rankings
 					</Typography>
-					<TableContainer component={Paper} sx={{ marginBottom: '30px', maxWidth: '90%' }}>
-						<Table sx={{ width: '100%', fontSize: 13 }} size="small" aria-label="standings table">
+					<TableContainer component={Paper} className="table-container" sx={{ borderRadius: 3, mb: '15px' }}>
+						<Table sx={{ width: '100%', fontSize: 14 }} size="small" aria-label="standings table">
 							<TableHead>
-								<TableRow 
-									sx={{
-										backgroundColor: 'gray',
-										color: 'white',
-										fontWeight: 700
-									}
-								}>
+								<TableRow className="table-header">
 									{columns.map((c) => (
 										<TableCell
 											align="center"
 											key={c}
-											sx={{ minWidth: 40, fontSize: 'inherit', color: 'inherit', fontWeight: 'inherit', padding: '6px 6px' }}
+											sx={{ minWidth: 40, fontSize: 'inherit', fontWeight: 'inherit' }}
 										>
 											{c}
 										</TableCell>
@@ -157,8 +151,9 @@ const PowerRankings = () => {
 										<TableRow
 										key={team.name}
 										sx={{
-											'&:last-child td, &:last-child th': { border: 0 },
-											backgroundColor: idx % 2 === 0 ? 'lightgray' : 'white'
+											backgroundColor: idx % 2 === 0 ? '#5B697F' : '#283447',
+											borderColor: idx % 2 === 0 ? '#5B697F' : '#283447',
+											color: 'white',
 										}}
 										>
 											<TableCell
@@ -169,6 +164,8 @@ const PowerRankings = () => {
 													minWidth: 10,
 													fontSize: 'inherit',
 													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
 												}}
 											>
 												{idx + 1}
@@ -179,9 +176,10 @@ const PowerRankings = () => {
 												sx={{
 													minWidth: 40,
 													fontSize: 'inherit',
-													fontWeight: 700,
-													left: 0,
 													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
+													left: 0,
 												}}
 											>
 												{team.name}
@@ -191,7 +189,9 @@ const PowerRankings = () => {
 												sx={{
 													minWidth: 40,
 													fontSize: 'inherit',
-													background: 'inherit',
+													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
 												}}
 											>
 												{team.power_ranking_score}
@@ -201,7 +201,9 @@ const PowerRankings = () => {
 												sx={{
 													minWidth: 40,
 													fontSize: 'inherit',
-													background: 'inherit',
+													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
 												}}
 											>
 												{team.wins}
@@ -211,7 +213,9 @@ const PowerRankings = () => {
 												sx={{
 													minWidth: 40,
 													fontSize: 'inherit',
-													background: 'inherit',
+													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
 												}}
 											>
 												{team.overall_wins}
@@ -221,7 +225,9 @@ const PowerRankings = () => {
 												sx={{
 													minWidth: 40,
 													fontSize: 'inherit',
-													background: 'inherit',
+													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
 												}}
 											>
 												{team.points}
@@ -231,7 +237,9 @@ const PowerRankings = () => {
 												sx={{
 													minWidth: 40,
 													fontSize: 'inherit',
-													background: 'inherit',
+													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
 												}}
 											>
 												{team.consistency}
@@ -241,7 +249,9 @@ const PowerRankings = () => {
 												sx={{
 													minWidth: 40,
 													fontSize: 'inherit',
-													background: 'inherit',
+													backgroundColor: 'inherit',
+													borderColor: 'inherit',
+													color: 'inherit',
 												}}
 											>
 												{team.l5}

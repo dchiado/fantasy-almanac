@@ -37,3 +37,16 @@
     transform: rotate(360deg);
   }
 }
+
+.table-container {
+  max-width: 80%;
+  color: white;
+  background-color: '#283447';
+  border: 1px solid white;
+}
+
+.table-header {
+  background-color: #E0FBFC;
+  color: black;
+  font-weight: 700;
+}
