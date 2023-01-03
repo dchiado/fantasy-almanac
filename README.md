@@ -18,11 +18,6 @@ This program compiles data on an ESPN fantasy football league using the public E
     ```
     pip install -r requirements.txt
     ```
-1. Export flask environment variables
-    ```
-    export FLASK_APP=flaskr
-    export FLASK_ENV=development
-    ```
 1. Install frontend dependencies. Navigate into the frontend directory with `cd frontend` and run:
     ```
     npm install

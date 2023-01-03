@@ -14,8 +14,8 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
-import './Standings.css';
 import { useSelector } from "react-redux";
+import './Standings.css';
 
 const headers = [ 'Wins', 'Losses', 'Ties', 'Win %' ]
 
@@ -139,7 +139,7 @@ const Standings = () => {
 			{Object.keys(standingsRows).length > 0 &&
 				<div className="table-content">
 					<TableContainer component={Paper} className="table-container" sx={{ borderRadius: 3 }}>
-						<Table sx={{ minWidth: 650, fontSize: 13 }} size="small" aria-label="standings table">
+						<Table sx={{ minWidth: 650, fontSize: 13, borderCollapse: 'separate', borderSpacing: '0' }} size="small" aria-label="standings table">
 							<TableHead>
 								<TableRow className="table-header">
 									<TableCell 
@@ -230,7 +230,8 @@ const Standings = () => {
 													left: 0,
 													color: 'inherit',
 													backgroundColor: 'inherit',
-													borderColor: 'inherit'
+													borderColor: 'inherit',
+													border: '2px solid',
 												}}
 											>
 												{row.name}
@@ -238,6 +239,7 @@ const Standings = () => {
 											{seasons.map((s) => {
 												const rec = row.seasons.find((r) => r.year === s)
 												const borderColor = rec?.reg_season_champ ? 'lightgreen': 'inherit';
+												const formattedRecord = rec ? `${rec.wins}-${rec.losses}${rec.ties !== 0 ? '-' + rec.ties : ''}` : '';
 												
 												return (
 													<TableCell
@@ -248,11 +250,11 @@ const Standings = () => {
 															fontSize: 'inherit',
 															color: rec?.playoff_champ ? 'black' : 'inherit',
 															background: rec?.playoff_champ ? 'gold' : 'inherit',
-															border: rec?.reg_season_champ ? '2px solid' : 'inherit',
+															border: rec?.reg_season_champ ? '2px solid' : '',
 															borderColor: borderColor
 														}}
 													>
-														{rec ? `${rec.wins}-${rec.losses}-${rec.ties}` : ''}
+														{formattedRecord}
 													</TableCell>
 													)
 												})}
