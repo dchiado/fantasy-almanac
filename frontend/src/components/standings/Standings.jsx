@@ -19,7 +19,7 @@ import './Standings.css';
 
 const headers = [ 'Wins', 'Losses', 'Ties', 'Win %' ]
 
-const Standings = () => {
+const Standings = ({ setError }) => {
 	const leagueId = useSelector((state) => state.leagueInfo.id)
 
 	const [standingsData, setStandingsData] = useState({});
@@ -42,13 +42,19 @@ const Standings = () => {
 					method: 'GET',
 					headers: { 'Content-Type':'application/json' },
 				}
-			).then((res) =>
+			)
+			.then((res) =>
 				res.json().then((data) => {
 					setStandingsData(data);
 				})
-			);
+			)
+			.catch((error) => {
+				setLoading(false);
+				console.error(error);
+				setError(`Error retrieving data: ${error.message}`);
+			});	
 		}
-	}, [standingsData, leagueId]);
+	}, [standingsData, leagueId, setError]);
 
 	useEffect(() => {
 		if (Object.keys(standingsData).length > 0 && standingsRows.length === 0) {
@@ -116,7 +122,7 @@ const Standings = () => {
 								onChange={handleStartYearChange}
 								sx={{ color: 'white' }}
 							>
-								{standingsData.seasons.map((year) => <MenuItem value={year} key={year}>{year}</MenuItem>)}
+								{standingsData?.seasons?.map((year) => <MenuItem value={year} key={year}>{year}</MenuItem>)}
 							</Select>
 						</FormControl>
 						<FormControl fullWidth>
@@ -129,7 +135,7 @@ const Standings = () => {
 								onChange={handleEndYearChange}
 								sx={{ color: 'white' }}
 							>
-								{standingsData.seasons.map((year) => <MenuItem value={year} key={year}>{year}</MenuItem>)}
+								{standingsData?.seasons?.map((year) => <MenuItem value={year} key={year}>{year}</MenuItem>)}
 							</Select>
 						</FormControl>
 					</div>

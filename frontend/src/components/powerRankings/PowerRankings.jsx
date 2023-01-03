@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import './PowerRankings.css';
 
-const PowerRankings = () => {
+const PowerRankings = ({ setError }) => {
 	const leagueId = useSelector((state) => state.leagueInfo.id)
 
 	const [loading, setLoading] = useState(true);
@@ -28,14 +28,20 @@ const PowerRankings = () => {
 					method: 'GET',
 					headers: { 'Content-Type':'application/json' },
 				}
-			).then((res) => {
-					res.json().then((data) => {
-						setRankingsData(data);
-						setLoading(false);
-					})}
-				);
+			)
+			.then((res) => {
+				res.json().then((data) => {
+					setRankingsData(data);
+					setLoading(false);
+				})}
+			)
+			.catch((error) => {
+				setLoading(false);
+				console.error(error);
+				setError(`Error retrieving data: ${error.message}`);
+			});
 		}
-	}, [rankingsData, leagueId]);
+	}, [rankingsData, leagueId, setError]);
 
 	useEffect(() => {
 		if (rankingsData.length !== 0) {

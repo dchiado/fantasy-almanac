@@ -66,7 +66,11 @@ const App = () => {
 						}));
 					}
 				})
-			);
+			)
+			.catch((error) => {
+				console.error(error);
+				setError(`Error retrieving data: ${error.message}`);
+			});		
 		}
 	}, [cookies?.league_id, dispatch, leagueId, setCookie]);
 
@@ -105,16 +109,24 @@ const App = () => {
 						/>
 					</Route>
 					<Route path="/standings">
-						<Standings />
+						<Standings
+							setError={setError}
+						/>
 					</Route>
 					<Route path="/head-to-head">
-						<HeadToHead />
+						<HeadToHead
+							setError={setError}
+						/>
 					</Route>
 					<Route path="/power-rankings">
-						<PowerRankings />
+						<PowerRankings
+							setError={setError}
+						/>
 					</Route>
 					<Route path="/records">
-						<Records />
+						<Records
+							setError={setError}
+						/>
 					</Route>
 					<Route path="/mobile-data-links">
 						<MobileDataLinks />

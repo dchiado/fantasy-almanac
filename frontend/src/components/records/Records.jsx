@@ -23,7 +23,7 @@ import { useSelector } from "react-redux";
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import './Records.css';
 
-const Records = () => {
+const Records = ({ setError }) => {
 	const leagueId = useSelector((state) => state.leagueInfo.id)
   const [loading, setLoading] = useState(false);
 
@@ -68,7 +68,8 @@ const Records = () => {
         method: 'GET',
         headers: { 'Content-Type':'application/json' },
       }
-    ).then((res) =>
+    )
+    .then((res) =>
       res.json().then((data) => {
         if (object === 'week') {
           setHeaders(['Year', 'Week', 'Team', 'Score']);
@@ -82,6 +83,11 @@ const Records = () => {
         }
       })
     )
+    .catch((error) => {
+      setLoading(false);
+      console.error(error);
+      setError(`Error retrieving data: ${error.message}`);
+    });
   }
 
   const handleSelectBestWorst = (event) => {

@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import './HeadToHead.css';
 
-const HeadToHead = () => {
+const HeadToHead = ({ setError }) => {
 	const leagueId = useSelector((state) => state.leagueInfo.id)
 
 	const [loading, setLoading] = useState(false);
@@ -23,13 +23,18 @@ const HeadToHead = () => {
 					method: 'GET',
 					headers: { 'Content-Type':'application/json' },
 				}
-			).then((res) =>
+			)
+			.then((res) =>
 				res.json().then((data) => {
 					setTeams(data);
 				})
-			);
+			)
+			.catch((error) => {
+				console.error(error);
+				setError(`Error retrieving data: ${error.message}`);
+			});
 		}
-	}, [teams, leagueId]);
+	}, [teams, leagueId, setError]);
 
 	useEffect(() => {
 		if (Object.keys(matchupData).length === 0 && teamsSubmitted && leagueId) {
@@ -41,14 +46,20 @@ const HeadToHead = () => {
 					method: 'GET',
 					headers: { 'Content-Type':'application/json' },
 				}
-			).then((res) =>
+			)
+			.then((res) =>
 				res.json().then((data) => {
 					setMatchupData(JSON.parse(JSON.stringify(data)));
 					setLoading(false);
 				})
-			);
+			)
+			.catch((error) => {
+				setLoading(false);
+				console.error(error);
+				setError(`Error retrieving data: ${error.message}`);
+			});
 		}
-	}, [matchupData, team1, team2, teamsSubmitted, leagueId])
+	}, [matchupData, team1, team2, teamsSubmitted, leagueId, setError])
 
 	const handleSelectTeam1 = (event) => {
 		setTeam1(event.target.value);
