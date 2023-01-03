@@ -231,7 +231,7 @@ const Standings = () => {
 													color: 'inherit',
 													backgroundColor: 'inherit',
 													borderColor: 'inherit',
-													border: '2px solid',
+													border: '2px solid inherit',
 												}}
 											>
 												{row.name}
@@ -250,7 +250,7 @@ const Standings = () => {
 															fontSize: 'inherit',
 															color: rec?.playoff_champ ? 'black' : 'inherit',
 															background: rec?.playoff_champ ? 'gold' : 'inherit',
-															border: rec?.reg_season_champ ? '2px solid' : '',
+															border: '2px solid',
 															borderColor: borderColor
 														}}
 													>
