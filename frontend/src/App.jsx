@@ -18,6 +18,7 @@ import { useCookies } from "react-cookie";
 import { updateLeagueInfo } from './features/leagueInfo/leagueInfoSlice'
 import { Alert } from "@mui/material";
 import { Stack } from "@mui/system";
+import Keepers from "./components/keepers/Keepers";
 
 const App = () => {
 	const width = window.innerWidth;
@@ -70,7 +71,7 @@ const App = () => {
 			.catch((error) => {
 				console.error(error);
 				setError(`Error retrieving data: ${error.message}`);
-			});		
+			});
 		}
 	}, [cookies?.league_id, dispatch, leagueId, setCookie]);
 
@@ -128,6 +129,13 @@ const App = () => {
 							setError={setError}
 						/>
 					</Route>
+					{leagueId === '166975' && // The Gridiron league only
+						<Route path="/keepers">
+							<Keepers
+								setError={setError}
+								/>
+						</Route>
+					}
 					<Route path="/mobile-data-links">
 						<MobileDataLinks />
 					</Route>

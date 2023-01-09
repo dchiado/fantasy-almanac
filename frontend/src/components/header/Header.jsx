@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import './Header.css';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -11,34 +11,45 @@ import { useSelector } from 'react-redux'
 import { Link } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
-const pages = [
-  {
-    name: 'All-time Standings',
-    link: '/standings',
-  },
-  {
-    name: 'Head-to-Head',
-    link: '/head-to-head',
-  },
-  {
-    name: 'Records',
-    link: '/records',
-  },
-  {
-    name: 'Power Rankings',
-    link: '/power-rankings',
-  },
-];
-
 const Header = () => {
   const leagueInfo = useSelector((state) => state.leagueInfo)
 	const [,, removeCookie] = useCookies(["league_id"]);
+  const [pages, setPages] = useState([
+    {
+      name: 'All-time Standings',
+      link: '/standings',
+    },
+    {
+      name: 'Head-to-Head',
+      link: '/head-to-head',
+    },
+    {
+      name: 'Records',
+      link: '/records',
+    },
+    {
+      name: 'Power Rankings',
+      link: '/power-rankings',
+    },
+  ]);
 
   const handleRemoveCookie = () => {
     removeCookie("league_id", {
       path: "/"
     });
   }
+
+  useEffect(() => {
+		if (leagueInfo?.id === '166975' && !pages.find(p => p.name === 'Keepers')) {
+      setPages([
+        ...pages,
+        {
+          name: 'Keepers',
+          link: '/keepers'
+        }
+      ]);
+		}
+	}, [leagueInfo, pages])
 
   return (
     <AppBar

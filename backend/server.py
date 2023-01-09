@@ -8,7 +8,7 @@ import head_to_head
 import power_rankings
 import scores
 import matchups
-# import json
+import rosters
 
 x = datetime.datetime.now()
   
@@ -108,6 +108,13 @@ async def list_matchups():
 async def get_power_rankings():
     session['league_id'] = request.args.get('leagueId')
     resp = await power_rankings.current()
+    return resp
+
+
+@app.route('/keepers', methods=['GET'])
+async def get_keeper_options():
+    session['league_id'] = request.args.get('leagueId')
+    resp = await rosters.keeper_options()
     return resp
 
 
