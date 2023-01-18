@@ -61,3 +61,13 @@ For older seasons, the endpoint looks like this:
 ## UI Components
 Material UI is used for building frontend component. Components, examples, and other
 documentation can be found [here](https://mui.com/). 
+
+## Deploy
+
+The backend is deployed via elastic beanstalk. It can be deployed by going into the backend directory and running `eb deploy` (with the right AWS creds).
+
+The frontend is deployed to a static website on S3 and sits behind a cloudfront distribution. To deploy the frontend:
+
+1. Edit the `.env` file to be variables you want for prod
+1. cd into the frontend dir and run `npm run build`
+1. Upload all files in the `frontend/build` dir into the `ffalmanac.com` bucket
