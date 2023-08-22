@@ -11,7 +11,7 @@ import matchups
 import rosters
 
 x = datetime.datetime.now()
-  
+
 # Initializing flask app
 app = Flask(__name__)
 CORS(app)
@@ -25,7 +25,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 def health():
     return 'OK'
 
-  
+
 @app.route('/info', methods=['GET'])
 # @cross_origin()
 async def home():
@@ -34,8 +34,8 @@ async def home():
     if "established" in resp:
         session['start_year'] = resp['established']
     return resp
-  
-      
+
+
 @app.route('/standings', methods=['GET'])
 async def all_time_standings():
     session['league_id'] = request.args.get('leagueId')

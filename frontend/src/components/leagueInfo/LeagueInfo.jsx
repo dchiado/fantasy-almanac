@@ -24,7 +24,7 @@ const LeagueInfo = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
 	helpText += 'Only ESPN leagues are supported and the setting "Make League Viewable to Public" must be set to "Yes".'
 
 	return (
-		<div>
+		<div className="wrapper">
 			{cookies?.league_id && leagueInfo.name ? 
 				<div>
           <Typography

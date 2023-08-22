@@ -89,7 +89,10 @@ const App = () => {
 		if (cookies?.league_id !== undefined && !leagueInfo?.id && !error) {
 			setLeagueId(cookies.league_id);
 			fetchLeagueInfo();
-		}
+		} else if (window.location.host.split('.')[0] == 'gridiron' && !error) {
+      setLeagueId('166975');
+      fetchLeagueInfo();
+    }
 	}, [cookies, dispatch, leagueInfo, error, fetchLeagueInfo])
 
 	return (
@@ -133,7 +136,7 @@ const App = () => {
 						<Route path="/keepers">
 							<Keepers
 								setError={setError}
-								/>
+              />
 						</Route>
 					}
 					<Route path="/mobile-data-links">
@@ -149,8 +152,7 @@ const App = () => {
 					<Alert onClose={() => setError()} severity="error">{error}</Alert>
 				</Stack>
 			}
-			<Footer />
-			<FooterMobile />
+      {width > breakpoint ? <Footer /> : <FooterMobile />}
 		</div>
 	);
 }

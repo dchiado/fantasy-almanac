@@ -3,6 +3,7 @@ import { Button, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { useCookies } from 'react-cookie';
 import { useSelector } from 'react-redux';
+import "./LeagueInfoMobile.css";
 
 const LeagueInfoMobile = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
   const leagueInfo = useSelector((state) => state.leagueInfo)
@@ -15,7 +16,7 @@ const LeagueInfoMobile = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
   }
 
   return (
-    <div>
+    <div className="wrapper">
       {leagueInfo?.name &&
         <Box sx={{ display: { md: 'flex', paddingLeft: 10 } }}>
           <Typography

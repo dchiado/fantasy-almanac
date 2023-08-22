@@ -10,6 +10,8 @@ const Keepers = ({ setError }) => {
   const [keepers, setKeepers] = useState([]);
 	const [loading, setLoading] = useState(false);
 
+  const [isDesktop, _setDesktop] = useState(window.innerWidth > 900);
+
   useEffect(() => {
 		if (keepers.length === 0 && leagueId) {
       setLoading(true);
@@ -49,12 +51,21 @@ const Keepers = ({ setError }) => {
                       display: 'flex',
                       fontWeight: 700,
                       letterSpacing: '.25rem',
+                      ml: 5,
                       mb: 2
                     }}
                     >
                     {team.team_name}
                   </Typography>
-                  <TableContainer component={Paper} className="table-container" sx={{ width: 650, mb: 5 }}>
+                  <TableContainer
+                    component={Paper}
+                    className="table-container"
+                    sx={{
+                      width: { sm: '100%', md: 650 },
+                      ml: 'auto',
+                      mr: 'auto',
+                      mb: 5 
+                    }}>
                     <Table sx={{ fontSize: 14 }} size="small" aria-label="keepers table">
                       <TableHead>
                         <TableRow className="table-header">
@@ -65,15 +76,17 @@ const Keepers = ({ setError }) => {
                           >
                             Player
                           </TableCell>
+                          {isDesktop && 
+                            <TableCell
+                              align="center"
+                              key="acquired"
+                              sx={{ minWidth: 25, fontSize: 'inherit', color: 'inherit', fontWeight: 'inherit' }}
+                            >
+                              Acquired
+                            </TableCell>
+                          }
                           <TableCell
-                            align="center"
-                            key="acquired"
-                            sx={{ minWidth: 25, fontSize: 'inherit', color: 'inherit', fontWeight: 'inherit' }}
-                          >
-                            Acquired
-                          </TableCell>
-                          <TableCell
-                            align="center"
+                          align="center"
                             key="round"
                             sx={{ minWidth: 25, fontSize: 'inherit', color: 'inherit', fontWeight: 'inherit' }}
                           >
@@ -104,18 +117,20 @@ const Keepers = ({ setError }) => {
                               >
                                 {player.name}
                               </TableCell>
-                              <TableCell
-                                align="center"
-                                key='acq'
-                                sx={{
-                                  fontSize: 'inherit',
-                                  backgroundColor: 'inherit',
-                                  color: 'inherit',
-                                  borderColor: 'inherit',
-                                }}
-                              >
-                                {player.acq_type}
-                              </TableCell>
+                              {isDesktop && 
+                                <TableCell
+                                  align="center"
+                                  key='acq'
+                                  sx={{
+                                    fontSize: 'inherit',
+                                    backgroundColor: 'inherit',
+                                    color: 'inherit',
+                                    borderColor: 'inherit',
+                                  }}
+                                >
+                                  {player.acq_type}
+                                </TableCell>
+                              }
                               <TableCell
                                 align="center"
                                 key='round'
