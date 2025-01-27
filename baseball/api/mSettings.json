@@ -1,0 +1,153 @@
+{
+  "gameId": 2,
+  "id": 9342,
+  "members": [
+    {
+      "displayName": "mmoran36",
+      "id": "{24DAF4C8-D64B-11D2-94E8-0060B067D8ED}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "Freezang11",
+      "id": "{38476D6A-FB31-415B-876D-6AFB31115B4C}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "sarith",
+      "id": "{3D2086F9-4B1B-4C5B-AB7C-328A10522F17}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "bruce mackinney",
+      "id": "{43D3912D-7001-48ED-9E53-585761EA0C01}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "justin6949734",
+      "id": "{661B581A-EBD1-4F18-B50D-7FFE82C5B809}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "ESPNFAN9374444827",
+      "id": "{6E640244-C4BB-4CCB-8414-EE3A0067A9E9}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "imjoshs",
+      "id": "{7B96ED34-9C70-4942-96ED-349C704942F9}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "tarheelballer524",
+      "id": "{8243B4E1-98AB-492D-ABE4-35BCE05C3435}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "dylpick1",
+      "id": "{AB3DD4A6-3944-4D17-AFCB-6344BC69A45B}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "jkat35",
+      "id": "{AF4ED587-51B1-4237-8C0B-068FD113E102}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "candacealexis716",
+      "id": "{C8F4C2BA-F061-4C25-B4C2-BAF0612C259A}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "deutschlandman11",
+      "id": "{CF119E63-3E27-4108-8172-B24E16FA4785}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "duvalx595959",
+      "id": "{F49D4555-DA08-4CF3-BEB5-0896A282EAD4}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "dsilva1013",
+      "id": "{FABAB0CB-E511-4079-B9EF-F5401DB761D2}",
+      "isLeagueManager": false
+    }
+  ],
+  "scoringPeriodId": 196,
+  "seasonId": 2024,
+  "segmentId": 0,
+  "settings": { "name": "MLB Addicts- Roger Maris Div." },
+  "status": {
+    "currentMatchupPeriod": 1,
+    "isActive": true,
+    "latestScoringPeriod": 196
+  },
+  "teams": [
+    {
+      "abbrev": "JOSH",
+      "id": 1,
+      "owners": [
+        "{38476D6A-FB31-415B-876D-6AFB31115B4C}",
+        "{7B96ED34-9C70-4942-96ED-349C704942F9}"
+      ]
+    },
+    {
+      "abbrev": "CCT",
+      "id": 2,
+      "owners": ["{C8F4C2BA-F061-4C25-B4C2-BAF0612C259A}"]
+    },
+    {
+      "abbrev": "BM",
+      "id": 3,
+      "owners": ["{43D3912D-7001-48ED-9E53-585761EA0C01}"]
+    },
+    {
+      "abbrev": "Z",
+      "id": 4,
+      "owners": ["{661B581A-EBD1-4F18-B50D-7FFE82C5B809}"]
+    },
+    {
+      "abbrev": "SST",
+      "id": 5,
+      "owners": ["{3D2086F9-4B1B-4C5B-AB7C-328A10522F17}"]
+    },
+    {
+      "abbrev": "JST",
+      "id": 6,
+      "owners": ["{AF4ED587-51B1-4237-8C0B-068FD113E102}"]
+    },
+    {
+      "abbrev": "Dang",
+      "id": 7,
+      "owners": ["{AB3DD4A6-3944-4D17-AFCB-6344BC69A45B}"]
+    },
+    {
+      "abbrev": "CHOP",
+      "id": 8,
+      "owners": [
+        "{8243B4E1-98AB-492D-ABE4-35BCE05C3435}",
+        "{6E640244-C4BB-4CCB-8414-EE3A0067A9E9}"
+      ]
+    },
+    {
+      "abbrev": "HARP",
+      "id": 9,
+      "owners": ["{CF119E63-3E27-4108-8172-B24E16FA4785}"]
+    },
+    {
+      "abbrev": "DDT",
+      "id": 10,
+      "owners": ["{FABAB0CB-E511-4079-B9EF-F5401DB761D2}"]
+    },
+    {
+      "abbrev": "643",
+      "id": 11,
+      "owners": ["{24DAF4C8-D64B-11D2-94E8-0060B067D8ED}"]
+    },
+    {
+      "abbrev": "Thur",
+      "id": 12,
+      "owners": ["{F49D4555-DA08-4CF3-BEB5-0896A282EAD4}"]
+    }
+  ]
+}

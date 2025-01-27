@@ -21,7 +21,7 @@ const LeagueInfo = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
   };
 
 	let helpText = 'Your league ID can be found in the URL of your league page as the number after "leagueId=". '
-	helpText += 'Only ESPN leagues are supported and the setting "Make League Viewable to Public" must be set to "Yes".'
+	helpText += 'Only ESPN football leagues are supported and the setting "Make League Viewable to Public" must be set to "Yes".'
 
 	return (
 		<div className="wrapper">

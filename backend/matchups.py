@@ -1,4 +1,3 @@
-import collections
 import aiohttp
 from utils import (
     is_bye_week,

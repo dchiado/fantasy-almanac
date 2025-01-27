@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import Footer from "./components/footer/Footer";
 import Header from "./components/header/Header";
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route, Switch} from 'react-router-dom';
 
 import Suggestions from "./components/suggestions/Suggestions";
 import LeagueInfo from "./components/leagueInfo/LeagueInfo";
@@ -13,22 +13,30 @@ import Records from "./components/records/Records";
 import FooterMobile from "./components/footerMobile/FooterMobile";
 import LeagueInfoMobile from "./components/leagueInfoMobile/LeagueInfoMobile";
 import MobileDataLinks from "./components/mobileDataLinks/MobileDataLinks";
+import Keepers from "./components/keepers/Keepers";
+import BaseballOverall from "./components/baseballOverall/BaseballOverall";
 import { useDispatch, useSelector } from "react-redux";
 import { useCookies } from "react-cookie";
 import { updateLeagueInfo } from './features/leagueInfo/leagueInfoSlice'
 import { Alert } from "@mui/material";
 import { Stack } from "@mui/system";
-import Keepers from "./components/keepers/Keepers";
 
 const App = () => {
+  const path = window.location.pathname;
 	const width = window.innerWidth;
   const breakpoint = 620;
+  console.log('path: ' + path);
 
 	const dispatch = useDispatch()
 	const leagueInfo = useSelector((state) => state.leagueInfo.id)
 	const [cookies, setCookie] = useCookies(["league_id"]);
   const [error, setError] = useState();
 	const [leagueId, setLeagueId] = useState();
+  const [showHeader, setShowHeader] = useState(true);
+
+	useEffect(() => {
+    setShowHeader(width > breakpoint && path !== '/mlb-addicts');
+  }, [path, width, breakpoint])
 
 	const fetchLeagueInfo = useCallback(() => {
 		if (leagueId) {
@@ -89,7 +97,7 @@ const App = () => {
 		if (cookies?.league_id !== undefined && !leagueInfo?.id && !error) {
 			setLeagueId(cookies.league_id);
 			fetchLeagueInfo();
-		} else if (window.location.host.split('.')[0] == 'gridiron' && !error) {
+		} else if (window.location.host.split('.')[0] === 'gridiron' && !error) {
       setLeagueId('166975');
       fetchLeagueInfo();
     }
@@ -98,7 +106,7 @@ const App = () => {
 	return (
 		<div className="App">
 			<BrowserRouter>
-				{width > breakpoint ? <Header /> : <div></div>}
+				{showHeader ? <Header /> : <div></div>}
 				<Switch>
 					<Route exact path="/">
 						<LeagueInfo
@@ -139,6 +147,11 @@ const App = () => {
               />
 						</Route>
 					}
+          <Route path="/mlb-addicts">
+						<BaseballOverall
+							setError={setError}
+						/>
+					</Route>
 					<Route path="/mobile-data-links">
 						<MobileDataLinks />
 					</Route>
@@ -152,7 +165,11 @@ const App = () => {
 					<Alert onClose={() => setError()} severity="error">{error}</Alert>
 				</Stack>
 			}
-      {width > breakpoint ? <Footer /> : <FooterMobile />}
+      {showHeader &&
+        <>
+          {width > breakpoint ? <Footer /> : <FooterMobile />}
+        </>
+      }
 		</div>
 	);
 }

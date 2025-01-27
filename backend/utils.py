@@ -4,7 +4,7 @@ from flask import session
 
 from datetime import date
 from itertools import groupby
-from os import environ
+
 
 async def load_data(year, uri, http_session, week=None, headers=None):
     """Call the ESPN API based on arguments passed and current year.

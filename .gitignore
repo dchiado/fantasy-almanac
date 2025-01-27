@@ -26,3 +26,8 @@ backend/__pycache__/
 frontend/node_modules/
 frontend/build/
 frontend/.env*
+
+# other dependencies
+**/node_modules
+dependencies_layer
+python
