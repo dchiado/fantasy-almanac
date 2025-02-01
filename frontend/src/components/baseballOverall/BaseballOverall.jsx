@@ -54,7 +54,7 @@ const BaseballOverall = ({ setError }) => {
 	const [standingsData, setStandingsData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [display, setDisplay] = useState('points');
-  const [sorting, setSorting] = useState({ field: null, ascending: null })
+  const [sorting, setSorting] = useState({ field: 'totalPoints', ascending: true })
 
 
 	useEffect(() => {
@@ -116,11 +116,17 @@ const BaseballOverall = ({ setError }) => {
     setStandingsData(sorting.ascending ? sortedStandings : sortedStandings.reverse());
   }, [sorting]);
 
-  const Arrows = () => {
+  const Arrows = ({ column }) => {
+    const sorted = column === sorting.field;
+    const up = sorting.ascending;
+
+    const upClass = `up-arrow${sorted && up ? ' up-black' : ''}`;
+    const downClass = `down-arrow${sorted && !up ? ' down-black' : ''}`;
+
     return (
       <div className="baseball-right">
-        <div class="up-arrow"></div>
-        <div class="down-arrow"></div>
+        <div className={upClass}></div>
+        <div className={downClass}></div>
       </div>
     );
   }
@@ -155,20 +161,20 @@ const BaseballOverall = ({ setError }) => {
                       <th>
                         Team
                       </th>
-                      <th>
+                      <th className="baseball-clip">
                         League
                       </th>
                       <th className="baseball-clickable" onClick={() => applySorting('overallRank', !sorting.ascending)}>
                         <div className="baseball-left">
                           Rank
                         </div>
-                        <Arrows />
+                        <Arrows column="overallRank" />
                       </th>
                       <th className="baseball-clickable" onClick={() => applySorting('totalPoints', !sorting.ascending)}>
                         <div className="baseball-left">
                           Points
                         </div>
-                        <Arrows />
+                        <Arrows column="totalPoints" />
                       </th>
                       {stats.map((stat, idx) => (
                         <>
@@ -180,7 +186,7 @@ const BaseballOverall = ({ setError }) => {
                             <div className="baseball-left">
                               {stat.label}
                             </div>
-                            <Arrows />
+                            <Arrows column={stat.key} />
                           </th>
                           {idx === 4 && <td className="baseball-gray" key="header-empty-column"></td>}
                         </>
@@ -190,13 +196,13 @@ const BaseballOverall = ({ setError }) => {
                         <div className="baseball-left">
                           GP
                         </div>
-                        <Arrows />
+                        <Arrows column="gamesPlayed" />
                       </th>
                       <th className="baseball-clickable" onClick={() => applySorting('inningsPitched', !sorting.ascending)}>
                         <div className="baseball-left">
                           IP
                         </div>
-                        <Arrows />
+                        <Arrows column="inningsPitched" />
                       </th>
                     </tr>
                   </thead>
@@ -211,7 +217,7 @@ const BaseballOverall = ({ setError }) => {
                           <td>
                             {row.name}
                           </td>
-                          <td>
+                          <td className="baseball-clip">
                             {row.leagueName}
                           </td>
                           <td>
@@ -221,12 +227,19 @@ const BaseballOverall = ({ setError }) => {
                             {row.totalPoints}
                           </td>
                           {stats.map((stat, idx) => {
-                            let displayVal = display === 'points' ? row.stats[stat.key].points : row.stats[stat.key].value;
-                            const trimmed = displayVal.toString().substring(0, 7);
+                            let displayVal;
+                            let hoverVal;
+                            if (display === 'stats') {
+                              const value = row.stats[stat.key].value.toString();
+                              hoverVal = value.length > 5 ? value : null;
+                              displayVal = value.substring(0, 5);
+                            } else {
+                              displayVal = row.stats[stat.key].points.toString();
+                            }
                             return (
                               <>
-                                <td key={`${row.name}-${stat.key}`}>
-                                  {trimmed}
+                                <td key={`${row.name}-${stat.key}`} title={hoverVal}>
+                                  {displayVal}
                                 </td>
                                 {idx === 4  && <td className="baseball-gray" key={`${row.name}-empty-column`}></td>}
                               </>

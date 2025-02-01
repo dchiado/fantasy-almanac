@@ -25,7 +25,6 @@ const App = () => {
   const path = window.location.pathname;
 	const width = window.innerWidth;
   const breakpoint = 620;
-  console.log('path: ' + path);
 
 	const dispatch = useDispatch()
 	const leagueInfo = useSelector((state) => state.leagueInfo.id)
