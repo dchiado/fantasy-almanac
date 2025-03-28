@@ -1,4 +1,4 @@
-const year = '2024'
+const year = '2025'
 const urlBase = `https://lm-api-reads.fantasy.espn.com/apis/v3/games/flb/seasons/${year}/segments/0/leagues`
 const leagueIds = [
   3334,
@@ -9,9 +9,7 @@ const leagueIds = [
   31036,
   31470,
   49488,
-  81126,
-  136347,
-  73273492
+  81126
 ]
 
 // could populate this with mScoreboard > settings > scoringSettings > scoringItems
