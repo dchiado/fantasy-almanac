@@ -102,12 +102,16 @@ export const handler = async (event) => {
     const teamsData = allTeamsData.find((t) => t.id === leagueId);
 
     const leagueName = settings.settings.name;
+    const cleanedLeagueName = leagueName.replace(/^MLB Addicts\s*-?\s*/, "");
 
     scoreboard.teams.forEach((team) => {
-      const teamOwnerInfo = teamsData.teams.find((t) => t.id === team.id);
-      const primaryOwner = teamOwnerInfo.primaryOwner;
-      const ownerInfo = teamsData.members.find((m) => m.id === primaryOwner);
-      const ownerName = `${ownerInfo.firstName} ${ownerInfo.lastName}`;
+      const teamInfo = teamsData.teams.find((t) => t.id === team.id);
+      const owners = teamInfo.owners;
+      const ownersNames = owners.map((o) => {
+        const ownerInfo = teamsData.members.find((m) => m.id === o);
+        return `${ownerInfo.firstName} ${ownerInfo.lastName}`;
+      })
+      const formattedOwners = ownersNames.join(', ');
 
       const teamDetails = scoreboard.schedule[0].teams.find((t) => t.teamId === team.id)
       const teamStats = teamDetails.cumulativeScore.scoreByStat;
@@ -118,8 +122,8 @@ export const handler = async (event) => {
       const info = {
         name: team.name,
         id: team.id,
-        owner: ownerName,
-        leagueName: leagueName,
+        owner: formattedOwners,
+        leagueName: cleanedLeagueName,
         leagueRank: team.rankCalculatedFinal,
         gamesPlayed: teamStats['81'].score,
         inningsPitched: inningsPitched,
