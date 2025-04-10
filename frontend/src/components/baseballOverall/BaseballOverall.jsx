@@ -213,7 +213,7 @@ const BaseballOverall = ({ setError }) => {
                   <tbody>
                     {standingsData.map((row, idx) => {
                       return (
-                        <tr key={`${row.name}-row`} >
+                        <tr key={`${row.name}-row-${idx}`} >
                           <td className="baseball-row-number">
                             {idx + 1}
                           </td>
@@ -244,7 +244,7 @@ const BaseballOverall = ({ setError }) => {
                             }
                             return (
                               <>
-                                <td key={`${row.name}-${stat.key}`} title={hoverVal}>
+                                <td key={`${row.name}-${stat.key}-${idx}`} title={hoverVal}>
                                   {displayVal}
                                 </td>
                                 {idx === 4  && <td className="baseball-gray" key={`${row.name}-empty-column`}></td>}
