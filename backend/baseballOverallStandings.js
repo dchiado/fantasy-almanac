@@ -87,15 +87,28 @@ export const handler = async (event) => {
   const scoreboardJsonPromises = scoreboardPromises.map((promise) => promise.then((resp) => resp.json()));
   const allScoreboards = await Promise.all(scoreboardJsonPromises);
 
-
+  // get all team data
+  const teamPromises = [];
+  for (const leagueId of leagueIds) {
+    teamPromises.push(fetch(`${urlBase}/${leagueId}?&view=mTeam`));
+  }
+  const teamJsonPromises = teamPromises.map((promise) => promise.then((resp) => resp.json()));
+  const allTeamsData = await Promise.all(teamJsonPromises);
+  
   // compile all data
   for (const leagueId of leagueIds) {
     const settings = allSettings.find((s) => s.id === leagueId);
     const scoreboard = allScoreboards.find((s) => s.id === leagueId);
+    const teamsData = allTeamsData.find((t) => t.id === leagueId);
 
     const leagueName = settings.settings.name;
 
     scoreboard.teams.forEach((team) => {
+      const teamOwnerInfo = teamsData.teams.find((t) => t.id === team.id);
+      const primaryOwner = teamOwnerInfo.primaryOwner;
+      const ownerInfo = teamsData.members.find((m) => m.id === primaryOwner);
+      const ownerName = `${ownerInfo.firstName} ${ownerInfo.lastName}`;
+
       const teamDetails = scoreboard.schedule[0].teams.find((t) => t.teamId === team.id)
       const teamStats = teamDetails.cumulativeScore.scoreByStat;
 
@@ -105,6 +118,7 @@ export const handler = async (event) => {
       const info = {
         name: team.name,
         id: team.id,
+        owner: ownerName,
         leagueName: leagueName,
         leagueRank: team.rankCalculatedFinal,
         gamesPlayed: teamStats['81'].score,

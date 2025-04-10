@@ -162,6 +162,9 @@ const BaseballOverall = ({ setError }) => {
                         Team
                       </th>
                       <th className="baseball-clip">
+                        Owner
+                      </th>
+                      <th className="baseball-clip">
                         League
                       </th>
                       <th className="baseball-clickable" onClick={() => applySorting('overallRank', !sorting.ascending)}>
@@ -216,6 +219,9 @@ const BaseballOverall = ({ setError }) => {
                           </td>
                           <td>
                             {row.name}
+                          </td>
+                          <td className="baseball-clip">
+                            {row.owner}
                           </td>
                           <td className="baseball-clip">
                             {row.leagueName}
