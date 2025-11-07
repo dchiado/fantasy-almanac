@@ -34,15 +34,17 @@ async def load_data(year, uri, http_session, week=None, headers=None):
         return resp_json
     else:
         url = (
-            "https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/leagueHistory/" +
-            str(session['league_id']) +
-            "?seasonId=" +
-            str(year) +
-            "&view=" + uri +
-            ("&scoringPeriodId=" + str(week) if week is not None else '')
+          "https://fantasy.espn.com/apis/v3/games/ffl/leagueHistory/" +
+          str(session['league_id']) +
+          "?seasonId=" + str(year) +
+          "&view=" + uri +
+          ("&scoringPeriodId=" + str(week) if week is not None else '')
         )
+        print ('Calling endpoint: ', url)
         resp = await http_session.request(method='GET', url=url, headers=headers)
+        print('Resp: ', resp)
         resp_json = await resp.json()
+        print('Resp JSON: ', resp_json)
         return resp_json[0]
 
 

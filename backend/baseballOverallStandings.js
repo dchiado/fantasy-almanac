@@ -133,7 +133,6 @@ export const handler = async (event) => {
       statMapping.forEach((statMapObj) => {
         const statId = statMapObj.id;
         const value = teamStats[statId].score;
-        // TODO: not doing anything with this yet, when does it become true?
         const ineligible = teamStats[statId].ineligible;
         info.stats[statMapObj.stat] = { value: value, ineligible: ineligible }
       })
@@ -146,27 +145,44 @@ export const handler = async (event) => {
   statMapping.forEach((statObj) => {
     // get list of values
     const stat = statObj.stat;
-    const allVals = allTeams.map(t => t.stats[stat].value).sort((a, b) => a - b);
+
+    // collect ineligible teams (didn't meet minimum)
+    const ineligibleTeams = allTeams.filter(t => t.stats[stat].ineligible);
+
+    // collect values only from *eligible* teams for ranking
+    const eligibleTeams = allTeams.filter(t => !t.stats[stat].ineligible);
+    const eligibleVals = eligibleTeams.map(t => t.stats[stat].value);
+
+    // sort values properly
+    eligibleVals.sort((a, b) => a - b);
     if (!statObj.highIsBetter) {
-      allVals.reverse();
+      eligibleVals.reverse();
     }
 
     allTeams.forEach((team) => {
-      const teamVal = team.stats[stat].value;
+      const { value, ineligible } = team.stats[stat];
 
-      // find all indexes of this stat total + 1
-      const allIndexes = allVals.reduce((accu, current, idx) => {
-        if (current === teamVal) {
-          accu.push(idx + 1);
-        }
-        return accu;
-      }, []);
+      if (ineligible) {
+        // Always force bottom score
+        team.stats[stat].points = 1;
+      } else {    
+        // find all indexes of this stat total + 1
+        const eligibleIndexes = eligibleVals.reduce((accu, current, idx) => {
+          if (current === value) {
+            accu.push(idx + 1);
+          }
+          return accu;
+        }, []);
 
-      // get average of those indexes
-      const average = allIndexes.reduce((a, b) => a + b) / allIndexes.length;
+        // the average of those indexes is their points for the stat
+        const points = eligibleIndexes.reduce((a, b) => a + b) / eligibleIndexes.length;
 
-      // assign that number of points to the team
-      team.stats[stat].points = average;
+        // ineligible teams get pushed to the bottom, so move everyone else up
+        const adjustedPoints = points + ineligibleTeams.length;
+
+        // assign that number of points to the team
+        team.stats[stat].points = adjustedPoints;
+      }
     })
   })
 

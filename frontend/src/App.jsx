@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Switch} from 'react-router-dom';
 
 import Suggestions from "./components/suggestions/Suggestions";
 import LeagueInfo from "./components/leagueInfo/LeagueInfo";
+import CookieWarning from "./components/cookieWarning/CookieWarning";
 import Standings from "./components/standings/Standings";
 import HeadToHead from "./components/headToHead/HeadToHead";
 import PowerRankings from "./components/powerRankings/PowerRankings";
@@ -15,6 +16,8 @@ import LeagueInfoMobile from "./components/leagueInfoMobile/LeagueInfoMobile";
 import MobileDataLinks from "./components/mobileDataLinks/MobileDataLinks";
 import Keepers from "./components/keepers/Keepers";
 import BaseballOverall from "./components/baseballOverall/BaseballOverall";
+import LoadingSpinner from "./components/loadingSpinner/LoadingSpinner";
+
 import { useDispatch, useSelector } from "react-redux";
 import { useCookies } from "react-cookie";
 import { updateLeagueInfo } from './features/leagueInfo/leagueInfoSlice'
@@ -32,6 +35,9 @@ const App = () => {
   const [error, setError] = useState();
 	const [leagueId, setLeagueId] = useState();
   const [showHeader, setShowHeader] = useState(true);
+  const [_espnS2, setEspnS2] = useState("");
+  const [isCached, setIsCached] = useState(null);
+  const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
     setShowHeader(width > breakpoint && path !== '/mlb-addicts');
@@ -39,6 +45,9 @@ const App = () => {
 
 	const fetchLeagueInfo = useCallback(() => {
 		if (leagueId) {
+      setLoading(true);
+
+      // Make everything a POST to include the cookie
 			fetch(
 				`${process.env.REACT_APP_API_URL}/info?leagueId=${leagueId}`,
 				{
@@ -70,15 +79,20 @@ const App = () => {
 							established: data.established,
 							teams: data.teams,
 							year: data.year,
-							week: data.week,
+							week: data.week
 						}));
+
+            setIsCached(data.cached);
 					}
 				})
 			)
 			.catch((error) => {
 				console.error(error);
 				setError(`Error retrieving data: ${error.message}`);
-			});
+			})
+      .finally(() => {
+        setLoading(false);
+      });
 		}
 	}, [cookies?.league_id, dispatch, leagueId, setCookie]);
 
@@ -93,11 +107,19 @@ const App = () => {
 	}
 
 	useEffect(() => {
-		if (cookies?.league_id !== undefined && !leagueInfo?.id && !error) {
+    const subdomain = window.location.host.split('.')[0];
+    if (error) {
+      return;
+    }
+
+		if (cookies?.league_id !== undefined && !leagueInfo?.id) {
 			setLeagueId(cookies.league_id);
 			fetchLeagueInfo();
-		} else if (window.location.host.split('.')[0] === 'gridiron' && !error) {
+		} else if (subdomain === 'gridiron') {
       setLeagueId('166975');
+      fetchLeagueInfo();
+    } else if (Number.isInteger(Number(subdomain))) {
+      setLeagueId(String(subdomain));
       fetchLeagueInfo();
     }
 	}, [cookies, dispatch, leagueInfo, error, fetchLeagueInfo])
@@ -108,10 +130,19 @@ const App = () => {
 				{showHeader ? <Header /> : <div></div>}
 				<Switch>
 					<Route exact path="/">
-						<LeagueInfo
-							onLeagueIdChange={onLeagueIdChange}
-							onLeagueInfoSubmit={onLeagueInfoSubmit}
-						/>
+            {loading ? <LoadingSpinner /> :
+            (
+              <LeagueInfo
+                onLeagueIdChange={onLeagueIdChange}
+                onLeagueInfoSubmit={onLeagueInfoSubmit}
+              />
+            )}
+            {isCached === false && 
+              <CookieWarning
+                onCookieSubmit={setEspnS2}
+                onCacheComplete={() => setIsCached(true)}
+              />
+            }
 					</Route>
 					<Route path="/league-info-mobile">
 						<LeagueInfoMobile
@@ -164,11 +195,7 @@ const App = () => {
 					<Alert onClose={() => setError()} severity="error">{error}</Alert>
 				</Stack>
 			}
-      {showHeader &&
-        <>
-          {width > breakpoint ? <Footer /> : <FooterMobile />}
-        </>
-      }
+      {width > breakpoint ? <Footer /> : <FooterMobile />}
 		</div>
 	);
 }

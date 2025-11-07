@@ -1,0 +1,48 @@
+.cookie-warning {
+  margin-top: 40px;
+  margin-bottom: 40px;
+  padding: 24px;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  max-width: 600px;
+  background-color: #36475f !important;
+  border-radius: 12px;
+  text-align: left;
+  color: white !important;
+}
+
+.cookie-warning h6 {
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+.cookie-warning p,
+.cookie-warning ol {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.cookie-warning ol {
+  padding-left: 20px;
+}
+
+.cookie-warning a {
+  color: #61dafb !important;
+  text-decoration: underline;
+  word-break: break-word;
+}
+
+.cookie-warning input {
+  background-color: white !important;
+  color: black !important;
+}
+
+.cookie-warning-input-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+}

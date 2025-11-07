@@ -30,4 +30,6 @@ frontend/.env*
 # other dependencies
 **/node_modules
 dependencies_layer
-python
+
+# lambda layers
+*.zip
