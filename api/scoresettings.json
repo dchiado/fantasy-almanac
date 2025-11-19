@@ -1,0 +1,34 @@
+{
+  "scoringItems": [
+    {
+      "isReverseItem": false,
+      "points": 6.0,
+      "statId": 25
+    },
+    {
+      "isReverseItem": false,
+      "points": 6.0,
+      "statId": 104
+    },
+    {
+      "isReverseItem": false,
+      "points": 6.0,
+      "statId": 43
+    },
+    {
+      "isReverseItem": false,
+      "points": 6.0,
+      "statId": 102
+    },
+    {
+      "isReverseItem": false,
+      "points": 6.0,
+      "statId": 101
+    },
+    {
+      "isReverseItem": false,
+      "points": 6.0,
+      "statId": 63
+    }
+  ]
+}

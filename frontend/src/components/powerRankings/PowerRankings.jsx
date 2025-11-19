@@ -2,6 +2,7 @@ import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
+import ReactMarkdown from 'react-markdown';
 import './PowerRankings.css';
 
 const PowerRankings = ({ setError }) => {
@@ -9,6 +10,7 @@ const PowerRankings = ({ setError }) => {
 
 	const [loading, setLoading] = useState(true);
 	const [rankingsData, setRankingsData] = useState([]);
+  const [writeup, setWriteup] = useState(null);
 	const [parsedRankings, setParsedRankings] = useState([]);
 	const [weights, setWeights] = useState({
 		wins: 3,
@@ -31,7 +33,12 @@ const PowerRankings = ({ setError }) => {
 			)
 			.then((res) => {
 				res.json().then((data) => {
-					setRankingsData(data);
+					setRankingsData(data.teams);
+
+          if (data.writeup) {
+            setWriteup(data.writeup);
+          }
+          
 					setLoading(false);
 				})}
 			)
@@ -136,6 +143,31 @@ const PowerRankings = ({ setError }) => {
 						>
 						Power Rankings
 					</Typography>
+
+
+					<Typography variant="body1" sx={{ mb: 2 }}>
+            {writeup ? (
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div style={{ width: '80%' }}>
+                  <ReactMarkdown>{writeup}</ReactMarkdown>
+                </div>
+              </div>
+            ) : 'Check back later for the power rankings writeup.'}
+					</Typography>
+
+          <Typography
+						variant="h6"
+						sx={{
+							display: 'flex',
+							fontWeight: 700,
+							letterSpacing: '.25rem',
+							mb: 2,
+              mt: 4
+						}}
+						>
+						Breakdown
+					</Typography>
+
 					<TableContainer component={Paper} className="table-container" sx={{ borderRadius: 3, mb: '15px' }}>
 						<Table sx={{ width: '100%', fontSize: 14 }} size="small" aria-label="standings table">
 							<TableHead>
@@ -275,7 +307,8 @@ const PowerRankings = ({ setError }) => {
 							display: 'flex',
 							fontWeight: 700,
 							letterSpacing: '.25rem',
-							mb: 2
+							mb: 2,
+              mt: 2
 						}}
 						>
 						Weights
