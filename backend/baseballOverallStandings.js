@@ -1,4 +1,4 @@
-const year = '2025'
+const year = '2026'
 const urlBase = `https://lm-api-reads.fantasy.espn.com/apis/v3/games/flb/seasons/${year}/segments/0/leagues`
 const leagueIds = [
   3334,
@@ -66,6 +66,14 @@ const statMapping = [
   }  
 ]
 
+const emptyStatsObject = () => {
+  const statsObj = {};
+  statMapping.forEach((statMapObj) => {
+    statsObj[statMapObj.stat] = { value: 0, ineligible: false, points: 0 };
+  })
+  return statsObj;
+}
+
 // https://github.com/cwendt94/espn-api/blob/master/espn_api/baseball/constant.py
 
 export const handler = async (event) => {
@@ -113,22 +121,34 @@ export const handler = async (event) => {
       })
       const formattedOwners = ownersNames.join(', ');
 
-      const teamDetails = scoreboard.schedule[0].teams.find((t) => t.teamId === team.id)
-      const teamStats = teamDetails.cumulativeScore.scoreByStat;
-
-      const outs = teamStats['34'].score;
-      const inningsPitched = Math.floor(outs / 3) + (outs % 3) / 10;
-
       const info = {
         name: team.name,
         id: team.id,
         owner: formattedOwners,
         leagueName: cleanedLeagueName,
         leagueRank: team.rankCalculatedFinal,
-        gamesPlayed: teamStats['81'].score,
-        inningsPitched: inningsPitched,
         stats: {}
       }
+
+      const teamDetails = scoreboard.schedule[0].teams.find((t) => t.teamId === team.id)
+      const teamStats = teamDetails.cumulativeScore?.scoreByStat;
+
+      if (!teamStats) {
+        console.warn(`No stats found for team ${team.name} in league ${leagueName}`);
+        allTeams.push({
+          ...info,
+          stats: emptyStatsObject(),
+          gamesPlayed: 0,
+          inningsPitched: 0
+        });
+        return;
+      }
+
+      const outs = teamStats['34'].score;
+      const inningsPitched = Math.floor(outs / 3) + (outs % 3) / 10;
+
+      info.gamesPlayed = teamStats['81'].score;
+      info.inningsPitched = inningsPitched;
 
       statMapping.forEach((statMapObj) => {
         const statId = statMapObj.id;
