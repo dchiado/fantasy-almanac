@@ -6,8 +6,6 @@ const BUCKET = 'ffalmanac-data';
 export const handler = async (event) => {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   const data = event;
-  console.log('Got data: ');
-  console.log(data);
   const { year, week, league_id } = data;
 
   const prompt = `
@@ -51,9 +49,6 @@ Dataset:
 ${JSON.stringify(data)}
 `;
 
-  console.log('Prompt: ');
-  console.log(prompt);
-
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -76,11 +71,7 @@ ${JSON.stringify(data)}
   }  
 
   const resp = await response.json();
-  console.log(resp);
-
   const llm_response = resp.content[0].text;
-  console.log('LLM response: ');
-  console.log(llm_response);
 
   // Create a unique S3 key
   const key = `power_rankings/league_${league_id}/${year}/week_${week}/rankings.md`;

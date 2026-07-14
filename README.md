@@ -1,73 +1,195 @@
 # Fantasy Almanac
 
-This program compiles data on an ESPN fantasy football league using the public ESPN API. The backend uses python scripts to retrieve and organize the data and is built on [flask](https://flask.palletsprojects.com/en/2.0.x/). The frontend is built with React and was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Fantasy Almanac is a React web application for exploring historical ESPN Fantasy Football league data. It retrieves league information from ESPN's public Fantasy API, processes the data with serverless Python functions running on AWS Lambda, and presents the results through an interactive web interface.
 
+## Architecture
 
-## Setup
-1. Python 3 is required, which can be obtained [here](https://www.python.org/downloads).
-1. Navigate into the backend directory with `cd backend`
-1. Set up your virtual environment. If you name it something other than `env`, make sure to gitignore that dir.
-    ```
-    python3 -m venv env
-    ```
-1. Activate your virtual environment.
-    ```
-    source env/bin/activate
-    ```
-1. Install all dependencies:
-    ```
-    pip install -r requirements.txt
-    ```
-1. Install frontend dependencies. Navigate into the frontend directory with `cd frontend` and run:
-    ```
-    npm install
-    ```
-1. In the `frontend` dir, create a `.env` file that looks like this:
-    ```
-    REACT_APP_API_URL=http://localhost:5000
-    ```
+```text
+                   +----------------------+
+                   |   React Frontend     |
+                   |   S3 + CloudFront    |
+                   +----------+-----------+
+                              |
+                              v
+                   +----------------------+
+                   |     API Gateway      |
+                   +----------+-----------+
+                              |
+                +-------------+-------------+
+                |             |             |
+                v             v             v
+         +------------+ +------------+ +------------+
+         |  Lambda 1  | |  Lambda 2  | |  Lambda N  |
+         +------------+ +------------+ +------------+
+                              |
+                              v
+                   +----------------------+
+                   | ESPN Fantasy API     |
+                   +----------------------+
+```
 
+### Tech Stack
 
-## Use
-- In one terminal, cd into the `backend` dir and run the flask app with:
-    ```
-    FLASK_APP=server.py flask run
-    ```
-- In another terminal, cd into the `frontend` dir and run the frontend with:
-    ```
-    npm start
-    ```
-- The web app will be available at `http://localhost:3000/`
+- **Frontend:** React
+- **Backend:** Python on AWS Lambda
+- **API:** Amazon API Gateway
+- **Hosting:** Amazon S3 + CloudFront
+- **Data Source:** ESPN Fantasy Football API
 
+---
 
-## ESPN API
-ESPN has a public API for fantasy leagues that are marked as "publicly accessible". For these,
-there is no need for an auth token or key and the API can be accessed with just the league ID.
+## Local Development
 
+### Prerequisites
 
-### Endpoints
-The endpoints are not well documented, so there are sample responses inside the `api` directory.
-This data is not live but is just for viewing the response structure.
+- Python 3
+- Node.js and npm
 
-For recent seasons, the endpoint looks like this where endpoint is the name of the json file in
-that directory, such as `mDraftDetail`:
+### Backend
 
-`http://fantasy.espn.com/apis/v3/games/ffl/seasons/{year}/segments/0/leagues/{league_id}?&view={endpoint}`
+Navigate to the backend directory:
 
-For older seasons, the endpoint looks like this:
+```bash
+cd backend
+```
 
-`https://fantasy.espn.com/apis/v3/games/ffl/leagueHistory/{league_id}?seasonId={year}&view={endpoint}`
+Create and activate a virtual environment:
 
-## UI Components
-Material UI is used for building frontend component. Components, examples, and other
-documentation can be found [here](https://mui.com/). 
+```bash
+python3 -m venv env
+source env/bin/activate
+```
 
-## Deploy
+Install dependencies:
 
-The backend is deployed via elastic beanstalk. It can be deployed by going into the backend directory and running `eb deploy` (with the right AWS creds).
+```bash
+pip install -r requirements.txt
+```
 
-The frontend is deployed to a static website on S3 and sits behind a cloudfront distribution. To deploy the frontend:
+> **Note:** The production backend runs as AWS Lambda functions. Running the full backend locally requires additional setup or local Lambda tooling. During development you can either invoke the deployed API Gateway endpoints or run individual handlers locally for testing.
 
-1. Edit the `.env` file to be variables you want for prod (https://api.ffalmanac.com)
-1. cd into the frontend dir and run `npm run build`
-1. Upload all files in the `frontend/build` dir into the `ffalmanac.com` bucket
+### Frontend
+
+Navigate to the frontend directory:
+
+```bash
+cd frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a `.env` file:
+
+```text
+REACT_APP_API_URL=http://localhost:5000
+```
+
+Start the development server:
+
+```bash
+npm start
+```
+
+The application will be available at:
+
+```
+http://localhost:3000
+```
+
+---
+
+## Deployment
+
+### Backend
+
+The backend consists of multiple AWS Lambda functions exposed through Amazon API Gateway.
+
+Deployment is currently manual by packaging and uploading updated Lambda code through AWS.
+
+### Frontend
+
+Update the environment variables as needed, then build the production bundle:
+
+```bash
+cd frontend
+npm run build
+```
+
+Upload the contents of `frontend/build` to the S3 bucket hosting the static site.
+
+CloudFront will serve the updated frontend.
+
+---
+
+## ESPN Fantasy API
+
+ESPN exposes a public API for fantasy football leagues marked as publicly accessible.
+
+For public leagues, no authentication is required.
+
+> **Note:** ESPN does not officially document these endpoints, and they occasionally change. If requests suddenly begin failing, one of the first things to check is whether the base URLs have changed.
+
+### Current Endpoints
+
+For **2020 and newer**:
+
+```
+https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{year}/segments/0/leagues/{league_id}?view={endpoint}
+```
+
+For **2019 and older**:
+
+```
+https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/leagueHistory/{league_id}?seasonId={year}&view={endpoint}
+```
+
+An optional scoring period can be specified by appending:
+
+```
+&scoringPeriodId={week}
+```
+
+### Previous Base URLs
+
+Historically, these endpoints used the `fantasy.espn.com` domain instead of `lm-api-reads.fantasy.espn.com`:
+
+Recent seasons:
+
+```
+https://fantasy.espn.com/apis/v3/games/ffl/seasons/{year}/segments/0/leagues/{league_id}?view={endpoint}
+```
+
+Older seasons:
+
+```
+https://fantasy.espn.com/apis/v3/games/ffl/leagueHistory/{league_id}?seasonId={year}&view={endpoint}
+```
+
+Sample API responses are included in the `api/` directory for reference.
+
+Private leagues require the appropriate ESPN authentication cookies (`espn_s2` and `SWID`).
+
+## Frontend
+
+The frontend is built with React and Material UI.
+
+The primary environment variable is:
+
+```text
+REACT_APP_API_URL
+```
+
+which should point to the appropriate API Gateway endpoint for the target environment.
+
+---
+
+## Future Improvements
+
+- Automate Lambda deployment
+- Add CI/CD for frontend and backend deployments
+- Manage AWS infrastructure as code
+- Improve local Lambda development experience
