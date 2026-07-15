@@ -34,14 +34,19 @@ const App = () => {
 	const [cookies, setCookie] = useCookies(["league_id"]);
   const [error, setError] = useState();
 	const [leagueId, setLeagueId] = useState();
-  const [showHeader, setShowHeader] = useState(true);
+  const [isDesktop, setIsDesktop] = useState(true);
+  const [showHeaderFooter, setShowHeaderFooter] = useState(true);
   const [_espnS2, setEspnS2] = useState("");
   const [isCached, setIsCached] = useState(null);
   const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
-    setShowHeader(width > breakpoint && path !== '/mlb-addicts');
-  }, [path, width, breakpoint])
+    setShowHeaderFooter(path !== '/mlb-addicts');
+  }, [path])
+
+  useEffect(() => {
+    setIsDesktop(width >= breakpoint);
+  }, [width, breakpoint]);
 
 	const fetchLeagueInfo = useCallback(() => {
 		if (leagueId) {
@@ -127,7 +132,7 @@ const App = () => {
 	return (
 		<div className="App">
 			<BrowserRouter>
-				{showHeader ? <Header /> : <div></div>}
+				{showHeaderFooter ? <Header /> : <div></div>}
 				<Switch>
 					<Route exact path="/">
             {loading ? <LoadingSpinner /> :
@@ -195,7 +200,7 @@ const App = () => {
 					<Alert onClose={() => setError()} severity="error">{error}</Alert>
 				</Stack>
 			}
-      {width > breakpoint ? <Footer /> : <FooterMobile />}
+      {showHeaderFooter ? isDesktop ? <Footer /> : <FooterMobile /> : <></>}
 		</div>
 	);
 }
