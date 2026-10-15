@@ -1,330 +1,159 @@
 import {
-  Button,
+  Box,
   FormControl,
   FormControlLabel,
-  FormGroup,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
   Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
 } from "@mui/material";
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
-import './Records.css';
-import { fetchApi } from "../../api";
+import LoadingState from "../ui/LoadingState";
+import PageLayout from "../ui/PageLayout";
+import SectionCard from "../ui/SectionCard";
+import StatTable from "../ui/StatTable";
+import useApi from "../../hooks/useApi";
+
+const rankColumn = { key: 'rank', label: '#', align: 'center', render: (_, idx) => idx + 1, cellSx: () => ({ color: 'text.secondary', width: 40 }) };
+
+const columnsFor = {
+  week: [
+    rankColumn,
+    { key: 'year', label: 'Year', align: 'center' },
+    { key: 'week', label: 'Week', align: 'center' },
+    { key: 'team_name', label: 'Team', wrap: true, minWidth: 140 },
+    { key: 'score', label: 'Score', numeric: true, cellSx: () => ({ fontWeight: 600 }) },
+  ],
+  season: [
+    rankColumn,
+    { key: 'year', label: 'Year', align: 'center' },
+    { key: 'team_name', label: 'Team', wrap: true, minWidth: 140 },
+    { key: 'average', label: 'Average', numeric: true, cellSx: () => ({ fontWeight: 600 }) },
+    { key: 'league_average', label: 'League Avg', numeric: true, hideBelow: 'sm' },
+    { key: 'std_dev_away', label: 'Std Dev', numeric: true },
+  ],
+  matchup: [
+    rankColumn,
+    { key: 'year', label: 'Year', align: 'center' },
+    { key: 'week', label: 'Week', align: 'center' },
+    { key: 'difference', label: 'Margin', numeric: true, cellSx: () => ({ fontWeight: 600 }) },
+    { key: 'winner', label: 'Winner', wrap: true, minWidth: 120 },
+    { key: 'loser', label: 'Loser', wrap: true, minWidth: 120 },
+  ],
+};
+
+const endpointFor = { week: '/individual-weeks', season: '/individual-seasons', matchup: '/matchups' };
+const COUNTS = [5, 10, 25, 50, 100];
+
+// Toggle groups ignore a click on the active option rather than clearing it
+const exclusive = (setter) => (_, value) => { if (value !== null) setter(value); };
 
 const Records = ({ setError }) => {
-	const leagueId = useSelector((state) => state.leagueInfo.id)
-  const [loading, setLoading] = useState(false);
+	const leagueInfo = useSelector((state) => state.leagueInfo)
+  const leagueId = leagueInfo.id;
 
-  const [bestWorst, setBestWorst] = useState('');
-  const [object, setObject] = useState('');
-  const [scope, setScope] = useState('');
-  const [startYear, setStartYear] = useState('');
-  const [endYear, setEndYear] = useState('');
-  const [numRecords, setNumRecords] = useState('');
+  const firstYear = Number(leagueInfo.established) || null;
+  const lastYear = Number(leagueInfo.year) || null;
+  const years = firstYear && lastYear ? Array.from({ length: lastYear - firstYear + 1 }, (_, i) => firstYear + i) : [];
+
+  const [bestWorst, setBestWorst] = useState('best');
+  const [object, setObject] = useState('week');
+  const [scope, setScope] = useState('alltime');
+  const [startYear, setStartYear] = useState(firstYear ?? '');
+  const [endYear, setEndYear] = useState(lastYear ?? '');
+  const [numRecords, setNumRecords] = useState(10);
   const [includePlayoffs, setIncludePlayoffs] = useState(false);
 
-  const [records, setRecords] = useState([]);
-  const [headers, setHeaders] = useState([]);
+  // League info can land after this page mounts (e.g. a direct visit), so seed the range then
+  useEffect(() => {
+    if (firstYear && startYear === '') setStartYear(firstYear);
+    if (lastYear && endYear === '') setEndYear(lastYear);
+  }, [firstYear, lastYear, startYear, endYear]);
+
+  const usesRange = scope === 'years' && startYear !== '' && endYear !== '';
+  const params = `?leagueId=${leagueId}&bestworst=${bestWorst}&playoffs=${includePlayoffs}&count=${numRecords}`
+    + (usesRange ? `&startyear=${startYear}&endyear=${endYear}` : '');
+  const { data: records, loading, error } = useApi(leagueId ? endpointFor[object] + params : null);
 
   useEffect(() => {
-    if (records.length > 0 && headers.length > 0) {
-      setLoading(false)
-    }
-  }, [records, headers]);
+    if (error) setError(`Error retrieving data: ${error.message}`);
+  }, [error, setError]);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setLoading(true);
+  const yearSelect = (id, label, value, onChange) => (
+    <FormControl sx={{ minWidth: 96, flex: 1 }}>
+      <InputLabel id={`${id}-label`}>{label}</InputLabel>
+      <Select labelId={`${id}-label`} id={id} value={value} label={label} onChange={(e) => onChange(e.target.value)}>
+        {years.map((y) => <MenuItem value={y} key={y}>{y}</MenuItem>)}
+      </Select>
+    </FormControl>
+  );
 
-    let endpoint;
-    if (object === 'week') {
-      endpoint = '/individual-weeks';
-    } else if (object === 'season') {
-      endpoint = '/individual-seasons'
-    } else {
-      endpoint = '/matchups'
-    }
-
-    let params = `?leagueId=${leagueId}&bestworst=${bestWorst}&playoffs=${includePlayoffs}&count=${numRecords}`;
-    if (scope === 'years') {
-      params += `&startyear=${startYear}&endyear=${endYear}`
-    }
-
-    fetchApi(endpoint + params)
-    .then((data) => {
-      if (object === 'week') {
-        setHeaders(['Year', 'Week', 'Team', 'Score']);
-        setRecords(data.map((d) => [d.year, d.week, d.team_name, d.score]));
-      } else if (object === 'season') {
-        setHeaders(['Year', 'Team', 'Average', 'League Average', 'Std Dev']);
-        setRecords(data.map((d) => [d.year, d.team_name, d.average, d.league_average, d.std_dev_away]));
-      } else {
-        setHeaders(['Year', 'Week', 'Win Margin', 'Winner', 'Loser']);
-        setRecords(data.map((d) => [d.year, d.week, d.difference, d.winner, d.loser]));
-      }
-    })
-    .catch((error) => {
-      setLoading(false);
-      console.error(error);
-      setError(`Error retrieving data: ${error.message}`);
-    });
-  }
-
-  const handleSelectBestWorst = (event) => {
-    setBestWorst(event.target.value);
-  }
-
-  const handleSelectObject = (event) => {
-    setObject(event.target.value);
-  }
-
-  const handleSelectScope = (event) => {
-    setScope(event.target.value);
-  }
-
-  const handleStartYearChange = (event) => {
-    setStartYear(event.target.value);
-  }
-
-  const handleEndYearChange = (event) => {
-    setEndYear(event.target.value);
-  }
-
-  const handleNumRecordsChange = (event) => {
-    const newVal = parseInt(event.target.value) || 0;
-		setNumRecords(newVal);
-  }
-
-  const handleIncludePlayoffs = (event) => {
-    setIncludePlayoffs(event.target.checked);
-  }
-
-  const handleNewQuery = () => {
-    setHeaders([]);
-    setRecords([]);
-  }
+  const objectLabel = { week: 'weeks', season: 'seasons', matchup: 'matchups' }[object];
+  const rangeLabel = usesRange ? `from ${startYear} to ${endYear}` : 'of all time';
 
   return (
-    <div className="records-content">
-      {loading && <LoadingSpinner />}
+    <PageLayout maxWidth={900} title="Records" subtitle={`The ${numRecords} ${bestWorst} ${objectLabel} ${rangeLabel}`}>
+      <SectionCard sx={{ mb: 3 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'auto 1fr' }, gap: 2, alignItems: 'center' }}>
+          <ToggleButtonGroup exclusive fullWidth size="small" color="primary" value={bestWorst} onChange={exclusive(setBestWorst)} aria-label="Best or worst">
+            <ToggleButton value="best">Best</ToggleButton>
+            <ToggleButton value="worst">Worst</ToggleButton>
+          </ToggleButtonGroup>
+          <ToggleButtonGroup exclusive fullWidth size="small" color="primary" value={object} onChange={exclusive(setObject)} aria-label="Record type">
+            <ToggleButton value="week">Weeks</ToggleButton>
+            <ToggleButton value="season">Seasons</ToggleButton>
+            <ToggleButton value="matchup">Matchups</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
 
-      {(records.length === 0 && !loading) &&
-        <form onSubmit={handleSubmit} className="head-to-head-form">
-          <FormControl sx={{ minWidth: 300 }}>
-            <InputLabel id='best-worst-label' sx={{ color: 'lightgray' }}>Best/Worst</InputLabel>
-            <Select
-              labelId='best-worst-label'
-              id='select-best-worst'
-              value={bestWorst}
-              label='Best/Worst'
-              name='bestworst'
-              onChange={handleSelectBestWorst}
-              required
-              sx={{ color: 'white' }}
-              >
-              <MenuItem value="best" key="best">Best</MenuItem>
-              <MenuItem value="worst" key="worst">Worst</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl sx={{ minWidth: 300 }}>
-            <InputLabel id='object-label' sx={{ color: 'lightgray' }}>Season/Week/Matchup</InputLabel>
-            <Select
-              labelId='object-label'
-              id='select-object'
-              value={object}
-              label='Season/Week/Matchup'
-              name='object'
-              onChange={handleSelectObject}
-              required
-              sx={{ color: 'white' }}
-              >
-              <MenuItem value="season" key="season">Seasons</MenuItem>
-              <MenuItem value="week" key="week">Weeks</MenuItem>
-              <MenuItem value="matchup" key="matchup">Matchups</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl sx={{ minWidth: 300 }}>
-            <InputLabel id='scope-label' sx={{ color: 'lightgray' }}>When?</InputLabel>
-            <Select
-              labelId='scope-label'
-              id='select-scope'
-              value={scope}
-              label='When?'
-              name='scope'
-              onChange={handleSelectScope}
-              required
-              sx={{ color: 'white' }}
-              >
-              <MenuItem value="alltime" key="alltime">All-Time</MenuItem>
-              <MenuItem value="years" key="years">Specific year range</MenuItem>
-            </Select>
-          </FormControl>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', mt: 2 }}>
+          <ToggleButtonGroup
+            exclusive
+            size="small"
+            color="primary"
+            value={scope}
+            onChange={exclusive(setScope)}
+            aria-label="Time range"
+            sx={{ flex: { xs: '1 1 100%', sm: '0 0 auto' } }}
+          >
+            <ToggleButton value="alltime" sx={{ flex: 1 }}>All-time</ToggleButton>
+            <ToggleButton value="years" sx={{ flex: 1 }} disabled={years.length === 0}>Year range</ToggleButton>
+          </ToggleButtonGroup>
 
           {scope === 'years' &&
-            <div className="row-input">
-              <FormControl>
-                <TextField
-                  id="outlined-from"
-                  label="From"
-                  value={startYear || ''}
-                  variant="filled"
-                  onChange={handleStartYearChange}
-                  sx={{
-                    input: { color: 'white' },
-                    label: { color: 'lightgray' },
-                  }}
-                  />
-              </FormControl>
-              <FormControl>
-                <TextField
-                  id="outlined-to"
-                  label="To"
-                  value={endYear || ''}
-                  variant="filled"
-                  onChange={handleEndYearChange}
-                  sx={{
-                    input: { color: 'white' },
-                    label: { color: 'lightgray' },
-                  }}
-                  />
-              </FormControl>
-            </div>
+            <Box sx={{ display: 'flex', gap: 1.5, flex: { xs: '1 1 100%', sm: '0 1 220px' } }}>
+              {yearSelect('start-year', 'From', startYear, (y) => { setStartYear(y); if (y > endYear) setEndYear(y); })}
+              {yearSelect('end-year', 'To', endYear, (y) => { setEndYear(y); if (y < startYear) setStartYear(y); })}
+            </Box>
           }
 
-          <FormControl>
-            <TextField
-              id="outlined-num-records"
-              label="Number of records"
-              value={numRecords}
-              variant="filled"
-              onChange={handleNumRecordsChange}
-              sx={{
-                input: { color: 'white' },
-                label: { color: 'lightgray' },
-              }}
-              />
+          <FormControl sx={{ minWidth: 90 }}>
+            <InputLabel id="num-records-label">Show</InputLabel>
+            <Select labelId="num-records-label" id="num-records" value={numRecords} label="Show" onChange={(e) => setNumRecords(e.target.value)}>
+              {COUNTS.map((c) => <MenuItem value={c} key={c}>{c}</MenuItem>)}
+            </Select>
           </FormControl>
 
-          {(object === 'week' || object === 'matchup') &&
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Switch onChange={handleIncludePlayoffs}/>
-                }
-                label="Include Playoffs"
-                />
-            </FormGroup>
+          {object !== 'season' &&
+            <FormControlLabel
+              control={<Switch checked={includePlayoffs} onChange={(e) => setIncludePlayoffs(e.target.checked)} />}
+              label="Include playoffs"
+            />
           }
+        </Box>
+      </SectionCard>
 
-          <Button variant="contained" type="submit" value="Submit">Submit</Button>
-        </form>
+      {loading
+        ? <LoadingState inline rows={Math.min(numRecords, 12)} title={false} />
+        : records?.length > 0
+          ? <StatTable columns={columnsFor[object]} rows={records} ariaLabel="Records" />
+          : Array.isArray(records) && <Typography color="text.secondary" sx={{ textAlign: 'center', py: 6 }}>No records match those filters.</Typography>
       }
-
-      {records.length > 0 &&
-        <div className="table-content">
-          {records.length > 0 &&
-            <div className="table-button-wrapper">
-              <Typography
-                variant="h6"
-                sx={{
-                  display: { xs: 'none', md: 'flex' },
-                  fontWeight: 700,
-                  letterSpacing: '.25rem',
-                }}
-                >
-                The {numRecords} {bestWorst} {object}s {scope === 'alltime' ? 'of all-time' : `from ${startYear} to ${endYear}`} 
-              </Typography>
-
-              <TableContainer component={Paper} className="table-container">
-                <Table sx={{ fontSize: 14 }} size="small" aria-label="records table">
-                  <TableHead>
-                    <TableRow className="table-header">
-                      <TableCell
-                        align="center"
-                        key='rank'
-                        sx={{ fontSize: 'inherit', color: 'inherit', fontWeight: 'inherit' }}
-                      >
-                        #
-                      </TableCell>
-
-                      {headers.map((h) => (
-                        <TableCell
-                          align="center"
-                          key={h}
-                          sx={{ minWidth: 25, fontSize: 'inherit', color: 'inherit', fontWeight: 'inherit' }}
-                        >
-                          {h}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {records.map((row, idx) => (
-                      <TableRow
-                        key={`row-${idx}`}
-                        sx={{
-                          backgroundColor: idx % 2 === 0 ? '#5B697F' : '#283447',
-                          borderColor: idx % 2 === 0 ? '#5B697F' : '#283447',
-                          color: 'white',
-                        }}
-                        >
-                          <TableCell
-                            align="center"
-                            key='rank'
-                            sx={{
-                              fontSize: 'inherit',
-                              backgroundColor: 'inherit',
-                              color: 'inherit',
-                              borderColor: 'inherit',
-                            }}
-                          >
-                            {idx + 1}
-                          </TableCell>
-
-                          {row.map((cell) => (
-                            <TableCell
-                              align="center"
-                              key={cell}
-                              sx={{
-                                minWidth: 25,
-                                fontSize: 'inherit',
-                                backgroundColor: 'inherit',
-                                color: 'inherit',
-                                borderColor: 'inherit',
-                              }}
-                            >
-                              {cell}
-                            </TableCell>
-                            )
-                          )}
-                        </TableRow>
-                      )
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-
-              <Button variant="contained" onClick={handleNewQuery} sx={{ marginBottom: '20px' }}>New Query</Button>
-            </div>
-          }
-        </div>
-      }
-    </div>
+    </PageLayout>
   )
 }
 

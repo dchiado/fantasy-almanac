@@ -1,24 +1,37 @@
 import React, { useState, useEffect } from "react";
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import FormGroup from '@mui/material/FormGroup';
+import Box from '@mui/material/Box';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import LoadingState from "../ui/LoadingState";
+import PageLayout from "../ui/PageLayout";
+import StatTable from "../ui/StatTable";
 import { useSelector } from "react-redux";
 import './Standings.css';
 import { fetchApi } from "../../api";
 
-const headers = [ 'Wins', 'Losses', 'Ties', 'Win %' ]
+const formatRecord = (rec) => `${rec.wins}-${rec.losses}${rec.ties !== 0 ? '-' + rec.ties : ''}`;
+
+// A season's record, marked when that team won the title or the regular season
+const SeasonRecord = ({ rec }) => {
+	if (!rec) return null;
+	const className = [
+		'season-record',
+		rec.playoff_champ && 'champ',
+		rec.reg_season_champ && 'reg-champ',
+	].filter(Boolean).join(' ');
+
+	return (
+		<span className={className}>
+			{rec.playoff_champ && <EmojiEventsIcon sx={{ fontSize: 14 }} />}
+			{formatRecord(rec)}
+		</span>
+	);
+}
 
 const Standings = ({ setError }) => {
 	const leagueId = useSelector((state) => state.leagueInfo.id)
@@ -91,236 +104,77 @@ const Standings = ({ setError }) => {
 		}
 	}, [activeTeams, allRows, currentSeason, seasons])
 
+	const sum = (row, field) => row.seasons.reduce((accu, s) => seasons.includes(s.year) ? accu + s[field] : accu, 0);
+
+	const tableRows = standingsRows.map((row) => {
+		const wins = sum(row, 'wins');
+		const losses = sum(row, 'losses');
+		const ties = sum(row, 'ties');
+		const winPct = wins + losses === 0 ? '' : (wins / (wins + losses) * 100).toFixed(2) + '%';
+		return { ...row, wins, losses, ties, winPct };
+	});
+
+	const columns = [
+		{ key: 'name', label: 'Owner', sticky: true, minWidth: 120, cellSx: () => ({ fontWeight: 600 }) },
+		...seasons.map((year) => ({
+			key: String(year),
+			label: year,
+			align: 'center',
+			render: (row) => <SeasonRecord rec={row.seasons.find((r) => r.year === year)} />,
+		})),
+		{ key: 'wins', label: 'W', numeric: true, cellSx: () => ({ fontWeight: 600 }) },
+		{ key: 'losses', label: 'L', numeric: true },
+		{ key: 'ties', label: 'T', numeric: true },
+		{ key: 'winPct', label: 'Win %', numeric: true, cellSx: () => ({ fontWeight: 600 }) },
+	];
+
+	const yearSelect = (id, label, value, onChange) => (
+		<FormControl sx={{ minWidth: 110, flex: 1 }}>
+			<InputLabel id={`${id}-label`}>{label}</InputLabel>
+			<Select labelId={`${id}-label`} id={id} value={value} label={label} onChange={onChange}>
+				{allSeasons.map((year) => <MenuItem value={year} key={year}>{year}</MenuItem>)}
+			</Select>
+		</FormControl>
+	);
+
+	if (loading) {
+		return <LoadingState rows={12} />;
+	}
+
 	return (
-		<div className="standings-content">
-			{loading ? <LoadingSpinner /> :
-				<div className="filters">
-					<FormGroup>
-						<FormControlLabel
-							control={
-								<Switch onChange={handleFilterActive}/>
-							}
-							label="Active Teams"
-						/>
-					</FormGroup>
-
-					<div className="year-filter">
-						<FormControl fullWidth>
-							<InputLabel id='select-start-year-label' sx={{ color: 'white' }}>Start Year</InputLabel>
-							<Select
-								labelId='select-start-year-label'
-								id='select-start-year'
-								value={startYear}
-								label='startYear'
-								onChange={handleStartYearChange}
-								sx={{ color: 'white' }}
-							>
-								{standingsData?.seasons?.map((year) => <MenuItem value={year} key={year}>{year}</MenuItem>)}
-							</Select>
-						</FormControl>
-						<FormControl fullWidth>
-							<InputLabel id='select-end-year-label' sx={{ color: 'white' }}>End Year</InputLabel>
-							<Select
-								labelId='select-end-year-label'
-								id='select-end-year'
-								value={endYear}
-								label='endYear'
-								onChange={handleEndYearChange}
-								sx={{ color: 'white' }}
-							>
-								{standingsData?.seasons?.map((year) => <MenuItem value={year} key={year}>{year}</MenuItem>)}
-							</Select>
-						</FormControl>
-					</div>
-				</div>
+		<PageLayout
+			maxWidth={1600}
+			title="All-time Standings"
+			subtitle={`${seasons[0]}–${seasons[seasons.length - 1]} · ${tableRows.length} owners`}
+			actions={
+				<Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5 }}>
+					<FormControlLabel
+						control={<Switch checked={activeTeams} onChange={handleFilterActive} />}
+						label="Active teams only"
+						sx={{ mr: 1 }}
+					/>
+					<Box sx={{ display: 'flex', gap: 1.5, flex: { xs: '1 1 100%', sm: '0 1 auto' } }}>
+						{yearSelect('select-start-year', 'From', startYear, handleStartYearChange)}
+						{yearSelect('select-end-year', 'To', endYear, handleEndYearChange)}
+					</Box>
+				</Box>
 			}
-
-			{Object.keys(standingsRows).length > 0 &&
-				<div className="table-content">
-					<TableContainer component={Paper} className="table-container" sx={{ borderRadius: 3 }}>
-						<Table sx={{ minWidth: 650, fontSize: 13, borderCollapse: 'separate', borderSpacing: '0' }} size="small" aria-label="standings table">
-							<TableHead>
-								<TableRow className="table-header">
-									<TableCell 
-										sx={{
-											minWidth: 105,
-											fontSize: 'inherit',
-											fontWeight: 'inherit',
-											position: 'sticky',
-											backgroundColor: 'inherit',
-											left: 0,
-										}}
-									>
-										Owner
-									</TableCell>
-									{seasons.map((year) => (
-										<TableCell
-											align="center"
-											key={year}
-											sx={{ minWidth: 40, fontSize: 'inherit', color: 'inherit', fontWeight: 'inherit' }}
-										>
-											{year}
-										</TableCell>
-									))}
-									{headers.map((h) => (
-										<TableCell 
-											key={h}
-											align="center"
-											sx={{
-												minWidth: 40,
-												fontSize: 'inherit',
-												color: 'inherit',
-												fontWeight: 'inherit',
-												backgroundColor: 'inherit'	
-											}}
-										>
-											{h}
-										</TableCell>
-									))}
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{standingsRows.map((row, idx) => {
-									const tmWins = row.seasons.reduce((accu, object) => {
-										if (seasons.includes(object.year)) {
-											return accu + object.wins;
-										} else {
-											return accu;
-										}
-									}, 0).toString();
-									const tmLosses = row.seasons.reduce((accu, object) => {
-										if (seasons.includes(object.year)) {
-											return accu + object.losses;
-										} else {
-											return accu;
-										}
-									}, 0).toString();
-									const tmTies = row.seasons.reduce((accu, object) => {
-										if (seasons.includes(object.year)) {
-											return accu + object.ties;
-										} else {
-											return accu;
-										}
-									}, 0).toString();
-									let tmWinPct;
-									if (parseInt(tmWins) + parseInt(tmLosses) === 0) {
-										tmWinPct = '';
-									} else {
-										tmWinPct = (parseInt(tmWins) / (parseInt(tmWins) + parseInt(tmLosses)) * 100).toFixed(2) + '%';
-									}
-
-									return (
-										<TableRow
-											key={row.name}
-											sx={{
-												backgroundColor: idx % 2 === 0 ? '#5B697F' : '#283447',
-												borderColor: idx % 2 === 0 ? '#5B697F' : '#283447',
-												color: 'white',
-											}}
-										>
-											<TableCell
-												component="th"
-												scope="row"
-												sx={{
-													minWidth: 105,
-													fontSize: 'inherit',
-													fontWeight: 700,
-													position: 'sticky',
-													left: 0,
-													color: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													border: '2px solid inherit',
-												}}
-											>
-												{row.name}
-											</TableCell>
-											{seasons.map((s) => {
-												const rec = row.seasons.find((r) => r.year === s)
-												const borderColor = rec?.reg_season_champ ? 'lightgreen': 'inherit';
-												const formattedRecord = rec ? `${rec.wins}-${rec.losses}${rec.ties !== 0 ? '-' + rec.ties : ''}` : '';
-												
-												return (
-													<TableCell
-														align="center"
-														key={s}
-														sx={{
-															minWidth: 40,
-															fontSize: 'inherit',
-															color: rec?.playoff_champ ? 'black' : 'inherit',
-															background: rec?.playoff_champ ? 'gold' : 'inherit',
-															border: '2px solid',
-															borderColor: borderColor
-														}}
-													>
-														{formattedRecord}
-													</TableCell>
-													)
-												})}
-											<TableCell
-												align="center"
-												sx={{
-													minWidth: 40,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-												}}
-											>
-												{tmWins}
-											</TableCell>
-											<TableCell
-												align="center"
-												sx={{
-													minWidth: 40,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-												}}
-											>
-												{tmLosses}
-											</TableCell>
-											<TableCell
-												align="center"
-												sx={{
-													minWidth: 40,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-												}}
-											>
-												{tmTies}
-											</TableCell>
-											<TableCell
-												align="center"
-												sx={{
-													minWidth: 40,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-												}}
-											>
-												{tmWinPct}
-											</TableCell>
-										</TableRow>
-									)
-								})}
-							</TableBody>
-						</Table>
-					</TableContainer>
-				</div>
+		>
+			{tableRows.length > 0 &&
+				<>
+					<StatTable
+						columns={columns}
+						rows={tableRows}
+						getRowKey={(row) => row.name}
+						ariaLabel="All-time standings"
+					/>
+					<Box className="standings-legend">
+						<span className="season-record champ"><EmojiEventsIcon sx={{ fontSize: 14 }} />League champ</span>
+						<span className="season-record reg-champ">Regular season champ</span>
+					</Box>
+				</>
 			}
-			{Object.keys(standingsRows).length > 0 &&
-				<div className="legend">
-					<div className="legend-champ">League Champ</div>
-					<div className="legend-reg-season-champ">Reg Season Champ</div>
-				</div>
-			}
-
-		</div>
+		</PageLayout>
 	);
 }
 

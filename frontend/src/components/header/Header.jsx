@@ -1,37 +1,28 @@
-import React, { useEffect, useState } from "react";
-import './Header.css';
+import React from "react";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import SportsFootballIcon from '@mui/icons-material/SportsFootball';
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import { useSelector } from 'react-redux'
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useCookies } from "react-cookie";
+
+const PAGES = [
+  { name: 'All-time Standings', link: '/standings' },
+  { name: 'Head-to-Head', link: '/head-to-head' },
+  { name: 'Records', link: '/records' },
+  { name: 'Power Rankings', link: '/power-rankings' },
+  { name: 'Keepers', link: '/keepers' }
+];
 
 const Header = () => {
   const leagueInfo = useSelector((state) => state.leagueInfo)
 	const [,, removeCookie] = useCookies(["league_id"]);
-  const [pages, setPages] = useState([
-    {
-      name: 'All-time Standings',
-      link: '/standings',
-    },
-    {
-      name: 'Head-to-Head',
-      link: '/head-to-head',
-    },
-    {
-      name: 'Records',
-      link: '/records',
-    },
-    {
-      name: 'Power Rankings',
-      link: '/power-rankings',
-    },
-  ]);
 
   const handleRemoveCookie = () => {
     removeCookie("league_id", {
@@ -39,100 +30,86 @@ const Header = () => {
     });
   }
 
-  useEffect(() => {
-		if (leagueInfo?.id === '166975' && !pages.find(p => p.name === 'Keepers')) {
-      setPages([
-        ...pages,
-        {
-          name: 'Keepers',
-          link: '/keepers'
-        }
-      ]);
-		}
-	}, [leagueInfo, pages])
-
   return (
-    <AppBar
-      position="static"
-      sx={{
-        display: { xs: 'none', sm: 'flex' },
-        backgroundColor: '#3B485D',
-        color: 'white'
-      }}
-    >
-      <Container maxWidth="xxl" sx={{ marginLeft: 0 }}>
-        <Toolbar disableGutters>
-          <Link to="/">
-            <SportsFootballIcon sx={{ display: { xs: 'none', sm: 'flex' }, mr: 1, color: 'white' }} />
-          </Link>
+    <AppBar position="sticky" color="transparent">
+      <Toolbar sx={{ gap: { xs: 1.5, sm: 3 }, minHeight: { xs: 56, sm: 64 }, px: { xs: 2, sm: 3 } }}>
+        <Box
+          component={Link}
+          to="/"
+          sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary', textDecoration: 'none', flexShrink: 0 }}
+        >
+          <SportsFootballIcon sx={{ color: 'primary.main' }} />
           <Typography
-            variant="h6"
             noWrap
-            component={Link}
-            to="/"
             sx={{
-              mr: 5,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.25rem',
-              color: 'inherit',
-              textDecoration: 'none',
+              // Hidden on small tablets, where the nav links need the room
+              display: { xs: 'block', sm: 'none', md: 'block' },
+              fontSize: { xs: 15, sm: 17 },
+              fontWeight: 800,
+              letterSpacing: '.18em',
             }}
-            >
+          >
             FANTASY ALMANAC
           </Typography>
-          {leagueInfo?.name &&
-            <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'flex', gap: 20, paddingLeft: 10 } }}>
-              {pages.map((page) => (
-                <Button
-                  key={page.name}
-                  component={Link}
-                  to={page.link}
-                  sx={{ color: 'inherit', display: 'block' }}
-                >
-                  {page.name}
-                </Button>
-              ))}
-            </Box>
-          }
-          {leagueInfo?.name &&
-            <Box
-              sx={{
-                display: {
-                  xs: 'none',
-                  md: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  whiteSpace: 'nowrap',
-                  paddingLeft: 10 }
-              }}
-            >
-              <Typography
-                variant="h6"
+        </Box>
+
+        {leagueInfo?.name &&
+          <Box component="nav" sx={{ flexGrow: 1, display: { xs: 'none', sm: 'flex' }, gap: 0.5, overflowX: 'auto' }}>
+            {PAGES.map((page) => (
+              <Button
+                key={page.name}
+                component={NavLink}
+                to={page.link}
                 sx={{
-                  display: { xs: 'none', md: 'flex' },
-                  fontSize: 16,
-                  fontWeight: 600,
-                  letterSpacing: '.25rem',
-                  color: 'inherit',
-                  textDecoration: 'none',
+                  color: 'text.secondary',
+                  whiteSpace: 'nowrap',
+                  px: 1.5,
+                  '&:hover': { color: 'text.primary', backgroundColor: 'rgba(255,255,255,0.04)' },
+                  '&.active': { color: 'text.primary', backgroundColor: 'rgba(94,230,160,0.12)' },
                 }}
               >
+                {page.name}
+              </Button>
+            ))}
+          </Box>
+        }
+
+        {leagueInfo?.name &&
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto', minWidth: 0 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 0 }}>
+              <Typography noWrap sx={{ fontSize: { xs: 13, sm: 15 }, fontWeight: 600, maxWidth: { xs: 120, sm: 220 } }}>
                 {leagueInfo.name}
               </Typography>
               <Button
-                key='league-name'
                 href="/"
                 onClick={handleRemoveCookie}
-                sx={{ color: 'inherit', display: 'block', fontSize: 11, padding: 0 }}
+                sx={{
+                  display: { xs: 'none', md: 'block' },
+                  color: 'text.secondary',
+                  fontSize: 12,
+                  fontWeight: 500,
+                  p: 0,
+                  minWidth: 0,
+                  lineHeight: 1.4,
+                  '&:hover': { color: 'primary.main', backgroundColor: 'transparent' },
+                }}
               >
-                (Change)
+                Change league
               </Button>
-          </Box>          
-          }
-        </Toolbar>
-      </Container>
+            </Box>
+            <Tooltip title="Feature suggestions">
+              <IconButton
+                component={Link}
+                to="/suggestions"
+                aria-label="Feature suggestions"
+                sx={{ display: { xs: 'none', sm: 'inline-flex' }, color: 'text.secondary' }}
+              >
+                <LightbulbOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        }
+      </Toolbar>
     </AppBar>
   );
 }

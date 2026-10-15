@@ -1,8 +1,20 @@
+/* Mirrors `colors` in theme.js for plain .css files */
+:root {
+  --fa-bg: #0F1623;
+  --fa-surface: #172131;
+  --fa-surface-raised: #1E2A3D;
+  --fa-row: #172131;
+  --fa-row-alt: #1B2639;
+  --fa-border: rgba(255, 255, 255, 0.08);
+  --fa-text: #E6EDF6;
+  --fa-text-muted: #8B9AB0;
+  --fa-primary: #5EE6A0;
+  --fa-gold: #F5C451;
+  --fa-mobile-nav-height: calc(56px + env(safe-area-inset-bottom));
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

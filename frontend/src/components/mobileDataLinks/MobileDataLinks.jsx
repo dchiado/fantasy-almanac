@@ -22,43 +22,43 @@ const MobileDataLinks = () => {
       <Box sx={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center' }}>
         <nav aria-label="main data links">
           <List>
-            <ListItem disablePadding component={Link} to="/standings" sx={{ color: 'white' }}>
+            <ListItem disablePadding component={Link} to="/standings" sx={{ color: 'text.primary' }}>
               <ListItemButton>
                 <ListItemIcon>
-                  <TableChartIcon sx={{ color: 'white' }}/>
+                  <TableChartIcon sx={{ color: 'primary.main' }}/>
                 </ListItemIcon>
                 <ListItemText primary="All-time Standings" />
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding component={Link} to="/head-to-head" sx={{ color: 'white' }}>
+            <ListItem disablePadding component={Link} to="/head-to-head" sx={{ color: 'text.primary' }}>
               <ListItemButton>
                 <ListItemIcon>
-                  <PeopleIcon sx={{ color: 'white' }}/>
+                  <PeopleIcon sx={{ color: 'primary.main' }}/>
                 </ListItemIcon>
                 <ListItemText primary="Head-to-head" />
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding component={Link} to="/records" sx={{ color: 'white' }}>
+            <ListItem disablePadding component={Link} to="/records" sx={{ color: 'text.primary' }}>
               <ListItemButton>
                 <ListItemIcon>
-                  <WorkspacePremiumIcon sx={{ color: 'white' }}/>
+                  <WorkspacePremiumIcon sx={{ color: 'primary.main' }}/>
                 </ListItemIcon>
                 <ListItemText primary="Records" />
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding component={Link} to="/power-rankings" sx={{ color: 'white' }}>
+            <ListItem disablePadding component={Link} to="/power-rankings" sx={{ color: 'text.primary' }}>
               <ListItemButton>
                 <ListItemIcon>
-                  <ListIcon sx={{ color: 'white' }}/>
+                  <ListIcon sx={{ color: 'primary.main' }}/>
                 </ListItemIcon>
                 <ListItemText primary="Power Rankings" />
               </ListItemButton>
             </ListItem>
             {leagueInfo?.id === '166975' &&
-              <ListItem disablePadding component={Link} to="/keepers" sx={{ color: 'white' }}>
+              <ListItem disablePadding component={Link} to="/keepers" sx={{ color: 'text.primary' }}>
                 <ListItemButton>
                   <ListItemIcon>
-                    <LockIcon sx={{ color: 'white' }}/>
+                    <LockIcon sx={{ color: 'primary.main' }}/>
                   </ListItemIcon>
                   <ListItemText primary="Keepers" />
                 </ListItemButton>

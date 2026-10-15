@@ -1,111 +1,54 @@
-import React, { useState } from "react";
+import React from "react";
 import { useSelector } from 'react-redux'
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { useCookies } from "react-cookie";
-import { ClickAwayListener, IconButton, Tooltip, Typography } from "@mui/material";
-import HelpIcon from '@mui/icons-material/Help';
-import "./LeagueInfo.css";
+import { Box, Typography } from "@mui/material";
+import SportsFootballIcon from '@mui/icons-material/SportsFootball';
+import SectionCard from "../ui/SectionCard";
+import LeagueDashboard from "./LeagueDashboard";
 
 const LeagueInfo = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
 	const leagueInfo = useSelector((state) => state.leagueInfo)
 	const [cookies,,] = useCookies(["league_id"]);
-	const [open, setOpen] = useState(false);
 
-	const handleTooltipClose = () => {
-    setOpen(false);
-  };
-
-  const handleTooltipOpen = () => {
-    setOpen(true);
-  };
-
-	let helpText = 'Your league ID can be found in the URL of your league page as the number after "leagueId=". '
-	helpText += 'Only ESPN football leagues are supported. If your league isn\'t viewable to the public, you\'ll be asked for your espn_s2 cookie.'
+	if (cookies?.league_id && leagueInfo.name) {
+		return <LeagueDashboard leagueInfo={leagueInfo} />;
+	}
 
 	return (
-		<div className="league-info-wrapper">
-			{cookies?.league_id && leagueInfo.name ? 
-				<div>
-          <Typography
-            variant="h4"
-            sx={{
-              display: 'flex',
-							alignContent: 'center',
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.25rem',
-            }}
-            >
-            {leagueInfo.name}
-          </Typography>
+		<Box sx={{ width: '100%', maxWidth: 480, px: 2, py: { xs: 5, sm: 8 }, boxSizing: 'border-box', textAlign: 'left' }}>
+			<SportsFootballIcon sx={{ color: 'primary.main', fontSize: 40 }} />
+			<Typography variant="h4" component="h1" sx={{ mt: 1 }}>Your league's history, in one place</Typography>
+			<Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>
+				All-time standings, rivalries, records and weekly power rankings for your ESPN fantasy football league.
+			</Typography>
 
-					<div className="league-info-subtitles">
-						<div className="left">
-							<Typography variant="caption" sx={{ mt: 3, display: 'flex', letterSpacing: '.25rem' }}>
-								Established
-							</Typography>
-							<Typography variant="h6" sx={{ display: 'flex', letterSpacing: '.25rem' }}>
-								{leagueInfo.established}
-							</Typography>
-						</div>
-						<div className="right">
-							<Typography variant="caption" sx={{ mt: 3, display: 'flex', letterSpacing: '.25rem' }}>
-								Teams
-							</Typography>
-							<Typography variant="h6" sx={{ display: 'flex', letterSpacing: '.25rem' }}>
-								{leagueInfo.teams}
-							</Typography>
-						</div>
-					</div>
-				</div>
-				:
-				<form onSubmit={onLeagueInfoSubmit} className="row-form">
-					<ClickAwayListener onClickAway={handleTooltipClose}>
-            <div>
-							<Tooltip
-                PopperProps={{
-                  disablePortal: true,
-                }}
-                onClose={handleTooltipClose}
-                open={open}
-                disableFocusListener
-                disableHoverListener
-                disableTouchListener
-                title={<div style={{ fontSize: 14 }}>{helpText}</div>}
-              >
-								<IconButton onClick={handleTooltipOpen}>
-									<HelpIcon sx={{ color: 'white' }} />
-								</IconButton>
-							</Tooltip>
-						</div>
-          </ClickAwayListener>
-
+			<SectionCard>
+				<Box component="form" onSubmit={onLeagueInfoSubmit} sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
 					<TextField
-						id="outlined-name"
-						label="League ID"
-						variant="filled"
+						id="league-id"
+						label="ESPN league ID"
 						onChange={onLeagueIdChange}
 						onKeyPress={(event) => {
-							if (!/[0-9]/.test(event.key)) {
+							// Digits only, but let Enter through so the form still submits
+							if (event.key.length === 1 && !/[0-9]/.test(event.key)) {
 								event.preventDefault();
 							}
 						}}
-						sx={{
-							input: { color: 'white' },
-							label: { color: 'white' },
-						}}
+						inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+						fullWidth
 					/>
-					<Button
-						variant="contained"
-						type="submit"
-						value="Submit"
-					>
-						Submit
+					<Button variant="contained" type="submit" sx={{ flexShrink: 0, height: 40 }}>
+						Go
 					</Button>
-				</form>
-			}
-		</div>
+				</Box>
+				<Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+					Find it in your league page's URL, after <code>leagueId=</code>. Private leagues will be asked
+					for an <code>espn_s2</code> cookie.
+				</Typography>
+			</SectionCard>
+		</Box>
 	);
 }
 

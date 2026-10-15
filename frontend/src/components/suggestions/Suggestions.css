@@ -1,6 +1,10 @@
 .column-form {
-  width: 30%;
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  padding: 32px 16px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
+  text-align: left;
 }

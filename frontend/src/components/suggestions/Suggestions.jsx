@@ -1,38 +1,38 @@
-import { Button, TextField } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import React from "react";
 import './Suggestions.css';
 
 const Suggestions = () => {
   return (
-    <form 
+    <form
       action="https://formspree.io/f/mzbyyanw"
       method="POST"
       className="column-form"
       >
+      <div>
+        <Typography variant="h5">Feature suggestions</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Got an idea for the almanac? Send it over.
+        </Typography>
+      </div>
       <TextField
         id="email"
         label="Your email"
-        variant="filled"
+        type="email"
         name="email"
-        sx={{
-          input: { color: 'white' },
-          label: { color: 'white' },
-        }}
+        fullWidth
       />
       <TextField
         id="message"
         label="Your message"
-        variant="filled"
         name="message"
         multiline
         rows={4}
-        sx={{
-          textarea: { color: 'white' },
-          label: { color: 'white' },
-        }}
+        fullWidth
       />
       <Button
         variant="contained"
+        size="large"
         type="submit"
         value="Submit"
       >

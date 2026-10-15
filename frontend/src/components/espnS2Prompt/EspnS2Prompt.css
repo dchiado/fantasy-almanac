@@ -1,13 +1,16 @@
 .espn-s2-prompt {
-  margin: 40px auto;
+  margin: 40px 16px;
   padding: 24px;
+  box-sizing: border-box;
+  width: calc(100% - 32px);
   padding-top: 40px;
   padding-bottom: 40px;
   max-width: 600px;
-  background-color: #36475f !important;
+  background-color: var(--fa-surface) !important;
+  border: 1px solid var(--fa-border);
   border-radius: 12px;
   text-align: left;
-  color: white !important;
+  color: var(--fa-text) !important;
 }
 
 .espn-s2-prompt h6 {
@@ -28,14 +31,9 @@
 }
 
 .espn-s2-prompt a {
-  color: #61dafb !important;
+  color: var(--fa-primary) !important;
   text-decoration: underline;
   word-break: break-word;
-}
-
-.espn-s2-prompt input {
-  background-color: white !important;
-  color: black !important;
 }
 
 .espn-s2-prompt-input-row {
@@ -48,7 +46,7 @@
 
 .espn-s2-prompt-link {
   margin-top: 16px !important;
-  color: #61dafb !important;
+  color: var(--fa-primary) !important;
   text-transform: none !important;
   padding: 0 !important;
 }

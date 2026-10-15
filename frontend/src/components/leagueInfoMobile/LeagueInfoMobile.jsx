@@ -3,6 +3,7 @@ import { Button, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { useCookies } from 'react-cookie';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import "./LeagueInfoMobile.css";
 
 const LeagueInfoMobile = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
@@ -24,7 +25,6 @@ const LeagueInfoMobile = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
           sx={{
             display: { md: 'flex' },
             fontWeight: 600,
-            letterSpacing: '.25rem',
             color: 'inherit',
             textDecoration: 'none',
           }}
@@ -42,6 +42,9 @@ const LeagueInfoMobile = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
           </Button>
       </Box>          
       }
+      <Button component={Link} to="/suggestions" sx={{ mt: 4, color: 'text.secondary' }}>
+        Suggest a feature
+      </Button>
     </div>
   )
 }

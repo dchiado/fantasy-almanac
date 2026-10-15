@@ -3,7 +3,7 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
-import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
+import LoadingState from "../ui/LoadingState";
 
 import './BaseballOverall.css';
 
@@ -134,7 +134,7 @@ const BaseballOverall = ({ setError }) => {
 	return (
 		<div className="baseball-container">
       {loading ? 
-        <div className="baseball-spinner"><LoadingSpinner /></div> :
+        <div className="baseball-spinner"><LoadingState variant="spinner" /></div> :
         <>
           {Object.keys(standingsData).length > 0 &&
             <>

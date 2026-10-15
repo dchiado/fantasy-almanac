@@ -1,27 +1,58 @@
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Slider, Typography, useMediaQuery } from "@mui/material";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import ReactMarkdown from 'react-markdown';
+import LoadingState from "../ui/LoadingState";
+import MovementBadge from "../ui/MovementBadge";
+import PageLayout from "../ui/PageLayout";
+import SectionCard from "../ui/SectionCard";
+import StatTable from "../ui/StatTable";
+import { DEFAULT_WEIGHTS, rankWithMovement } from "../../utils/powerRankings";
 import './PowerRankings.css';
 import { fetchApi } from "../../api";
 
+const columns = [
+	{
+		key: 'name',
+		label: 'Team',
+		sticky: true,
+		minWidth: 170,
+		render: (team, idx) => (
+			<Box component="span" sx={{ display: 'inline-flex', gap: 1, alignItems: 'center' }}>
+				<Box component="span" sx={{ color: 'text.secondary', width: 18, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{idx + 1}</Box>
+				<MovementBadge movement={team.movement} />
+				<Box component="span" sx={{ fontWeight: 600 }}>{team.name}</Box>
+			</Box>
+		),
+	},
+	{ key: 'power_ranking_score', label: 'PR Score', numeric: true, cellSx: () => ({ fontWeight: 700, color: 'primary.main' }) },
+	{ key: 'wins', label: 'Wins', numeric: true },
+	{ key: 'overall_wins', label: 'Overall Wins', numeric: true },
+	{ key: 'points', label: 'Points', numeric: true },
+	{ key: 'consistency', label: 'Consistency', numeric: true },
+	{ key: 'l5', label: 'Last 5', numeric: true },
+];
+
+const weightFields = [
+	{ key: 'wins', label: 'Wins' },
+	{ key: 'overallWins', label: 'Overall wins' },
+	{ key: 'points', label: 'Points' },
+	{ key: 'consistency', label: 'Consistency' },
+	{ key: 'lastFive', label: 'Last five' },
+];
+
 const PowerRankings = ({ setError }) => {
 	const leagueId = useSelector((state) => state.leagueInfo.id)
+	const isWide = useMediaQuery((theme) => theme.breakpoints.up('lg'));
 
 	const [loading, setLoading] = useState(true);
 	const [rankingsData, setRankingsData] = useState([]);
-  const [writeup, setWriteup] = useState(null);
-	const [parsedRankings, setParsedRankings] = useState([]);
-	const [weights, setWeights] = useState({
-		wins: 3,
-		overallWins: 1,
-		points: 2,
-		lastFive: 1,
-		consistency: 1,
-})
-
-	const columns = ['#', 'Team', 'PR Score', 'Wins', 'Overall Wins', 'Points', 'Consistency', 'Last 5 Wins']
+	const [writeup, setWriteup] = useState(null);
+	const [writeupExpanded, setWriteupExpanded] = useState(false);
+	const [writeupOverflows, setWriteupOverflows] = useState(false);
+	const writeupRef = useRef(null);
+	const [weights, setWeights] = useState(DEFAULT_WEIGHTS);
 
 	useEffect(() => {
 		if (rankingsData.length === 0 && leagueId) {
@@ -29,9 +60,9 @@ const PowerRankings = ({ setError }) => {
 			.then((data) => {
 				setRankingsData(data.teams);
 
-        if (data.writeup) {
-          setWriteup(data.writeup);
-        }
+				if (data.writeup) {
+					setWriteup(data.writeup);
+				}
 
 				setLoading(false);
 			})
@@ -43,334 +74,95 @@ const PowerRankings = ({ setError }) => {
 		}
 	}, [rankingsData, leagueId, setError]);
 
-	useEffect(() => {
-		if (rankingsData.length !== 0) {
-			const weightsSum = Object.values(weights).reduce((accu, val) => {
-				return accu + (val === '' ? 0 : val);
-			}, 0);
+	// Only offer "read more" when the collapsed writeup actually cuts text off
+	useLayoutEffect(() => {
+		const el = writeupRef.current;
+		if (el && !writeupExpanded) setWriteupOverflows(el.scrollHeight > el.clientHeight + 1);
+	}, [writeup, writeupExpanded, loading]);
 
-			const allWins = rankingsData.map((t) => t.wins).sort((a, b) => b - a);
-			const allOverallWins = rankingsData.map((t) => t.overall_wins).sort((a, b) => b - a);
-			const allPoints = rankingsData.map((t) => t.points).sort((a, b) => b - a);
-			const allLastFive = rankingsData.map((t) => t.l5).sort((a, b) => b - a);
-			const allConsistency = rankingsData.map((t) => t.consistency).sort((a, b) => a - b);
+	const parsedRankings = useMemo(
+		() => rankingsData.length ? rankWithMovement(rankingsData, weights) : [],
+		[rankingsData, weights]
+	);
 
-			const newRankings = [];
-			rankingsData.forEach((tm) => {
-				const winsRank = allWins.indexOf(tm.wins) + 1;
-				const overallWinsRank = allOverallWins.indexOf(tm.overall_wins) + 1;
-				const pointsRank = allPoints.indexOf(tm.points) + 1;
-				const lastFiveRank = allLastFive.indexOf(tm.l5) + 1;
-				const consistencyRank = allConsistency.indexOf(tm.consistency) + 1;
+	const weightsChanged = weightFields.some(({ key }) => weights[key] !== DEFAULT_WEIGHTS[key]);
 
-				const score = (
-					(
-						(weights.wins * winsRank) +
-						(weights.overallWins * overallWinsRank) +
-						(weights.points * pointsRank) +
-						(weights.lastFive * lastFiveRank) +
-						(weights.consistency * consistencyRank)
-					) / weightsSum
-				).toFixed(2);
+	const weightControls = (
+		<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+			{weightFields.map(({ key, label }) => (
+				<Box key={key}>
+					<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+						<Typography variant="body2" id={`weight-${key}-label`}>{label}</Typography>
+						<Typography variant="body2" sx={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{weights[key]}</Typography>
+					</Box>
+					<Slider
+						aria-labelledby={`weight-${key}-label`}
+						value={weights[key]}
+						onChange={(_, val) => setWeights((prev) => ({ ...prev, [key]: val }))}
+						min={0}
+						max={5}
+						step={1}
+						marks
+						size="small"
+					/>
+				</Box>
+			))}
+			<Button size="small" onClick={() => setWeights(DEFAULT_WEIGHTS)} disabled={!weightsChanged} sx={{ alignSelf: 'flex-start' }}>
+				Reset to defaults
+			</Button>
+		</Box>
+	);
 
-				const teamObj = {
-					power_ranking_score: score,
-					...tm
-				}
-				newRankings.push(teamObj);
-			});
-
-			const sortedData = newRankings.sort((a, b) => a.power_ranking_score - b.power_ranking_score);
-			setParsedRankings(sortedData);
-		}
-	}, [rankingsData, weights])
-
-	const handleChangeWins = (event) => {
-		const newVal = parseInt(event.target.value) || 0;
-		setWeights(prevState => {
-			return { ...prevState, wins: newVal };
-		}
-	)}
-
-	const handleChangeOverallWins = (event) => {
-		const newVal = parseInt(event.target.value) || 0;
-		setWeights(prevState => {
-			return { ...prevState, overallWins: newVal };
-		}
-	)}
-
-	const handleChangePoints = (event) => {
-		const newVal = parseInt(event.target.value) || 0;
-		setWeights(prevState => {
-			return { ...prevState, points: newVal };
-		}
-	)}
-
-	const handleChangeLast5 = (event) => {
-		const newVal = parseInt(event.target.value) || 0;
-		setWeights(prevState => {
-			return { ...prevState, lastFive: newVal };
-		}
-	)}
-
-	const handleChangeConsistency = (event) => {
-		const newVal = parseInt(event.target.value) || 0;
-		setWeights(prevState => {
-			return { ...prevState, consistency: newVal };
-		}
-	)}
+	if (loading) {
+		return <LoadingState rows={12} />;
+	}
 
 	return (
-		<div className="content">
-			{loading && <LoadingSpinner />}
+		<PageLayout maxWidth={1300} title="Power Rankings" subtitle="Arrows show movement since last week.">
 			{parsedRankings.length > 0 &&
-				<div className="rankings-container">
-					<Typography
-						variant="h6"
-						sx={{
-							display: 'flex',
-							fontWeight: 700,
-							letterSpacing: '.25rem',
-							mb: 2
-						}}
-						>
-						Power Rankings
-					</Typography>
+				<Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 4 } }}>
+					<SectionCard title="This week's writeup">
+						{writeup
+							? <>
+									<Box ref={writeupRef} className={`pr-writeup${writeupExpanded ? '' : ' collapsed'}${!writeupExpanded && writeupOverflows ? ' faded' : ''}`}>
+										<ReactMarkdown>{writeup}</ReactMarkdown>
+									</Box>
+									{(writeupOverflows || writeupExpanded) &&
+										<Button size="small" onClick={() => setWriteupExpanded((v) => !v)} sx={{ mt: 1, ml: -1 }}>
+											{writeupExpanded ? 'Show less' : 'Read the full writeup'}
+										</Button>
+									}
+								</>
+							: <Typography color="text.secondary">Check back later for the power rankings writeup.</Typography>
+						}
+					</SectionCard>
 
+					<Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 1fr) 260px' }, gap: 3, alignItems: 'start' }}>
+						<Box>
+							<Typography variant="h6" component="h2" sx={{ mb: 1.5 }}>Breakdown</Typography>
+							<StatTable
+								columns={columns}
+								rows={parsedRankings}
+								getRowKey={(team) => team.name}
+								ariaLabel="Power rankings breakdown"
+							/>
+						</Box>
 
-					<Typography variant="body1" sx={{ mb: 2 }}>
-            {writeup ? (
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <div style={{ width: '80%' }}>
-                  <ReactMarkdown>{writeup}</ReactMarkdown>
-                </div>
-              </div>
-            ) : 'Check back later for the power rankings writeup.'}
-					</Typography>
-
-          <Typography
-						variant="h6"
-						sx={{
-							display: 'flex',
-							fontWeight: 700,
-							letterSpacing: '.25rem',
-							mb: 2,
-              mt: 4
-						}}
-						>
-						Breakdown
-					</Typography>
-
-					<TableContainer component={Paper} className="table-container" sx={{ borderRadius: 3, mb: '15px' }}>
-						<Table sx={{ width: '100%', fontSize: 14 }} size="small" aria-label="standings table">
-							<TableHead>
-								<TableRow className="table-header">
-									{columns.map((c) => (
-										<TableCell
-											align="center"
-											key={c}
-											sx={{ minWidth: 40, fontSize: 'inherit', fontWeight: 'inherit' }}
-										>
-											{c}
-										</TableCell>
-									))}
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{parsedRankings.map((team, idx) => {
-									return (
-										<TableRow
-										key={team.name}
-										sx={{
-											backgroundColor: idx % 2 === 0 ? '#5B697F' : '#283447',
-											borderColor: idx % 2 === 0 ? '#5B697F' : '#283447',
-											color: 'white',
-										}}
-										>
-											<TableCell
-												align="center"
-												component="th"
-												scope="row"
-												sx={{
-													minWidth: 10,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-												}}
-											>
-												{idx + 1}
-											</TableCell>
-											<TableCell
-												component="th"
-												scope="row"
-												sx={{
-													minWidth: 40,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-													left: 0,
-												}}
-											>
-												{team.name}
-											</TableCell>
-											<TableCell
-												align="center"
-												sx={{
-													minWidth: 40,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-												}}
-											>
-												{team.power_ranking_score}
-											</TableCell>
-											<TableCell
-												align="center"
-												sx={{
-													minWidth: 40,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-												}}
-											>
-												{team.wins}
-											</TableCell>
-											<TableCell
-												align="center"
-												sx={{
-													minWidth: 40,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-												}}
-											>
-												{team.overall_wins}
-											</TableCell>
-											<TableCell
-												align="center"
-												sx={{
-													minWidth: 40,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-												}}
-											>
-												{team.points}
-											</TableCell>
-											<TableCell
-												align="center"
-												sx={{
-													minWidth: 40,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-												}}
-											>
-												{team.consistency}
-											</TableCell>
-											<TableCell
-												align="center"
-												sx={{
-													minWidth: 40,
-													fontSize: 'inherit',
-													backgroundColor: 'inherit',
-													borderColor: 'inherit',
-													color: 'inherit',
-												}}
-											>
-												{team.l5}
-											</TableCell>
-										</TableRow>
-									)
-								})}
-							</TableBody>
-						</Table>
-					</TableContainer>
-
-					<Typography
-						variant="h6"
-						sx={{
-							display: 'flex',
-							fontWeight: 700,
-							letterSpacing: '.25rem',
-							mb: 2,
-              mt: 2
-						}}
-						>
-						Weights
-					</Typography>
-					<div className="weights">
-						<TextField
-							id="weights-wins"
-							label="Wins"
-							value={weights.wins}
-							variant="filled"
-							onChange={handleChangeWins}
-							sx={{
-								input: { color: 'white' },
-								label: { color: 'white' },
-								maxWidth: 120
-							}}
-						/>
-						<TextField
-							id="weights-overall-wins"
-							label="Overall Wins"
-							value={weights.overallWins}
-							variant="filled"
-							onChange={handleChangeOverallWins}
-							sx={{
-								input: { color: 'white' },
-								label: { color: 'white' },
-								maxWidth: 120
-							}}
-						/>
-						<TextField
-							id="weights-points"
-							label="Points"
-							value={weights.points}
-							variant="filled"
-							onChange={handleChangePoints}
-							sx={{
-								input: { color: 'white' },
-								label: { color: 'white' },
-								maxWidth: 120
-							}}
-						/>
-						<TextField
-							id="weights-consistency"
-							label="Consistency"
-							value={weights.consistency}
-							variant="filled"
-							onChange={handleChangeConsistency}
-							sx={{
-								input: { color: 'white' },
-								label: { color: 'white' },
-								maxWidth: 120
-							}}
-						/>
-						<TextField
-							id="weights-last-five"
-							label="Last Five"
-							value={weights.lastFive}
-							variant="filled"
-							onChange={handleChangeLast5}
-							sx={{
-								input: { color: 'white' },
-								label: { color: 'white' },
-								maxWidth: 120
-							}}
-						/>
-					</div>
-				</div>
+						{/* Beside the table on wide screens so changes are visible while tuning; collapsed below it elsewhere */}
+						{isWide
+							? <SectionCard title="Weights" sx={{ position: 'sticky', top: 88, mt: 5 }}>{weightControls}</SectionCard>
+							: <Accordion variant="outlined" disableGutters sx={{ borderRadius: 3, '&:before': { display: 'none' } }}>
+									<AccordionSummary expandIcon={<ExpandMoreIcon />}>
+										<Typography sx={{ fontWeight: 600 }}>Tune the weights</Typography>
+										{weightsChanged && <Typography variant="body2" color="primary.main" sx={{ ml: 1 }}>· customized</Typography>}
+									</AccordionSummary>
+									<AccordionDetails>{weightControls}</AccordionDetails>
+								</Accordion>
+						}
+					</Box>
+				</Box>
 			}
-		</div>
+		</PageLayout>
 	);
 }
 

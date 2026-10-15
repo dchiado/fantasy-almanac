@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
-import Footer from "./components/footer/Footer";
 import Header from "./components/header/Header";
 import { BrowserRouter, Route, Switch} from 'react-router-dom';
 
@@ -17,25 +16,23 @@ import LeagueInfoMobile from "./components/leagueInfoMobile/LeagueInfoMobile";
 import MobileDataLinks from "./components/mobileDataLinks/MobileDataLinks";
 import Keepers from "./components/keepers/Keepers";
 import BaseballOverall from "./components/baseballOverall/BaseballOverall";
-import LoadingSpinner from "./components/loadingSpinner/LoadingSpinner";
+import LoadingState from "./components/ui/LoadingState";
 
 import { useDispatch } from "react-redux";
 import { useCookies } from "react-cookie";
 import { updateLeagueInfo } from './features/leagueInfo/leagueInfoSlice'
 import { ESPN_S2_KEY } from './api'
-import { Alert, Button } from "@mui/material";
+import { Alert, Button, useMediaQuery } from "@mui/material";
 import { Stack } from "@mui/system";
 
 const App = () => {
   const path = window.location.pathname;
-	const width = window.innerWidth;
-  const breakpoint = 620;
 
 	const dispatch = useDispatch()
 	const [cookies, setCookie] = useCookies(["league_id"]);
   const [error, setError] = useState();
 	const [leagueId, setLeagueId] = useState();
-  const [isDesktop, setIsDesktop] = useState(true);
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
   const [showHeaderFooter, setShowHeaderFooter] = useState(true);
   const [espnS2, setEspnS2] = useState(() => localStorage.getItem(ESPN_S2_KEY) || "");
   const [needsPrivateAuth, setNeedsPrivateAuth] = useState(false);
@@ -45,10 +42,6 @@ const App = () => {
 	useEffect(() => {
     setShowHeaderFooter(path !== '/mlb-addicts');
   }, [path])
-
-  useEffect(() => {
-    setIsDesktop(width >= breakpoint);
-  }, [width, breakpoint]);
 
 	const fetchLeagueInfo = useCallback((id, s2) => {
 		if (id) {
@@ -180,12 +173,12 @@ const App = () => {
 	);
 
 	return (
-		<div className="App">
+		<div className={`App${isMobile && showHeaderFooter ? ' mobile' : ''}`}>
 			<BrowserRouter>
 				{showHeaderFooter ? <Header /> : <div></div>}
 				<Switch>
 					<Route exact path="/">
-            {loading ? <LoadingSpinner /> :
+            {loading ? <LoadingState variant="card" /> :
             needsPrivateAuth ? privateAuthPrompt : (
               <LeagueInfo
                 onLeagueIdChange={onLeagueIdChange}
@@ -228,13 +221,11 @@ const App = () => {
 							setError={setError}
 						/>
 					</Route>
-					{leagueId === '166975' && // The Gridiron league only
-						<Route path="/keepers">
-							<Keepers
-								setError={setError}
-              />
-						</Route>
-					}
+          <Route path="/keepers">
+            <Keepers
+              setError={setError}
+            />
+          </Route>
           <Route path="/mlb-addicts">
 						<BaseballOverall
 							setError={setError}
@@ -247,13 +238,13 @@ const App = () => {
 						<Suggestions />
 					</Route>
 				</Switch>
+				{showHeaderFooter && isMobile && <FooterMobile />}
 			</BrowserRouter>
 			{error &&
 				<Stack spacing={2} sx={{ position: 'fixed', top: 100 }}>
 					<Alert onClose={() => setError()} severity="error">{error}</Alert>
 				</Stack>
 			}
-      {showHeaderFooter ? isDesktop ? <Footer /> : <FooterMobile /> : <></>}
 		</div>
 	);
 }

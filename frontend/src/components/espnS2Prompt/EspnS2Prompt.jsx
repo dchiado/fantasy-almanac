@@ -11,7 +11,7 @@ const EspnS2Prompt = ({ title, intro, outro, submitLabel, onSubmit, initialValue
   };
 
   return (
-    <Paper className="espn-s2-prompt" elevation={3}>
+    <Paper className="espn-s2-prompt" variant="outlined">
       <Typography variant="h6" gutterBottom>
         {title}
       </Typography>
@@ -32,13 +32,8 @@ const EspnS2Prompt = ({ title, intro, outro, submitLabel, onSubmit, initialValue
           label="espn_s2 Cookie"
           fullWidth
           value={espnS2}
-          variant="filled"
           onChange={(e) => setEspnS2(e.target.value)}
           disabled={!!busy}
-          sx={{
-            input: { color: 'white' },
-            label: { color: 'lightgray' },
-          }}
         />
         {busy || (
           <Button

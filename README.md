@@ -119,10 +119,10 @@ npm start
 ```bash
 cd frontend
 npm run build
-aws s3 sync build/ s3://<bucket-name> --delete
+aws s3 sync build/ s3://ffalmanac.com
 ```
 
-CloudFront serves the updated frontend.
+CloudFront serves the updated frontend. `index.html` is uploaded with `no-cache` and invalidated so clients never reference a deleted hashed bundle; files under `static/` are content-hashed and safe to cache.
 
 ---
 

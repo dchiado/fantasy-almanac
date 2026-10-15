@@ -1,0 +1,231 @@
+import React, { useMemo } from "react";
+import { Box, Button, Paper, Skeleton, Typography } from "@mui/material";
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { Link } from "react-router-dom";
+import useApi from "../../hooks/useApi";
+import MovementBadge from "../ui/MovementBadge";
+import { DEFAULT_WEIGHTS, rankWithMovement } from "../../utils/powerRankings";
+
+const DashCard = ({ title, to, linkLabel, children }) => (
+  <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+      <Typography variant="overline" component="h2" color="text.secondary">{title}</Typography>
+      {to &&
+        <Button component={Link} to={to} size="small" endIcon={<ArrowForwardIcon fontSize="small" />} sx={{ mr: -1 }}>
+          {linkLabel}
+        </Button>
+      }
+    </Box>
+    {children}
+  </Paper>
+);
+
+const CardSkeleton = ({ lines = 4 }) => (
+  <Box>
+    {Array.from({ length: lines }).map((_, i) => <Skeleton key={i} height={32} />)}
+  </Box>
+);
+
+const Unavailable = ({ children = 'Not available yet.' }) => (
+  <Typography variant="body2" color="text.secondary">{children}</Typography>
+);
+
+// A ranked line: position, name, optional extra, value on the right
+const RankRow = ({ place, name, extra, value }) => (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.75, borderBottom: '1px solid var(--fa-border)', '&:last-of-type': { borderBottom: 0 } }}>
+    <Typography sx={{ width: 20, textAlign: 'right', color: 'text.secondary', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{place}</Typography>
+    {extra}
+    <Typography sx={{ fontWeight: 600, flex: 1, minWidth: 0 }} noWrap>{name}</Typography>
+    <Typography sx={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{value}</Typography>
+  </Box>
+);
+
+// First paragraph of the markdown writeup as plain text
+const teaser = (markdown) => (markdown || '')
+  .split(/\n\s*\n/)
+  .map((p) => p.replace(/[#*_>`]/g, '').trim())
+  .find(Boolean);
+
+const PowerRankingsCard = ({ leagueId }) => {
+  const { data, loading, error } = useApi(`/power-rankings?leagueId=${leagueId}`);
+  const top = useMemo(() => data?.teams?.length ? rankWithMovement(data.teams, DEFAULT_WEIGHTS).slice(0, 5) : [], [data]);
+  const intro = teaser(data?.writeup);
+
+  return (
+    <DashCard title="Power rankings" to="/power-rankings" linkLabel="Full rankings">
+      {loading ? <CardSkeleton lines={5} />
+        : error || top.length === 0 ? <Unavailable>Rankings start once the season does.</Unavailable>
+        : <>
+            {top.map((team, idx) => (
+              <RankRow
+                key={team.name}
+                place={idx + 1}
+                name={team.name}
+                extra={<MovementBadge movement={team.movement} />}
+                value={`${team.wins}-${team.games ? team.games.length - team.wins : '?'}`}
+              />
+            ))}
+            {intro &&
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+              >
+                {intro}
+              </Typography>
+            }
+          </>
+      }
+    </DashCard>
+  );
+};
+
+const summarizeStandings = (standings) => {
+  const currentSeason = standings.seasons[standings.seasons.length - 1];
+
+  const owners = standings.teams.map((t) => {
+    const wins = t.seasons.reduce((a, s) => a + s.wins, 0);
+    const losses = t.seasons.reduce((a, s) => a + s.losses, 0);
+    return {
+      name: t.name,
+      seasons: t.seasons.length,
+      // Same rule as the Standings page's "Active teams" toggle
+      active: t.seasons.some((s) => s.year === currentSeason),
+      wins,
+      losses,
+      winPct: wins + losses > 0 ? wins / (wins + losses) : 0,
+      titles: t.seasons.filter((s) => s.playoff_champ).map((s) => s.year),
+    };
+  });
+
+  const champions = standings.teams
+    .flatMap((t) => t.seasons.filter((s) => s.playoff_champ).map((s) => ({ name: t.name, year: s.year })))
+    .sort((a, b) => b.year - a.year);
+
+  const mostTitles = Math.max(0, ...owners.map((o) => o.titles.length));
+
+  // Active owners only; skip one-season wonders unless the league is too young to have veterans
+  const minSeasons = Math.min(3, standings.seasons.length);
+  const leaders = owners
+    .filter((o) => o.active && o.seasons >= minSeasons)
+    .sort((a, b) => b.winPct - a.winPct)
+    .slice(0, 5);
+
+  return {
+    reigning: champions[0],
+    recentChampions: champions.slice(1, 4),
+    titleLeaders: mostTitles > 0 ? owners.filter((o) => o.titles.length === mostTitles) : [],
+    mostTitles,
+    leaders,
+  };
+};
+
+const ChampionsCard = ({ summary, loading, error }) => (
+  <DashCard title="Champions" to="/standings" linkLabel="Standings">
+    {loading ? <CardSkeleton lines={3} />
+      : error || !summary?.reigning ? <Unavailable>No champions crowned yet.</Unavailable>
+      : <>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ display: 'grid', placeItems: 'center', width: 48, height: 48, borderRadius: 2, bgcolor: 'var(--fa-gold)', color: '#1A1300', flexShrink: 0 }}>
+              <EmojiEventsIcon />
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="body2" color="text.secondary">Reigning champ · {summary.reigning.year}</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.2 }} noWrap>{summary.reigning.name}</Typography>
+            </Box>
+          </Box>
+          {summary.recentChampions.length > 0 &&
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+              Before that: {summary.recentChampions.map((c) => `${c.name} (${c.year})`).join(', ')}
+            </Typography>
+          }
+          {summary.mostTitles > 0 &&
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              <Box component="span" sx={{ color: 'text.secondary' }}>Most titles: </Box>
+              <strong>{summary.titleLeaders.map((o) => o.name).join(', ')}</strong> ({summary.mostTitles})
+            </Typography>
+          }
+        </>
+    }
+  </DashCard>
+);
+
+const LeadersCard = ({ summary, loading, error }) => (
+  <DashCard title="Active career win %" to="/standings" linkLabel="Standings">
+    {loading ? <CardSkeleton lines={5} />
+      : error || !summary?.leaders.length ? <Unavailable />
+      : summary.leaders.map((o, idx) => (
+          <RankRow
+            key={o.name}
+            place={idx + 1}
+            name={o.name}
+            extra={null}
+            value={
+              <>
+                <Box component="span" sx={{ color: 'text.secondary', fontWeight: 500, mr: 1.5 }}>{o.wins}-{o.losses}</Box>
+                {(o.winPct * 100).toFixed(1)}%
+              </>
+            }
+          />
+        ))
+    }
+  </DashCard>
+);
+
+const BestWeeksCard = ({ leagueId }) => {
+  const { data, loading, error } = useApi(`/individual-weeks?leagueId=${leagueId}&bestworst=best&playoffs=false&count=5`);
+
+  return (
+    <DashCard title="Best weeks ever" to="/records" linkLabel="Records">
+      {loading ? <CardSkeleton lines={5} />
+        : error || !data?.length ? <Unavailable />
+        : data.map((w, idx) => (
+            <RankRow
+              key={`${w.year}-${w.week}-${w.team_name}`}
+              place={idx + 1}
+              name={w.team_name}
+              extra={null}
+              value={
+                <>
+                  <Box component="span" sx={{ color: 'text.secondary', fontWeight: 500, mr: 1.5 }}>{w.year} Wk {w.week}</Box>
+                  {w.score}
+                </>
+              }
+            />
+          ))
+      }
+    </DashCard>
+  );
+};
+
+const LeagueDashboard = ({ leagueInfo }) => {
+  const standings = useApi(`/standings?leagueId=${leagueInfo.id}`);
+  const summary = useMemo(() => standings.data?.teams ? summarizeStandings(standings.data) : null, [standings.data]);
+
+  const facts = [
+    leagueInfo.established && `Est. ${leagueInfo.established}`,
+    leagueInfo.teams && `${leagueInfo.teams} teams`,
+    leagueInfo.year && `${leagueInfo.year} season${leagueInfo.week ? ` · Week ${leagueInfo.week}` : ''}`,
+  ].filter(Boolean);
+
+  return (
+    <Box sx={{ width: '100%', maxWidth: 1100, mx: 'auto', px: { xs: 2, sm: 3 }, py: { xs: 3, sm: 5 }, boxSizing: 'border-box', textAlign: 'left' }}>
+      <Typography variant="h3" component="h1" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
+        {leagueInfo.name}
+      </Typography>
+      <Typography color="text.secondary" sx={{ mt: 0.5, mb: { xs: 3, sm: 4 } }}>
+        {facts.join(' · ')}
+      </Typography>
+
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>
+        <PowerRankingsCard leagueId={leagueInfo.id} />
+        <ChampionsCard summary={summary} loading={standings.loading} error={standings.error} />
+        <LeadersCard summary={summary} loading={standings.loading} error={standings.error} />
+        <BestWeeksCard leagueId={leagueInfo.id} />
+      </Box>
+    </Box>
+  );
+};
+
+export default LeagueDashboard;
