@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Typography, TextField, Paper, Button, LinearProgress, Box } from "@mui/material";
-import './CookieWarning.css';
+import { LinearProgress, Box } from "@mui/material";
+import EspnS2Prompt from "../espnS2Prompt/EspnS2Prompt";
 
-const CookieWarning = ({ onCookieSubmit, onCacheComplete }) => {
-  const [espnS2, setEspnS2] = useState("");
+const CookieWarning = ({ initialEspnS2, onCookieSubmit, onCacheComplete }) => {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const leagueInfo = useSelector((state) => state.leagueInfo);
@@ -42,14 +41,10 @@ const CookieWarning = ({ onCookieSubmit, onCacheComplete }) => {
 
   if (!leagueInfo.established || leagueInfo.established >= 2018) return null;
 
-  const handleChange = (e) => {
-    setEspnS2(e.target.value);
-    onCookieSubmit(e.target.value);
-  };
+  const handleSend = async (espnS2) => {
+    if (!leagueInfo.id) return;
 
-  const handleSend = async () => {
-    if (!espnS2 || !leagueInfo.id) return;
-
+    onCookieSubmit(espnS2);
     setLoading(true);
     setProgress(0);
 
@@ -72,57 +67,24 @@ const CookieWarning = ({ onCookieSubmit, onCacheComplete }) => {
   };
 
   return (
-    <Paper className="cookie-warning" elevation={3} style={{ padding: 20, margin: "20px auto", maxWidth: 600 }}>
-      <Typography variant="h6" gutterBottom>
-        ⚠️ Heads-up, time traveler
-      </Typography>
-      <Typography paragraph>
-        Your league was established in <strong>{leagueInfo.established}</strong>, but ESPN's API won't serve
-        data from before 2018 without your <code>espn_s2</code> cookie. Fun, I know.
-      </Typography>
-      <Typography paragraph>
-        Here's how to find it:
-        <ol>
-          <li>Login to <a href="https://fantasy.espn.com" target="_blank" rel="noreferrer">ESPN Fantasy</a></li>
-          <li>Press <code>F12</code> or right-click → Inspect</li>
-          <li>Go to the <strong>Application</strong> tab → Storage → Cookies → <code>espn.com</code></li>
-          <li>Copy the value of <code>espn_s2</code></li>
-        </ol>
-        Paste it below and we'll use it to retrieve your league's ancient history. We will store the data so
-        you won't ever have to do this again.
-      </Typography>
-      <div className="cookie-warning-input-row">
-        <TextField
-          id="outlined-espn-cookie"
-          label="espn_s2 Cookie"
-          fullWidth
-          value={espnS2}
-          variant="filled"
-          onChange={handleChange}
-          disabled={loading}
-          sx={{
-            input: { color: 'white' },
-            label: { color: 'lightgray' },
-          }}
-        />
-        {loading ? (
-          <Box sx={{ mb: 2, width: '100%' }}>
-            <LinearProgress variant="determinate" value={progress} sx={{ height: 10, borderRadius: 5, mt: 1 }} />
-          </Box>
-        ) :
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSend}
-          disabled={loading || !espnS2}
-          sx={{ width: '150px' }}
-        >
-          {loading ? "Working..." : "Send It"}
-        </Button>
+    <EspnS2Prompt
+      title="⚠️ Heads-up, time traveler"
+      intro={
+        <>
+          Your league was established in <strong>{leagueInfo.established}</strong>, but ESPN's API won't serve
+          data from before 2018 without your <code>espn_s2</code> cookie. Fun, I know.
+        </>
       }
-
-      </div>
-    </Paper>
+      outro="Paste it below and we'll use it to retrieve your league's ancient history. We will store the data so you won't ever have to do this again."
+      submitLabel="Send It"
+      initialValue={initialEspnS2}
+      onSubmit={handleSend}
+      busy={loading && (
+        <Box sx={{ mb: 2, width: '100%' }}>
+          <LinearProgress variant="determinate" value={progress} sx={{ height: 10, borderRadius: 5, mt: 1 }} />
+        </Box>
+      )}
+    />
   );
 };
 

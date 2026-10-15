@@ -16,6 +16,7 @@ import Select from '@mui/material/Select';
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import { useSelector } from "react-redux";
 import './Standings.css';
+import { fetchApi } from "../../api";
 
 const headers = [ 'Wins', 'Losses', 'Ties', 'Win %' ]
 
@@ -36,18 +37,10 @@ const Standings = ({ setError }) => {
 
 	useEffect(() => {
 		if (Object.keys(standingsData).length === 0 && leagueId) {
-			fetch(`${process.env.REACT_APP_API_URL}/standings?leagueId=${leagueId}`,
-				{
-					crossDomain: true,
-					method: 'GET',
-					headers: { 'Content-Type':'application/json' },
-				}
-			)
-			.then((res) =>
-				res.json().then((data) => {
-					setStandingsData(data);
-				})
-			)
+			fetchApi(`/standings?leagueId=${leagueId}`)
+			.then((data) => {
+				setStandingsData(data);
+			})
 			.catch((error) => {
 				setLoading(false);
 				console.error(error);

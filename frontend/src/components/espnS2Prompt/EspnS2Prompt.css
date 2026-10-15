@@ -1,0 +1,54 @@
+.espn-s2-prompt {
+  margin: 40px auto;
+  padding: 24px;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  max-width: 600px;
+  background-color: #36475f !important;
+  border-radius: 12px;
+  text-align: left;
+  color: white !important;
+}
+
+.espn-s2-prompt h6 {
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+.espn-s2-prompt p,
+.espn-s2-prompt ol {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.espn-s2-prompt ol {
+  padding-left: 20px;
+}
+
+.espn-s2-prompt a {
+  color: #61dafb !important;
+  text-decoration: underline;
+  word-break: break-word;
+}
+
+.espn-s2-prompt input {
+  background-color: white !important;
+  color: black !important;
+}
+
+.espn-s2-prompt-input-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+.espn-s2-prompt-link {
+  margin-top: 16px !important;
+  color: #61dafb !important;
+  text-transform: none !important;
+  padding: 0 !important;
+}

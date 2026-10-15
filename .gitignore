@@ -7,9 +7,6 @@
 # testing
 /coverage
 
-# production
-/build
-
 # misc
 .DS_Store
 .env*
@@ -18,18 +15,22 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# backend
-backend/env
-backend/__pycache__/
-
 # frontend
 frontend/node_modules/
 frontend/build/
 frontend/.env*
 
-# other dependencies
+# lambda node_modules and Python caches
 **/node_modules
-dependencies_layer
+**/__pycache__
+**/*.pyc
 
 # lambda layers
 *.zip
+dependencies_layer
+
+# SAM build output
+.aws-sam/
+
+# real node_modules lives here to keep it out of iCloud sync
+*.nosync

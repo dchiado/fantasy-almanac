@@ -130,6 +130,7 @@ export const handler = async (event) => {
         stats: {}
       }
 
+
       const teamDetails = scoreboard.schedule[0].teams.find((t) => t.teamId === team.id)
       const teamStats = teamDetails.cumulativeScore?.scoreByStat;
 

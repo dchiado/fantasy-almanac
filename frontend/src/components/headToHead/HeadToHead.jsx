@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import './HeadToHead.css';
+import { fetchApi } from "../../api";
 
 const HeadToHead = ({ setError }) => {
 	const leagueId = useSelector((state) => state.leagueInfo.id)
@@ -16,19 +17,10 @@ const HeadToHead = ({ setError }) => {
 
 	useEffect(() => {
 		if (teams.length === 0 && leagueId) {
-			fetch(
-				`${process.env.REACT_APP_API_URL}/head-to-head-form?leagueId=${leagueId}`,
-				{
-					crossDomain: true,
-					method: 'GET',
-					headers: { 'Content-Type':'application/json' },
-				}
-			)
-			.then((res) =>
-				res.json().then((data) => {
-					setTeams(data);
-				})
-			)
+			fetchApi(`/head-to-head-form?leagueId=${leagueId}`)
+			.then((data) => {
+				setTeams(data);
+			})
 			.catch((error) => {
 				console.error(error);
 				setError(`Error retrieving data: ${error.message}`);
@@ -39,20 +31,11 @@ const HeadToHead = ({ setError }) => {
 	useEffect(() => {
 		if (Object.keys(matchupData).length === 0 && teamsSubmitted && leagueId) {
 			setLoading(true);
-			fetch(
-				`${process.env.REACT_APP_API_URL}/head-to-head?leagueId=${leagueId}&team1=${team1}&team2=${team2}`,
-				{
-					crossDomain: true,
-					method: 'GET',
-					headers: { 'Content-Type':'application/json' },
-				}
-			)
-			.then((res) =>
-				res.json().then((data) => {
-					setMatchupData(JSON.parse(JSON.stringify(data)));
-					setLoading(false);
-				})
-			)
+			fetchApi(`/head-to-head?leagueId=${leagueId}&team1=${team1}&team2=${team2}`)
+			.then((data) => {
+				setMatchupData(JSON.parse(JSON.stringify(data)));
+				setLoading(false);
+			})
 			.catch((error) => {
 				setLoading(false);
 				console.error(error);

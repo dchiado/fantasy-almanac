@@ -1,195 +1,154 @@
 # Fantasy Almanac
 
-Fantasy Almanac is a React web application for exploring historical ESPN Fantasy Football league data. It retrieves league information from ESPN's public Fantasy API, processes the data with serverless Python functions running on AWS Lambda, and presents the results through an interactive web interface.
+A React app for exploring ESPN Fantasy Football (and Baseball) league history. The frontend calls an API Gateway backed by AWS Lambda functions that fetch data from ESPN's public Fantasy API on the fly.
 
 ## Architecture
 
-```text
-                   +----------------------+
-                   |   React Frontend     |
-                   |   S3 + CloudFront    |
-                   +----------+-----------+
-                              |
-                              v
-                   +----------------------+
-                   |     API Gateway      |
-                   +----------+-----------+
-                              |
-                +-------------+-------------+
-                |             |             |
-                v             v             v
-         +------------+ +------------+ +------------+
-         |  Lambda 1  | |  Lambda 2  | |  Lambda N  |
-         +------------+ +------------+ +------------+
-                              |
-                              v
-                   +----------------------+
-                   | ESPN Fantasy API     |
-                   +----------------------+
+```
+React (S3 + CloudFront)
+        │
+        ▼
+   API Gateway (HTTP API)
+        │
+   ┌────┴────┬──────────┬──────────┐
+   ▼         ▼          ▼          ▼
+Lambda    Lambda     Lambda    Lambda ...
+        │
+        ▼
+  ESPN Fantasy API
 ```
 
-### Tech Stack
-
-- **Frontend:** React
-- **Backend:** Python on AWS Lambda
-- **API:** Amazon API Gateway
-- **Hosting:** Amazon S3 + CloudFront
-- **Data Source:** ESPN Fantasy Football API
+**Stack:** React · AWS Lambda (Python 3.12 / Node.js) · Amazon API Gateway (HTTP API) · S3 + CloudFront
 
 ---
 
-## Local Development
+## Repo structure
+
+```
+lambdas/
+  # Football — Python (TODO: migrate to JS)
+  leagueInfo/             GET /info
+  standings/              GET /standings
+  headToHeadForm/         GET /head-to-head-form
+  headToHead/             GET /head-to-head
+  powerRankings/          GET /power-rankings
+  individualWeeks/        GET /individual-weeks
+  individualSeasons/      GET /individual-seasons
+  matchups/               GET /matchups
+  keepers/                GET /keepers
+  # Football — JS
+  cache/                  POST /cache
+  cacheStatus/            GET /cache/status
+  writePowerRankings/        no route — invoked directly, writes AI rankings to S3
+  # Baseball — JS
+  baseballOverallStandings/  GET /baseball/overall-standings
+  baseballDailyScores/       no route — daily MLB scores email via SES
+utils_layer/            Shared Python layer (utils package)
+frontend/               React app (CRA)
+api/                    Sample ESPN API responses for reference
+baseball/api/           Sample ESPN Baseball API responses
+template.yaml           AWS SAM template
+samconfig.toml          SAM deploy config (dev + prod)
+```
+
+---
+
+## Lambda development
+
+> The app does not run locally — lambdas call ESPN's API and require AWS. Develop against the `dev` stack and promote to `prod` when ready.
 
 ### Prerequisites
 
-- Python 3
-- Node.js and npm
+- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+- AWS credentials configured (`aws configure`)
 
-### Backend
-
-Navigate to the backend directory:
+### Deploy to dev
 
 ```bash
-cd backend
+sam build
+sam deploy --config-env dev
 ```
 
-Create and activate a virtual environment:
+The API URL is printed at the end of the deploy as `ApiUrl`. Set it in `frontend/.env.local`:
+
+```
+REACT_APP_API_URL=https://<id>.execute-api.us-east-2.amazonaws.com/dev
+```
+
+### Deploy to prod
 
 ```bash
-python3 -m venv env
-source env/bin/activate
+sam build
+sam deploy --config-env prod
 ```
 
-Install dependencies:
+Prod requires a changeset confirmation (`confirm_changeset = true` in `samconfig.toml`).
+
+### Adding a new lambda
+
+1. Create `lambdas/<name>/index.mjs` with an `export const handler = async (event) => {}`.
+2. Add a `AWS::Serverless::Function` resource (and `HttpApi` event if it needs a route) to `template.yaml`.
+3. `sam build && sam deploy --config-env dev`.
+
+### Secrets
+
+Secrets are stored in AWS SSM Parameter Store and referenced in `template.yaml` with `{{resolve:ssm:...}}`. To add or update:
 
 ```bash
-pip install -r requirements.txt
-```
-
-> **Note:** The production backend runs as AWS Lambda functions. Running the full backend locally requires additional setup or local Lambda tooling. During development you can either invoke the deployed API Gateway endpoints or run individual handlers locally for testing.
-
-### Frontend
-
-Navigate to the frontend directory:
-
-```bash
-cd frontend
-```
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Create a `.env` file:
-
-```text
-REACT_APP_API_URL=http://localhost:5000
-```
-
-Start the development server:
-
-```bash
-npm start
-```
-
-The application will be available at:
-
-```
-http://localhost:3000
+aws ssm put-parameter --name /ffalmanac/ANTHROPIC_API_KEY --value "sk-..." --type SecureString --region us-east-2
 ```
 
 ---
 
-## Deployment
+## Frontend
 
-### Backend
+React app built with Material UI and Redux Toolkit.
 
-The backend consists of multiple AWS Lambda functions exposed through Amazon API Gateway.
+### Local dev
 
-Deployment is currently manual by packaging and uploading updated Lambda code through AWS.
+```bash
+cd frontend
+npm install
+# create .env.local pointing at dev API:
+echo "REACT_APP_API_URL=https://<dev-api-id>.execute-api.us-east-2.amazonaws.com/dev" > .env.local
+npm start
+```
 
-### Frontend
-
-Update the environment variables as needed, then build the production bundle:
+### Deploy to prod
 
 ```bash
 cd frontend
 npm run build
+aws s3 sync build/ s3://<bucket-name> --delete
 ```
 
-Upload the contents of `frontend/build` to the S3 bucket hosting the static site.
-
-CloudFront will serve the updated frontend.
+CloudFront serves the updated frontend.
 
 ---
 
 ## ESPN Fantasy API
 
-ESPN exposes a public API for fantasy football leagues marked as publicly accessible.
+ESPN exposes a public (undocumented) API for publicly visible leagues.
 
-For public leagues, no authentication is required.
-
-> **Note:** ESPN does not officially document these endpoints, and they occasionally change. If requests suddenly begin failing, one of the first things to check is whether the base URLs have changed.
-
-### Current Endpoints
-
-For **2020 and newer**:
-
+**2020+:**
 ```
-https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{year}/segments/0/leagues/{league_id}?view={endpoint}
+https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{year}/segments/0/leagues/{league_id}?view={view}
 ```
 
-For **2019 and older**:
-
+**2019 and older:**
 ```
-https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/leagueHistory/{league_id}?seasonId={year}&view={endpoint}
-```
-
-An optional scoring period can be specified by appending:
-
-```
-&scoringPeriodId={week}
+https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/leagueHistory/{league_id}?seasonId={year}&view={view}
 ```
 
-### Previous Base URLs
+Append `&scoringPeriodId={week}` for a specific week.
 
-Historically, these endpoints used the `fantasy.espn.com` domain instead of `lm-api-reads.fantasy.espn.com`:
-
-Recent seasons:
-
-```
-https://fantasy.espn.com/apis/v3/games/ffl/seasons/{year}/segments/0/leagues/{league_id}?view={endpoint}
-```
-
-Older seasons:
-
-```
-https://fantasy.espn.com/apis/v3/games/ffl/leagueHistory/{league_id}?seasonId={year}&view={endpoint}
-```
-
-Sample API responses are included in the `api/` directory for reference.
-
-Private leagues require the appropriate ESPN authentication cookies (`espn_s2` and `SWID`).
-
-## Frontend
-
-The frontend is built with React and Material UI.
-
-The primary environment variable is:
-
-```text
-REACT_APP_API_URL
-```
-
-which should point to the appropriate API Gateway endpoint for the target environment.
+Private leagues require `espn_s2` and `SWID` cookies. Sample API responses are in `api/` and `baseball/api/`.
 
 ---
 
-## Future Improvements
+## TODOs
 
-- Automate Lambda deployment
-- Add CI/CD for frontend and backend deployments
-- Manage AWS infrastructure as code
-- Improve local Lambda development experience
+- Migrate Python lambdas to JS
+- Clean up UI
+- Plain text (AI) queries about the history
+- Better in-game/season tracking: playoff odds charts, win % charts, etc.

@@ -1,11 +1,26 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 
 const s3 = new S3Client({ region: "us-east-2" });
+const ssm = new SSMClient({ region: "us-east-2" });
 const BUCKET = 'ffalmanac-data';
 
+let _apiKey;
+async function getApiKey() {
+  if (_apiKey) return _apiKey;
+  const res = await ssm.send(new GetParameterCommand({
+    Name: '/ffalmanac/ANTHROPIC_API_KEY',
+    WithDecryption: true,
+  }));
+  _apiKey = res.Parameter.Value;
+  return _apiKey;
+}
+
 export const handler = async (event) => {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = await getApiKey();
   const data = event;
+  console.log('Got data: ');
+  console.log(data);
   const { year, week, league_id } = data;
 
   const prompt = `
@@ -49,6 +64,9 @@ Dataset:
 ${JSON.stringify(data)}
 `;
 
+  console.log('Prompt: ');
+  console.log(prompt);
+
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -71,7 +89,11 @@ ${JSON.stringify(data)}
   }  
 
   const resp = await response.json();
+  console.log(resp);
+
   const llm_response = resp.content[0].text;
+  console.log('LLM response: ');
+  console.log(llm_response);
 
   // Create a unique S3 key
   const key = `power_rankings/league_${league_id}/${year}/week_${week}/rankings.md`;

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
 import Footer from "./components/footer/Footer";
 import Header from "./components/header/Header";
@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Switch} from 'react-router-dom';
 import Suggestions from "./components/suggestions/Suggestions";
 import LeagueInfo from "./components/leagueInfo/LeagueInfo";
 import CookieWarning from "./components/cookieWarning/CookieWarning";
+import EspnS2Prompt from "./components/espnS2Prompt/EspnS2Prompt";
 import Standings from "./components/standings/Standings";
 import HeadToHead from "./components/headToHead/HeadToHead";
 import PowerRankings from "./components/powerRankings/PowerRankings";
@@ -18,10 +19,11 @@ import Keepers from "./components/keepers/Keepers";
 import BaseballOverall from "./components/baseballOverall/BaseballOverall";
 import LoadingSpinner from "./components/loadingSpinner/LoadingSpinner";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useCookies } from "react-cookie";
 import { updateLeagueInfo } from './features/leagueInfo/leagueInfoSlice'
-import { Alert } from "@mui/material";
+import { ESPN_S2_KEY } from './api'
+import { Alert, Button } from "@mui/material";
 import { Stack } from "@mui/system";
 
 const App = () => {
@@ -30,13 +32,13 @@ const App = () => {
   const breakpoint = 620;
 
 	const dispatch = useDispatch()
-	const leagueInfo = useSelector((state) => state.leagueInfo.id)
 	const [cookies, setCookie] = useCookies(["league_id"]);
   const [error, setError] = useState();
 	const [leagueId, setLeagueId] = useState();
   const [isDesktop, setIsDesktop] = useState(true);
   const [showHeaderFooter, setShowHeaderFooter] = useState(true);
-  const [_espnS2, setEspnS2] = useState("");
+  const [espnS2, setEspnS2] = useState(() => localStorage.getItem(ESPN_S2_KEY) || "");
+  const [needsPrivateAuth, setNeedsPrivateAuth] = useState(false);
   const [isCached, setIsCached] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -48,14 +50,15 @@ const App = () => {
     setIsDesktop(width >= breakpoint);
   }, [width, breakpoint]);
 
-	const fetchLeagueInfo = useCallback(() => {
-		if (leagueId) {
+	const fetchLeagueInfo = useCallback((id, s2) => {
+		if (id) {
       setLoading(true);
 
-      // Make everything a POST to include the cookie
-			fetch(
-				`${process.env.REACT_APP_API_URL}/info?leagueId=${leagueId}`,
-				{
+      const url = s2
+        ? `${process.env.REACT_APP_API_URL}/info?leagueId=${id}&espnS2=${encodeURIComponent(s2)}`
+        : `${process.env.REACT_APP_API_URL}/info?leagueId=${id}`;
+
+			fetch(url, {
 					crossDomain: true,
 					method: 'GET',
 					headers: { 'Content-Type':'application/json' },
@@ -64,22 +67,35 @@ const App = () => {
 				res.json().then((data) => {
 					if (data.error) {
 						console.log(data.error)
-						let msg = `Error: ${data.error.message}`;
 						if (data.error.type === 'AUTH_LEAGUE_NOT_VISIBLE') {
-							msg += ' Make sure the league is Viewable to Public.'
-						} else if (data.error.type === 'GENERAL_NOT_FOUND') {
-							msg += '. Make sure you\'ve entered the correct League ID.'
+							if (s2) {
+								// espn_s2 is opaque, so a rejection is the only signal it expired
+								localStorage.removeItem(ESPN_S2_KEY);
+								setEspnS2("");
+								setError('ESPN didn\'t accept that espn_s2 cookie. It may have expired, or that account isn\'t in this league. Grab a fresh one and try again.');
+							}
+							setNeedsPrivateAuth(true);
+						} else {
+							let msg = `Error: ${data.error.message}`;
+							if (data.error.type === 'GENERAL_NOT_FOUND') {
+								msg += '. Make sure you\'ve entered the correct League ID.'
+							}
+							setError(msg);
 						}
-						setError(msg);
 					} else {
+						setNeedsPrivateAuth(false);
+						setError();
+						if (s2) {
+							localStorage.setItem(ESPN_S2_KEY, s2);
+						}
 						if (!cookies?.league_id) {
-							setCookie("league_id", leagueId, {
+							setCookie("league_id", id, {
 								path: "/"
 							});
 						}
-				
+
 						dispatch(updateLeagueInfo({
-							id: leagueId,
+							id,
 							name: data.name,
 							established: data.established,
 							teams: data.teams,
@@ -99,11 +115,22 @@ const App = () => {
         setLoading(false);
       });
 		}
-	}, [cookies?.league_id, dispatch, leagueId, setCookie]);
+	}, [cookies?.league_id, dispatch, setCookie]);
 
 	const onLeagueInfoSubmit = (event) => {
 		event.preventDefault();
-		fetchLeagueInfo();
+		fetchLeagueInfo(leagueId, espnS2);
+	}
+
+	const onPrivateAuthSubmit = (s2) => {
+		setEspnS2(s2);
+		fetchLeagueInfo(leagueId, s2);
+	}
+
+	const onPrivateAuthCancel = () => {
+		setNeedsPrivateAuth(false);
+		setLeagueId(undefined);
+		setError();
 	}
 
 	const onLeagueIdChange = (event) => {
@@ -111,23 +138,46 @@ const App = () => {
 		setLeagueId(id);
 	}
 
+	const autoLoaded = useRef(false);
 	useEffect(() => {
+		if (autoLoaded.current) return;
+		autoLoaded.current = true;
+
     const subdomain = window.location.host.split('.')[0];
-    if (error) {
-      return;
+		let id;
+		if (cookies?.league_id !== undefined) {
+			id = cookies.league_id;
+		} else if (subdomain === 'gridiron') {
+      id = '166975';
+    } else if (Number.isInteger(Number(subdomain))) {
+      id = String(subdomain);
     }
 
-		if (cookies?.league_id !== undefined && !leagueInfo?.id) {
-			setLeagueId(cookies.league_id);
-			fetchLeagueInfo();
-		} else if (subdomain === 'gridiron') {
-      setLeagueId('166975');
-      fetchLeagueInfo();
-    } else if (Number.isInteger(Number(subdomain))) {
-      setLeagueId(String(subdomain));
-      fetchLeagueInfo();
-    }
-	}, [cookies, dispatch, leagueInfo, error, fetchLeagueInfo])
+		if (id) {
+			setLeagueId(id);
+			fetchLeagueInfo(id, espnS2);
+		}
+	}, [cookies, espnS2, fetchLeagueInfo])
+
+	const privateAuthPrompt = (
+		<EspnS2Prompt
+			title="This league is private"
+			intro={
+				<>
+					League <strong>{leagueId}</strong> isn't viewable to the public, so ESPN needs your{' '}
+					<code>espn_s2</code> cookie to prove you're in it.
+				</>
+			}
+			outro="Paste it below. We'll remember it in this browser so you won't have to do this again until it expires."
+			submitLabel="Unlock"
+			onSubmit={onPrivateAuthSubmit}
+			footer={
+				<Button className="espn-s2-prompt-link" variant="text" onClick={onPrivateAuthCancel}>
+					Wrong league? Enter a different ID
+				</Button>
+			}
+		/>
+	);
 
 	return (
 		<div className="App">
@@ -136,24 +186,27 @@ const App = () => {
 				<Switch>
 					<Route exact path="/">
             {loading ? <LoadingSpinner /> :
-            (
+            needsPrivateAuth ? privateAuthPrompt : (
               <LeagueInfo
                 onLeagueIdChange={onLeagueIdChange}
                 onLeagueInfoSubmit={onLeagueInfoSubmit}
               />
             )}
-            {isCached === false && 
+            {isCached === false &&
               <CookieWarning
+                initialEspnS2={espnS2}
                 onCookieSubmit={setEspnS2}
                 onCacheComplete={() => setIsCached(true)}
               />
             }
 					</Route>
 					<Route path="/league-info-mobile">
-						<LeagueInfoMobile
-							onLeagueIdChange={onLeagueIdChange}
-							onLeagueInfoSubmit={onLeagueInfoSubmit}
-						/>
+						{needsPrivateAuth ? privateAuthPrompt : (
+							<LeagueInfoMobile
+								onLeagueIdChange={onLeagueIdChange}
+								onLeagueInfoSubmit={onLeagueInfoSubmit}
+							/>
+						)}
 					</Route>
 					<Route path="/standings">
 						<Standings

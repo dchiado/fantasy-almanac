@@ -1,0 +1,21 @@
+version = 0.1
+
+# ── dev ──────────────────────────────────────────────────────────────────────
+
+[dev.deploy.parameters]
+stack_name      = "ffalmanac-dev"
+region          = "us-east-2"
+resolve_s3      = true
+capabilities    = "CAPABILITY_IAM"
+parameter_overrides = "Stage=dev"
+confirm_changeset   = false
+
+# ── prod ─────────────────────────────────────────────────────────────────────
+
+[prod.deploy.parameters]
+stack_name      = "ffalmanac-prod"
+region          = "us-east-2"
+resolve_s3      = true
+capabilities    = "CAPABILITY_IAM"
+parameter_overrides = "Stage=prod"
+confirm_changeset   = true

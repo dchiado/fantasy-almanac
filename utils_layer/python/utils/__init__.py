@@ -1,11 +1,41 @@
 import json
+import collections
+import functools
 import requests
 import boto3
+from contextvars import ContextVar
+from itertools import groupby
 from datetime import datetime, date
 from botocore.exceptions import ClientError
 
 s3 = boto3.client('s3')
 CACHE_BUCKET = 'ffalmanac-data'
+
+_espn_s2 = ContextVar('espn_s2', default=None)
+
+
+class EspnError(Exception):
+    """ESPN refused the request; detail is the first entry of its "details" body."""
+    def __init__(self, detail):
+        super().__init__(detail.get("message"))
+        self.detail = detail
+
+
+def espn_handler(handler):
+    """Decorate a lambda_handler so every ESPN call in the request sends the
+    espnS2 query param as a cookie, and ESPN errors return as {"error": detail}."""
+    @functools.wraps(handler)
+    def wrapper(event, context):
+        params = event.get("queryStringParameters") or {}
+        token = _espn_s2.set(params.get("espnS2"))
+        try:
+            return handler(event, context)
+        except EspnError as e:
+            return {"error": e.detail}
+        finally:
+            _espn_s2.reset(token)
+    return wrapper
+
 
 def load_data(year, uri, league_id, week=None, headers=None):
     """
@@ -25,7 +55,7 @@ def load_data(year, uri, league_id, week=None, headers=None):
     should_cache = year != current_year
     s3_key = f'espn-cache/{league_id}/{year}/{uri}.json'
 
-    # Try to load from S3 first
+    # Try to load from S3 first (even current year — could be cached from earlier)
     try:
         print(f"Checking S3 for {s3_key}")
         cached = s3.get_object(Bucket=CACHE_BUCKET, Key=s3_key)
@@ -56,9 +86,21 @@ def load_data(year, uri, league_id, week=None, headers=None):
         if week is not None:
             url += f"&scoringPeriodId={week}"
 
+    espn_s2 = _espn_s2.get()
+    if espn_s2:
+        headers = {**(headers or {}), 'Cookie': f'espn_s2={espn_s2}'}
+
     print('Calling ESPN endpoint:', url)
     resp = requests.get(url, headers=headers)
-    resp.raise_for_status()
+    if not resp.ok:
+        # ESPN explains auth/not-found failures in a "details" body; surface it instead of crashing
+        try:
+            body = resp.json()
+        except ValueError:
+            body = None
+        if isinstance(body, dict) and "details" in body:
+            return body
+        resp.raise_for_status()
     data = resp.json()
 
     if should_cache:
@@ -168,6 +210,8 @@ def print_to_file(content, file):
 def latest_season(league_id):
     """Find the latest completed or currently active fantasy season"""
     status = season_status(league_id)
+    if "error" in status:
+        raise EspnError(status["error"])
     if status["status"] == "preseason":
         return status["season"] - 1
     else:
@@ -187,6 +231,8 @@ def season_status(league_id):
                 return {
                     "error": resp["details"][0]
                 }
+        else:
+            return {"error": resp["details"][0]}
 
     status = resp["status"]
     current_season = resp["seasonId"]
@@ -286,6 +332,8 @@ def check_start_year(year, league_id):
         if details["details"][0]["type"] == 'GENERAL_NOT_FOUND':
             this_year = int(this_year) - 1
             details = load_data(this_year, 'mNav', league_id)
+    if "details" in details:
+        raise EspnError(details["details"][0])
 
     actual_start_year = details["status"]["previousSeasons"][0]
 

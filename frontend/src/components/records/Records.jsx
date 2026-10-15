@@ -22,6 +22,7 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import './Records.css';
+import { fetchApi } from "../../api";
 
 const Records = ({ setError }) => {
 	const leagueId = useSelector((state) => state.leagueInfo.id)
@@ -62,27 +63,19 @@ const Records = ({ setError }) => {
       params += `&startyear=${startYear}&endyear=${endYear}`
     }
 
-    fetch(`${process.env.REACT_APP_API_URL}/${endpoint + params}`,
-      {
-        crossDomain: true,
-        method: 'GET',
-        headers: { 'Content-Type':'application/json' },
+    fetchApi(endpoint + params)
+    .then((data) => {
+      if (object === 'week') {
+        setHeaders(['Year', 'Week', 'Team', 'Score']);
+        setRecords(data.map((d) => [d.year, d.week, d.team_name, d.score]));
+      } else if (object === 'season') {
+        setHeaders(['Year', 'Team', 'Average', 'League Average', 'Std Dev']);
+        setRecords(data.map((d) => [d.year, d.team_name, d.average, d.league_average, d.std_dev_away]));
+      } else {
+        setHeaders(['Year', 'Week', 'Win Margin', 'Winner', 'Loser']);
+        setRecords(data.map((d) => [d.year, d.week, d.difference, d.winner, d.loser]));
       }
-    )
-    .then((res) =>
-      res.json().then((data) => {
-        if (object === 'week') {
-          setHeaders(['Year', 'Week', 'Team', 'Score']);
-          setRecords(data.map((d) => [d.year, d.week, d.team_name, d.score]));
-        } else if (object === 'season') {
-          setHeaders(['Year', 'Team', 'Average', 'League Average', 'Std Dev']);
-          setRecords(data.map((d) => [d.year, d.team_name, d.average, d.league_average, d.std_dev_away]));
-        } else {
-          setHeaders(['Year', 'Week', 'Win Margin', 'Winner', 'Loser']);
-          setRecords(data.map((d) => [d.year, d.week, d.difference, d.winner, d.loser]));
-        }
-      })
-    )
+    })
     .catch((error) => {
       setLoading(false);
       console.error(error);

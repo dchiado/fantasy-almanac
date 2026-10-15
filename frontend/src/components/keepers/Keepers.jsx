@@ -16,6 +16,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import './Keepers.css';
+import { fetchApi } from "../../api";
 
 const Keepers = ({ setError }) => {
   const leagueId = useSelector((state) => state.leagueInfo.id)
@@ -34,20 +35,12 @@ const Keepers = ({ setError }) => {
   useEffect(() => {
 		if (keepers.length === 0 && leagueId) {
       setLoading(true);
-			fetch(`${process.env.REACT_APP_API_URL}/keepers?leagueId=${leagueId}`,
-				{
-					crossDomain: true,
-					method: 'GET',
-					headers: { 'Content-Type':'application/json' },
-				}
-			)
-			.then((res) =>
-				res.json().then((data) => {
-          console.log(data);
-					setKeepers(data);
-          setLoading(false);
-				})
-			)
+			fetchApi(`/keepers?leagueId=${leagueId}`)
+			.then((data) => {
+        console.log(data);
+				setKeepers(data);
+        setLoading(false);
+			})
 			.catch((error) => {
 				setLoading(false);
 				console.error(error);

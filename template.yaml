@@ -1,0 +1,345 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Fantasy Almanac — Lambda + HTTP API Gateway
+
+Parameters:
+  Stage:
+    Type: String
+    AllowedValues: [dev, prod]
+    Default: dev
+
+Conditions:
+  IsProd: !Equals [!Ref Stage, prod]
+
+# Pip dependencies layer for Python lambdas (shared utils layer is built below)
+Mappings:
+  Layers:
+    us-east-2:
+      Dependencies: arn:aws:lambda:us-east-2:234180746947:layer:dependencies:3
+
+Globals:
+  Function:
+    Timeout: 30
+    Environment:
+      Variables:
+        STAGE: !Ref Stage
+
+Resources:
+
+  # ── API Gateway ──────────────────────────────────────────────────────────────
+
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Stage
+      CorsConfiguration:
+        AllowOrigins:
+          - !If [IsProd, "https://ffalmanac.com", "http://localhost:3000"]
+        AllowMethods: ["GET", "POST", "OPTIONS"]
+        AllowHeaders: ["Content-Type"]
+
+  UtilsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub ffalmanac-utils-${Stage}
+      ContentUri: utils_layer/
+      CompatibleRuntimes: [python3.12]
+      RetentionPolicy: Delete
+
+  # ── Python lambdas (TODO: migrate to JS) ────────────────────────────────────
+  # All Python lambdas use load_data() which reads/writes S3 for ESPN data
+  # caching. S3CrudPolicy covers GetObject + PutObject but NOT ListBucket.
+  # ListBucket is added explicitly — without it, GetObject on a missing key
+  # returns AccessDenied instead of NoSuchKey, breaking the cache-miss path.
+
+  LeagueInfoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/leagueInfo/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref UtilsLayer
+        - !FindInMap [Layers, !Ref AWS::Region, Dependencies]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: ffalmanac-data
+        - Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: arn:aws:s3:::ffalmanac-data
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /info
+            Method: GET
+
+  StandingsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/standings/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref UtilsLayer
+        - !FindInMap [Layers, !Ref AWS::Region, Dependencies]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: ffalmanac-data
+        - Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: arn:aws:s3:::ffalmanac-data
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /standings
+            Method: GET
+
+  HeadToHeadFormFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/headToHeadForm/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref UtilsLayer
+        - !FindInMap [Layers, !Ref AWS::Region, Dependencies]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: ffalmanac-data
+        - Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: arn:aws:s3:::ffalmanac-data
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /head-to-head-form
+            Method: GET
+
+  HeadToHeadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/headToHead/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref UtilsLayer
+        - !FindInMap [Layers, !Ref AWS::Region, Dependencies]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: ffalmanac-data
+        - Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: arn:aws:s3:::ffalmanac-data
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /head-to-head
+            Method: GET
+
+  PowerRankingsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/powerRankings/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref UtilsLayer
+        - !FindInMap [Layers, !Ref AWS::Region, Dependencies]
+      Environment:
+        Variables:
+          WRITE_POWER_RANKINGS_FUNCTION: !Ref WritePowerRankingsFunction
+      Policies:
+        - S3CrudPolicy:
+            BucketName: ffalmanac-data
+        - Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: arn:aws:s3:::ffalmanac-data
+          - Effect: Allow
+            Action: lambda:InvokeFunction
+            Resource: !GetAtt WritePowerRankingsFunction.Arn
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /power-rankings
+            Method: GET
+
+  IndividualWeeksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/individualWeeks/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref UtilsLayer
+        - !FindInMap [Layers, !Ref AWS::Region, Dependencies]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: ffalmanac-data
+        - Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: arn:aws:s3:::ffalmanac-data
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /individual-weeks
+            Method: GET
+
+  IndividualSeasonsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/individualSeasons/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref UtilsLayer
+        - !FindInMap [Layers, !Ref AWS::Region, Dependencies]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: ffalmanac-data
+        - Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: arn:aws:s3:::ffalmanac-data
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /individual-seasons
+            Method: GET
+
+  MatchupsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/matchups/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref UtilsLayer
+        - !FindInMap [Layers, !Ref AWS::Region, Dependencies]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: ffalmanac-data
+        - Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: arn:aws:s3:::ffalmanac-data
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /matchups
+            Method: GET
+
+  KeepersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/keepers/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref UtilsLayer
+        - !FindInMap [Layers, !Ref AWS::Region, Dependencies]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: ffalmanac-data
+        - Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: arn:aws:s3:::ffalmanac-data
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /keepers
+            Method: GET
+
+  # ── JS lambdas ───────────────────────────────────────────────────────────────
+
+  CacheFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/cache/
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 300
+      Policies:
+        - S3WritePolicy:
+            BucketName: ffalmanac-data
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /cache
+            Method: POST
+
+  CacheStatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/cacheStatus/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Policies:
+        - S3CrudPolicy:
+            BucketName: ffalmanac-data
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /cache/status
+            Method: GET
+
+  BaseballOverallStandingsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/baseballOverallStandings/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /baseball/overall-standings
+            Method: GET
+
+  # No API route — async-invoked by powerRankings, writes AI writeup to S3
+  WritePowerRankingsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/writePowerRankings/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Timeout: 60
+      Policies:
+        - S3WritePolicy:
+            BucketName: ffalmanac-data
+        - SSMParameterReadPolicy:
+            ParameterName: ffalmanac/ANTHROPIC_API_KEY
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"

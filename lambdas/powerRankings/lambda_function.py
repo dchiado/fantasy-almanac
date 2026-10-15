@@ -1,5 +1,6 @@
 import json
 from utils import (
+    espn_handler,
     is_bye_week,
     latest_season,
     load_data,
@@ -25,8 +26,9 @@ def update_overall_wins(tm, all_week_pts):
 def invoke_writeup_lambda(payload):
     import boto3
     lambda_client = boto3.client('lambda')
+    function_name = os.environ.get('WRITE_POWER_RANKINGS_FUNCTION', 'writePowerRankings')
     lambda_client.invoke(
-        FunctionName='writePowerRankings',
+        FunctionName=function_name,
         InvocationType='Event',
         Payload=json.dumps(payload)
     )
@@ -233,7 +235,10 @@ def current(league_id):
             "writeup": None
         }
 
+    # return list of teams objects
+    return teams
 
+@espn_handler
 def lambda_handler(event, context):
     league_id = event["queryStringParameters"]["leagueId"]
     return current(league_id)

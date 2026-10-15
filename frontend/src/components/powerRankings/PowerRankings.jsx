@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import LoadingSpinner from "../loadingSpinner/LoadingSpinner";
 import ReactMarkdown from 'react-markdown';
 import './PowerRankings.css';
+import { fetchApi } from "../../api";
 
 const PowerRankings = ({ setError }) => {
 	const leagueId = useSelector((state) => state.leagueInfo.id)
@@ -24,24 +25,16 @@ const PowerRankings = ({ setError }) => {
 
 	useEffect(() => {
 		if (rankingsData.length === 0 && leagueId) {
-			fetch(`${process.env.REACT_APP_API_URL}/power-rankings?leagueId=${leagueId}`,
-				{
-					crossDomain: true,
-					method: 'GET',
-					headers: { 'Content-Type':'application/json' },
-				}
-			)
-			.then((res) => {
-				res.json().then((data) => {
-					setRankingsData(data.teams);
+			fetchApi(`/power-rankings?leagueId=${leagueId}`)
+			.then((data) => {
+				setRankingsData(data.teams);
 
-          if (data.writeup) {
-            setWriteup(data.writeup);
-          }
-          
-					setLoading(false);
-				})}
-			)
+        if (data.writeup) {
+          setWriteup(data.writeup);
+        }
+
+				setLoading(false);
+			})
 			.catch((error) => {
 				setLoading(false);
 				console.error(error);
