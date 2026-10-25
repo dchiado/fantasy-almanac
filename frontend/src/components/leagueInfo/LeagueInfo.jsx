@@ -4,7 +4,6 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { useCookies } from "react-cookie";
 import { Box, Typography } from "@mui/material";
-import SportsFootballIcon from '@mui/icons-material/SportsFootball';
 import SectionCard from "../ui/SectionCard";
 import LeagueDashboard from "./LeagueDashboard";
 
@@ -18,8 +17,7 @@ const LeagueInfo = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
 
 	return (
 		<Box sx={{ width: '100%', maxWidth: 480, px: 2, py: { xs: 5, sm: 8 }, boxSizing: 'border-box', textAlign: 'left' }}>
-			<SportsFootballIcon sx={{ color: 'primary.main', fontSize: 40 }} />
-			<Typography variant="h4" component="h1" sx={{ mt: 1 }}>Your league's history, in one place</Typography>
+			<Typography variant="h4" component="h1" sx={{ mt: 1 }}>Your fantasy league's history</Typography>
 			<Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>
 				All-time standings, rivalries, records and weekly power rankings for your ESPN fantasy football league.
 			</Typography>

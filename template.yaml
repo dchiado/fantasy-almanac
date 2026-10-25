@@ -33,8 +33,13 @@ Resources:
     Properties:
       StageName: !Ref Stage
       CorsConfiguration:
-        AllowOrigins:
-          - !If [IsProd, "https://ffalmanac.com", "http://localhost:3000"]
+        # HTTP APIs don't support subdomain wildcards, so each prod host is listed
+        AllowOrigins: !If
+          - IsProd
+          - - "https://ffalmanac.com"
+            - "https://www.ffalmanac.com"
+            - "https://gridiron.ffalmanac.com"
+          - - "http://localhost:3000"
         AllowMethods: ["GET", "POST", "OPTIONS"]
         AllowHeaders: ["Content-Type"]
 
