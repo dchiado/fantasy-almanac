@@ -1,0 +1,657 @@
+{
+  "draftDetail": {
+    "drafted": true,
+    "inProgress": false
+  },
+  "id": 9342,
+  "schedule": [
+    {
+      "id": 1,
+      "teams": [
+        {
+          "cumulativeScore": {
+            "losses": 0,
+            "scoreByStat": {
+              "0": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 7985.0
+              },
+              "1": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 2051.0
+              },
+              "34": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 4906.0
+              },
+              "5": {
+                "ineligible": false,
+                "rank": 7.0,
+                "result": null,
+                "score": 304.0
+              },
+              "37": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 1481.0
+              },
+              "39": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 529.0
+              },
+              "41": {
+                "ineligible": false,
+                "rank": 5.0,
+                "result": null,
+                "score": 1.22910722
+              },
+              "10": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 737.0
+              },
+              "12": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 85.0
+              },
+              "13": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 45.0
+              },
+              "45": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 716.0
+              },
+              "47": {
+                "ineligible": false,
+                "rank": 4.0,
+                "result": null,
+                "score": 3.94048104
+              },
+              "48": {
+                "ineligible": false,
+                "rank": 7.0,
+                "result": null,
+                "score": 1590.0
+              },
+              "17": {
+                "ineligible": false,
+                "rank": 8.0,
+                "result": null,
+                "score": 0.32455942
+              },
+              "81": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 2150.0
+              },
+              "83": {
+                "ineligible": false,
+                "rank": 11.0,
+                "result": null,
+                "score": 214.0
+              },
+              "20": {
+                "ineligible": false,
+                "rank": 9.0,
+                "result": null,
+                "score": 1104.0
+              },
+              "21": {
+                "ineligible": false,
+                "rank": 10.0,
+                "result": null,
+                "score": 1071.0
+              },
+              "53": {
+                "ineligible": false,
+                "rank": 5.0,
+                "result": null,
+                "score": 95.0
+              },
+              "23": {
+                "ineligible": false,
+                "rank": 9.0,
+                "result": null,
+                "score": 217.0
+              },
+              "57": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 84.0
+              },
+              "60": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 130.0
+              }
+            },
+            "statBySlot": {
+              "0": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "1": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "2": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "3": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "4": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "5": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "22": {
+                "exceededOnScoringPeriod": 192,
+                "limitExceeded": true,
+                "statId": 34
+              },
+              "6": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "7": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "12": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              }
+            },
+            "ties": 0,
+            "wins": 0
+          },
+          "rosterForCurrentScoringPeriod": {
+            "entries": [
+              {
+                "injuryStatus": "NORMAL",
+                "lineupSlotId": 5,
+                "playerId": 41044,
+                "playerPoolEntry": {
+                  "id": 41044,
+                  "onTeamId": 6,
+                  "player": {
+                    "active": true,
+                    "defaultPositionId": 8,
+                    "eligibleDateByPosition": {
+                      "8": 1712564109473,
+                      "10": 1724661013630
+                    },
+                    "eligibleSlots": [
+                      9,
+                      5,
+                      12,
+                      16,
+                      17,
+                      11
+                    ],
+                    "firstName": "Julio",
+                    "fullName": "Julio Rodriguez",
+                    "gamesPlayedByPosition": {
+                      "8": 131,
+                      "10": 10,
+                      "12": 1
+                    },
+                    "id": 41044,
+                    "injured": false,
+                    "injuryStatus": "ACTIVE",
+                    "jersey": "44",
+                    "lastName": "Rodriguez",
+                    "proTeamId": 12,
+                    "stats": [],
+                    "universeId": 1
+                  },
+                  "status": "ONTEAM"
+                },
+                "status": "NORMAL"
+              },
+              {
+                "injuryStatus": "NORMAL",
+                "lineupSlotId": 1,
+                "playerId": 35002,
+                "playerPoolEntry": {
+                  "id": 35002,
+                  "onTeamId": 6,
+                  "player": {
+                    "active": true,
+                    "defaultPositionId": 3,
+                    "eligibleDateByPosition": {
+                      "3": 1712564107182,
+                      "5": 1725525029110,
+                      "10": 1720859431005
+                    },
+                    "eligibleSlots": [
+                      1,
+                      7,
+                      19,
+                      11,
+                      12,
+                      16,
+                      17,
+                      3
+                    ],
+                    "firstName": "Vladimir",
+                    "fullName": "Vladimir Guerrero Jr.",
+                    "gamesPlayedByPosition": {
+                      "3": 121,
+                      "5": 12,
+                      "10": 29,
+                      "12": 1
+                    },
+                    "id": 35002,
+                    "injured": false,
+                    "injuryStatus": "ACTIVE",
+                    "jersey": "27",
+                    "lastName": "Guerrero Jr.",
+                    "proTeamId": 14,
+                    "stats": [],
+                    "universeId": 1
+                  },
+                  "status": "ONTEAM"
+                },
+                "status": "NORMAL"
+              }
+            ]
+          },
+          "teamId": 6,
+          "tiebreak": 0.0,
+          "totalPoints": 75.0,
+          "totalPointsLive": 75.0
+        },
+        {
+          "cumulativeScore": {
+            "losses": 0,
+            "scoreByStat": {
+              "0": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 7329.0
+              },
+              "1": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 1846.0
+              },
+              "34": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 3560.0
+              },
+              "5": {
+                "ineligible": false,
+                "rank": 1.0,
+                "result": null,
+                "score": 234.0
+              },
+              "37": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 981.0
+              },
+              "39": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 336.0
+              },
+              "41": {
+                "ineligible": false,
+                "rank": 10.0,
+                "result": null,
+                "score": 1.10983146
+              },
+              "10": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 648.0
+              },
+              "12": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 84.0
+              },
+              "13": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 75.0
+              },
+              "45": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 466.0
+              },
+              "47": {
+                "ineligible": false,
+                "rank": 9.0,
+                "result": null,
+                "score": 3.53426966
+              },
+              "48": {
+                "ineligible": false,
+                "rank": 2.0,
+                "result": null,
+                "score": 1224.0
+              },
+              "17": {
+                "ineligible": false,
+                "rank": 2.0,
+                "result": null,
+                "score": 0.31686332
+              },
+              "81": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 2009.0
+              },
+              "83": {
+                "ineligible": false,
+                "rank": 4.0,
+                "result": null,
+                "score": 141.0
+              },
+              "20": {
+                "ineligible": false,
+                "rank": 2.0,
+                "result": null,
+                "score": 978.0
+              },
+              "21": {
+                "ineligible": false,
+                "rank": 3.0,
+                "result": null,
+                "score": 953.0
+              },
+              "53": {
+                "ineligible": false,
+                "rank": 2.0,
+                "result": null,
+                "score": 83.0
+              },
+              "23": {
+                "ineligible": false,
+                "rank": 8.0,
+                "result": null,
+                "score": 190.0
+              },
+              "57": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 58.0
+              },
+              "60": {
+                "ineligible": false,
+                "rank": 0.0,
+                "result": null,
+                "score": 83.0
+              }
+            },
+            "statBySlot": {
+              "0": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "1": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "2": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "3": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "4": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "5": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "22": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 34
+              },
+              "6": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "7": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              },
+              "12": {
+                "exceededOnScoringPeriod": 0,
+                "limitExceeded": false,
+                "statId": 81
+              }
+            },
+            "ties": 0,
+            "wins": 0
+          },
+          "rosterForCurrentScoringPeriod": {
+            "entries": [
+              {
+                "injuryStatus": "NORMAL",
+                "lineupSlotId": 5,
+                "playerId": 42404,
+                "playerPoolEntry": {
+                  "id": 42404,
+                  "onTeamId": 4,
+                  "player": {
+                    "active": true,
+                    "defaultPositionId": 7,
+                    "eligibleDateByPosition": {
+                      "8": 1705424197458,
+                      "9": 1705424197458
+                    },
+                    "eligibleSlots": [
+                      8,
+                      9,
+                      10,
+                      5,
+                      12,
+                      16,
+                      17
+                    ],
+                    "firstName": "Corbin",
+                    "fullName": "Corbin Carroll",
+                    "gamesPlayedByPosition": {
+                      "8": 81,
+                      "9": 78,
+                      "12": 6
+                    },
+                    "id": 42404,
+                    "injured": false,
+                    "injuryStatus": "ACTIVE",
+                    "jersey": "7",
+                    "lastName": "Carroll",
+                    "proTeamId": 29,
+                    "stats": [],
+                    "universeId": 2
+                  },
+                  "status": "ONTEAM"
+                },
+                "status": "NORMAL"
+              },
+              {
+                "injuryStatus": "NORMAL",
+                "lineupSlotId": 4,
+                "playerId": 33710,
+                "playerPoolEntry": {
+                  "id": 33710,
+                  "onTeamId": 4,
+                  "player": {
+                    "active": true,
+                    "defaultPositionId": 6,
+                    "eligibleDateByPosition": {
+                      "6": 1712650513158
+                    },
+                    "eligibleSlots": [
+                      4,
+                      6,
+                      19,
+                      12,
+                      16,
+                      17
+                    ],
+                    "firstName": "Trea",
+                    "fullName": "Trea Turner",
+                    "gamesPlayedByPosition": {
+                      "6": 118,
+                      "10": 3
+                    },
+                    "id": 33710,
+                    "injured": false,
+                    "injuryStatus": "ACTIVE",
+                    "jersey": "7",
+                    "lastName": "Turner",
+                    "proTeamId": 22,
+                    "stats": [],
+                    "universeId": 2
+                  },
+                  "status": "ONTEAM"
+                },
+                "status": "NORMAL"
+              }
+            ]
+          },
+          "teamId": 4,
+          "tiebreak": 0.0,
+          "totalPoints": 43.0,
+          "totalPointsLive": 43.0
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "isCustomizable": true,
+    "isPublic": true,
+    "scheduleSettings": {
+      "divisions": [
+        {
+          "id": 0,
+          "name": "East"
+        }
+      ],
+      "matchupPeriods": {
+        "1": [
+          1
+        ]
+      },
+      "periodTypeId": 0
+    },
+    "scoringSettings": {
+      "scoringItems": [
+        {
+          "isReverseItem": false,
+          "points": 1.0,
+          "statId": 20
+        },
+        {
+          "isReverseItem": false,
+          "points": 1.0,
+          "statId": 5
+        }
+      ]
+    }
+  },
+  "status": {
+    "currentMatchupPeriod": 1,
+    "finalScoringPeriod": 195,
+    "isActive": true,
+    "latestScoringPeriod": 196
+  },
+  "teams": [
+    {
+      "abbrev": "JOSH",
+      "divisionId": 0,
+      "id": 1,
+      "logo": "https://i.pinimg.com/736x/53/bb/01/53bb012a505b47afe2ad6e2ef96e3822.jpg",
+      "name": "imjoshOCM",
+      "rankCalculatedFinal": 2,
+      "record": {
+        "overall": {
+          "losses": 0,
+          "ties": 0,
+          "wins": 0
+        }
+      }
+    },
+    {
+      "abbrev": "CCT",
+      "divisionId": 0,
+      "id": 2,
+      "logo": "https://g.espncdn.com/lm-static/flb/images/default_logos/12.svg",
+      "name": "Candace's Competitive Team",
+      "rankCalculatedFinal": 10,
+      "record": {
+        "overall": {
+          "losses": 0,
+          "ties": 0,
+          "wins": 0
+        }
+      }
+    }
+  ]
+}

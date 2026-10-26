@@ -1,0 +1,175 @@
+{
+  "gameId": 2,
+  "id": 9342,
+  "members": [
+    {
+      "displayName": "member1",
+      "id": "{00000000-0000-0000-0000-000000000006}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member2",
+      "id": "{00000000-0000-0000-0000-000000000007}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member3",
+      "id": "{00000000-0000-0000-0000-000000000008}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member4",
+      "id": "{00000000-0000-0000-0000-000000000009}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member5",
+      "id": "{00000000-0000-0000-0000-000000000010}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member6",
+      "id": "{00000000-0000-0000-0000-000000000011}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member7",
+      "id": "{00000000-0000-0000-0000-000000000012}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member8",
+      "id": "{00000000-0000-0000-0000-000000000013}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member9",
+      "id": "{00000000-0000-0000-0000-000000000002}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member10",
+      "id": "{00000000-0000-0000-0000-000000000014}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member11",
+      "id": "{00000000-0000-0000-0000-000000000015}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member12",
+      "id": "{00000000-0000-0000-0000-000000000016}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member13",
+      "id": "{00000000-0000-0000-0000-000000000017}",
+      "isLeagueManager": false
+    },
+    {
+      "displayName": "member14",
+      "id": "{00000000-0000-0000-0000-000000000018}",
+      "isLeagueManager": false
+    }
+  ],
+  "scoringPeriodId": 196,
+  "seasonId": 2024,
+  "segmentId": 0,
+  "settings": {
+    "name": "MLB Addicts- Roger Maris Div."
+  },
+  "status": {
+    "currentMatchupPeriod": 1,
+    "isActive": true,
+    "latestScoringPeriod": 196
+  },
+  "teams": [
+    {
+      "abbrev": "JOSH",
+      "id": 1,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000007}",
+        "{00000000-0000-0000-0000-000000000012}"
+      ]
+    },
+    {
+      "abbrev": "CCT",
+      "id": 2,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000015}"
+      ]
+    },
+    {
+      "abbrev": "BM",
+      "id": 3,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000009}"
+      ]
+    },
+    {
+      "abbrev": "Z",
+      "id": 4,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000010}"
+      ]
+    },
+    {
+      "abbrev": "SST",
+      "id": 5,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000008}"
+      ]
+    },
+    {
+      "abbrev": "JST",
+      "id": 6,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000014}"
+      ]
+    },
+    {
+      "abbrev": "Dang",
+      "id": 7,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000002}"
+      ]
+    },
+    {
+      "abbrev": "CHOP",
+      "id": 8,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000013}",
+        "{00000000-0000-0000-0000-000000000011}"
+      ]
+    },
+    {
+      "abbrev": "HARP",
+      "id": 9,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000016}"
+      ]
+    },
+    {
+      "abbrev": "DDT",
+      "id": 10,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000018}"
+      ]
+    },
+    {
+      "abbrev": "643",
+      "id": 11,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000006}"
+      ]
+    },
+    {
+      "abbrev": "Thur",
+      "id": 12,
+      "owners": [
+        "{00000000-0000-0000-0000-000000000017}"
+      ]
+    }
+  ]
+}

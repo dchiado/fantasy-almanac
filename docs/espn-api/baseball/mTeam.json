@@ -1,0 +1,386 @@
+{
+  "draftDetail": {
+    "drafted": true,
+    "inProgress": false
+  },
+  "gameId": 2,
+  "id": 9342,
+  "members": [
+    {
+      "displayName": "member2",
+      "firstName": "Member",
+      "id": "{00000000-0000-0000-0000-000000000007}",
+      "lastName": "2",
+      "notificationSettings": [
+        {
+          "enabled": true,
+          "id": "b2b97eb5-4140-3e5a-a7ae-eaae64de38f1",
+          "type": "TEAM_PLAYER_INJURY"
+        }
+      ]
+    },
+    {
+      "displayName": "member7",
+      "firstName": "Member",
+      "id": "{00000000-0000-0000-0000-000000000012}",
+      "lastName": "7",
+      "notificationSettings": [
+        {
+          "enabled": true,
+          "id": "a8d5be9d-ae3b-372e-9244-33b046765130",
+          "type": "TEAM_PLAYER_INJURY"
+        }
+      ]
+    },
+    {
+      "displayName": "member11",
+      "firstName": "Member",
+      "id": "{00000000-0000-0000-0000-000000000015}",
+      "lastName": "11",
+      "notificationSettings": [
+        {
+          "enabled": false,
+          "id": "067d2838-a7d2-336b-8466-b253c88d6705",
+          "type": "TEAM_MATCHUP_SCORE"
+        }
+      ]
+    }
+  ],
+  "scoringPeriodId": 196,
+  "seasonId": 2024,
+  "segmentId": 0,
+  "status": {
+    "activatedDate": 1705457432374,
+    "createdAsLeagueType": 0,
+    "currentLeagueType": 0,
+    "currentMatchupPeriod": 1,
+    "finalScoringPeriod": 195,
+    "firstScoringPeriod": 8,
+    "isActive": true,
+    "isExpired": false,
+    "isFull": true,
+    "isPlayoffMatchupEdited": false,
+    "isToBeDeleted": false,
+    "isViewable": true,
+    "isWaiverOrderEdited": false,
+    "latestScoringPeriod": 196,
+    "previousSeasons": [
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023
+    ],
+    "standingsUpdateDate": 1728286641172,
+    "teamsJoined": 12,
+    "transactionScoringPeriod": 196,
+    "waiverLastExecutionDate": 1727771523239,
+    "waiverProcessStatus": {
+      "2024-03-29T09:08:06.581+00:00": 16,
+      "2024-03-30T08:26:45.560+00:00": 1,
+      "2024-04-02T08:37:55.480+00:00": 1,
+      "2024-04-03T09:24:56.863+00:00": 1,
+      "2024-04-08T09:13:54.565+00:00": 1,
+      "2024-04-09T08:23:05.949+00:00": 2,
+      "2024-04-10T08:24:50.716+00:00": 1,
+      "2024-04-11T09:26:25.963+00:00": 1,
+      "2024-04-22T08:31:59.936+00:00": 1,
+      "2024-04-25T08:39:54.019+00:00": 1,
+      "2024-04-27T08:16:00.150+00:00": 2,
+      "2024-04-30T09:02:59.700+00:00": 1,
+      "2024-05-01T09:02:04.232+00:00": 2,
+      "2024-05-02T08:46:41.540+00:00": 1,
+      "2024-05-03T08:46:16.500+00:00": 1,
+      "2024-05-14T09:11:02.355+00:00": 1,
+      "2024-05-15T09:18:10.567+00:00": 1,
+      "2024-05-16T09:01:34.336+00:00": 1,
+      "2024-05-17T08:52:53.468+00:00": 1,
+      "2024-05-20T09:00:41.895+00:00": 1,
+      "2024-05-26T08:57:44.357+00:00": 2,
+      "2024-06-01T09:17:35.170+00:00": 1,
+      "2024-06-20T09:54:18.402+00:00": 1,
+      "2024-06-26T09:04:31.972+00:00": 1,
+      "2024-06-29T08:59:03.942+00:00": 1,
+      "2024-06-30T09:24:08.602+00:00": 1,
+      "2024-07-04T08:53:40.171+00:00": 1,
+      "2024-07-24T09:21:15.370+00:00": 1,
+      "2024-07-26T09:20:58.385+00:00": 3,
+      "2024-07-28T08:22:51.135+00:00": 1,
+      "2024-08-14T08:13:35.845+00:00": 1,
+      "2024-09-11T08:28:10.541+00:00": 1,
+      "2024-09-27T09:13:17.833+00:00": 1
+    }
+  },
+  "teams": [
+    {
+      "abbrev": "JOSH",
+      "currentProjectedRank": 0,
+      "divisionId": 0,
+      "draftDayProjectedRank": 0,
+      "draftStrategy": {
+        "keeperPlayerIds": []
+      },
+      "id": 1,
+      "isActive": false,
+      "logo": "https://i.pinimg.com/736x/53/bb/01/53bb012a505b47afe2ad6e2ef96e3822.jpg",
+      "logoType": "CUSTOM_VALID",
+      "name": "imjoshOCM",
+      "owners": [
+        "{00000000-0000-0000-0000-000000000007}",
+        "{00000000-0000-0000-0000-000000000012}"
+      ],
+      "playoffSeed": 2,
+      "points": 100.0,
+      "pointsAdjusted": 0.0,
+      "pointsByStat": {
+        "0": 0.0,
+        "1": 0.0,
+        "5": 9.0,
+        "10": 0.0,
+        "12": 0.0,
+        "13": 0.0,
+        "17": 10.0,
+        "20": 8.0,
+        "21": 7.0,
+        "23": 12.0,
+        "34": 0.0,
+        "37": 0.0,
+        "39": 0.0,
+        "41": 11.0,
+        "45": 0.0,
+        "47": 11.0,
+        "48": 10.0,
+        "53": 10.0,
+        "57": 0.0,
+        "60": 0.0,
+        "81": 0.0,
+        "83": 12.0
+      },
+      "pointsDelta": 0.0,
+      "primaryOwner": "{00000000-0000-0000-0000-000000000007}",
+      "rankCalculatedFinal": 2,
+      "rankFinal": 0,
+      "record": {
+        "away": {
+          "gamesBack": 0.0,
+          "losses": 0,
+          "percentage": 0.0,
+          "pointsAgainst": 0.0,
+          "pointsFor": 0.0,
+          "streakLength": 0,
+          "streakType": "NONE",
+          "ties": 0,
+          "wins": 0
+        },
+        "division": {
+          "gamesBack": 0.0,
+          "losses": 0,
+          "percentage": 0.0,
+          "pointsAgainst": 0.0,
+          "pointsFor": 0.0,
+          "streakLength": 0,
+          "streakType": "NONE",
+          "ties": 0,
+          "wins": 0
+        },
+        "home": {
+          "gamesBack": 0.0,
+          "losses": 0,
+          "percentage": 0.0,
+          "pointsAgainst": 0.0,
+          "pointsFor": 0.0,
+          "streakLength": 0,
+          "streakType": "NONE",
+          "ties": 0,
+          "wins": 0
+        },
+        "overall": {
+          "gamesBack": 0.0,
+          "losses": 0,
+          "percentage": 0.0,
+          "pointsAgainst": 0.0,
+          "pointsFor": 0.0,
+          "streakLength": 0,
+          "streakType": "NONE",
+          "ties": 0,
+          "wins": 0
+        }
+      },
+      "tradeBlock": {},
+      "transactionCounter": {
+        "acquisitionBudgetSpent": 0,
+        "acquisitions": 76,
+        "drops": 71,
+        "matchupAcquisitionTotals": {
+          "1": 76
+        },
+        "misc": 0,
+        "moveToActive": 582,
+        "moveToIR": 23,
+        "paid": 0.0,
+        "teamCharges": 0.0,
+        "trades": 0
+      },
+      "valuesByStat": {
+        "0": 7853.0,
+        "1": 1967.0,
+        "5": 308.0,
+        "10": 789.0,
+        "12": 106.0,
+        "13": 64.0,
+        "17": 0.32478438,
+        "20": 1102.0,
+        "21": 1032.0,
+        "23": 293.0,
+        "34": 4750.0,
+        "37": 1256.0,
+        "39": 449.0,
+        "41": 1.07684211,
+        "45": 599.0,
+        "47": 3.40484211,
+        "48": 1698.0,
+        "53": 111.0,
+        "57": 64.0,
+        "60": 163.0,
+        "81": 2145.0,
+        "83": 227.0
+      },
+      "waiverRank": 1
+    },
+    {
+      "abbrev": "CCT",
+      "currentProjectedRank": 0,
+      "divisionId": 0,
+      "draftDayProjectedRank": 0,
+      "draftStrategy": {
+        "keeperPlayerIds": []
+      },
+      "id": 2,
+      "isActive": false,
+      "logo": "https://g.espncdn.com/lm-static/flb/images/default_logos/12.svg",
+      "logoType": "VECTOR",
+      "name": "Candace's Competitive Team",
+      "owners": [
+        "{00000000-0000-0000-0000-000000000015}"
+      ],
+      "playoffSeed": 10,
+      "points": 48.0,
+      "pointsAdjusted": 0.0,
+      "pointsByStat": {
+        "0": 0.0,
+        "1": 0.0,
+        "5": 3.0,
+        "10": 0.0,
+        "12": 0.0,
+        "13": 0.0,
+        "17": 5.0,
+        "20": 7.0,
+        "21": 6.0,
+        "23": 11.0,
+        "34": 0.0,
+        "37": 0.0,
+        "39": 0.0,
+        "41": 3.0,
+        "45": 0.0,
+        "47": 3.0,
+        "48": 3.0,
+        "53": 4.0,
+        "57": 0.0,
+        "60": 0.0,
+        "81": 0.0,
+        "83": 3.0
+      },
+      "pointsDelta": 0.0,
+      "primaryOwner": "{00000000-0000-0000-0000-000000000015}",
+      "rankCalculatedFinal": 10,
+      "rankFinal": 0,
+      "record": {
+        "away": {
+          "gamesBack": 0.0,
+          "losses": 0,
+          "percentage": 0.0,
+          "pointsAgainst": 0.0,
+          "pointsFor": 0.0,
+          "streakLength": 0,
+          "streakType": "NONE",
+          "ties": 0,
+          "wins": 0
+        },
+        "division": {
+          "gamesBack": 0.0,
+          "losses": 0,
+          "percentage": 0.0,
+          "pointsAgainst": 0.0,
+          "pointsFor": 0.0,
+          "streakLength": 0,
+          "streakType": "NONE",
+          "ties": 0,
+          "wins": 0
+        },
+        "home": {
+          "gamesBack": 0.0,
+          "losses": 0,
+          "percentage": 0.0,
+          "pointsAgainst": 0.0,
+          "pointsFor": 0.0,
+          "streakLength": 0,
+          "streakType": "NONE",
+          "ties": 0,
+          "wins": 0
+        },
+        "overall": {
+          "gamesBack": 0.0,
+          "losses": 0,
+          "percentage": 0.0,
+          "pointsAgainst": 0.0,
+          "pointsFor": 0.0,
+          "streakLength": 0,
+          "streakType": "NONE",
+          "ties": 0,
+          "wins": 0
+        }
+      },
+      "tradeBlock": {},
+      "transactionCounter": {
+        "acquisitionBudgetSpent": 0,
+        "acquisitions": 33,
+        "drops": 31,
+        "matchupAcquisitionTotals": {
+          "1": 33
+        },
+        "misc": 0,
+        "moveToActive": 267,
+        "moveToIR": 24,
+        "paid": 0.0,
+        "teamCharges": 0.0,
+        "trades": 0
+      },
+      "valuesByStat": {
+        "0": 7981.0,
+        "1": 2037.0,
+        "5": 258.0,
+        "10": 705.0,
+        "12": 104.0,
+        "13": 65.0,
+        "17": 0.32140034,
+        "20": 1100.0,
+        "21": 1024.0,
+        "23": 234.0,
+        "34": 4655.0,
+        "37": 1443.0,
+        "39": 482.0,
+        "41": 1.2406015,
+        "45": 687.0,
+        "47": 3.98474758,
+        "48": 1466.0,
+        "53": 94.0,
+        "57": 86.0,
+        "60": 26.0,
+        "81": 2154.0,
+        "83": 112.0
+      },
+      "waiverRank": 6
+    }
+  ]
+}

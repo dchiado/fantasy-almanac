@@ -4,12 +4,22 @@
       "player": {
         "defaultPositionId": 3,
         "droppable": true,
-        "eligibleSlots": [3, 4, 5, 23, 7, 20, 21],
+        "eligibleSlots": [
+          3,
+          4,
+          5,
+          23,
+          7,
+          20,
+          21
+        ],
         "firstName": "Jared",
         "fullName": "Jared Abbrederis",
         "id": 16836,
         "lastName": "Abbrederis",
-        "ownership": { "percentOwned": 0.00568871359223301 },
+        "ownership": {
+          "percentOwned": 0.00568871359223301
+        },
         "proTeamId": 0,
         "universeId": 0
       }
@@ -18,12 +28,21 @@
       "player": {
         "defaultPositionId": 2,
         "droppable": true,
-        "eligibleSlots": [2, 3, 23, 7, 20, 21],
+        "eligibleSlots": [
+          2,
+          3,
+          23,
+          7,
+          20,
+          21
+        ],
         "firstName": "Ameer",
         "fullName": "Ameer Abdullah",
         "id": 2576336,
         "lastName": "Abdullah",
-        "ownership": { "percentOwned": 2.4338212985436893 },
+        "ownership": {
+          "percentOwned": 2.4338212985436893
+        },
         "proTeamId": 16,
         "universeId": 2
       }

@@ -45,8 +45,9 @@ lambdas/
   baseballDailyScores/       no route — daily MLB scores email via SES
 utils_layer/            Shared Python layer (utils package)
 frontend/               React app (CRA)
-api/                    Sample ESPN API responses for reference
-baseball/api/           Sample ESPN Baseball API responses
+docs/
+  espn-api/             Reference for ESPN's (unofficial) Fantasy API, with sample responses
+  proposals/            Write-ups for possible future features
 template.yaml           AWS SAM template
 samconfig.toml          SAM deploy config (dev + prod)
 ```
@@ -128,27 +129,14 @@ CloudFront serves the updated frontend. `index.html` is uploaded with `no-cache`
 
 ## ESPN Fantasy API
 
-ESPN exposes a public (undocumented) API for publicly visible leagues.
+The app reads from ESPN's unofficial, undocumented Fantasy API. Public leagues need no auth; private leagues need the user's `espn_s2` cookie.
 
-**2020+:**
-```
-https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{year}/segments/0/leagues/{league_id}?view={view}
-```
-
-**2019 and older:**
-```
-https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/leagueHistory/{league_id}?seasonId={year}&view={view}
-```
-
-Append `&scoringPeriodId={week}` for a specific week.
-
-Private leagues require `espn_s2` and `SWID` cookies. Sample API responses are in `api/` and `baseball/api/`.
+See [docs/espn-api/](docs/espn-api/README.md) for endpoints, views, errors, gotchas and trimmed sample responses.
 
 ---
 
 ## TODOs
 
 - Migrate Python lambdas to JS
-- Clean up UI
 - Plain text (AI) queries about the history
 - Better in-game/season tracking: playoff odds charts, win % charts, etc.

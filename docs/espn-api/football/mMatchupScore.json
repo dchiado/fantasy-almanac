@@ -8,52 +8,147 @@
   "schedule": [
     {
       "away": {
+        "adjustment": 0.0,
         "cumulativeScore": {
           "losses": 0,
-          "scoreByStat": {
-            "3": {
-              "ineligible": false,
-              "rank": 0.0,
-              "result": null,
-              "score": 300.0
-            }
-          },
           "statBySlot": null,
           "ties": 0,
           "wins": 0
         },
-        "gamesPlayed": 0,
         "pointsByScoringPeriod": {
           "1": 149.4
         },
         "teamId": 17,
+        "tiebreak": 0.0,
         "totalPoints": 149.4
       },
       "home": {
+        "adjustment": 0.0,
         "cumulativeScore": {
           "losses": 0,
-          "scoreByStat": {
-            "3": {
-              "ineligible": false,
-              "rank": 0.0,
-              "result": null,
-              "score": 333.0
-            }
-          },
           "statBySlot": null,
           "ties": 0,
           "wins": 0
         },
-        "gamesPlayed": 0,
         "pointsByScoringPeriod": {
           "1": 148.52
         },
         "teamId": 20,
+        "tiebreak": 0.0,
         "totalPoints": 148.52
       },
       "id": 0,
       "matchupPeriodId": 1,
+      "playoffTierType": "NONE",
       "winner": "AWAY"
+    },
+    {
+      "away": {
+        "adjustment": 0.0,
+        "cumulativeScore": {
+          "losses": 0,
+          "statBySlot": null,
+          "ties": 0,
+          "wins": 0
+        },
+        "pointsByScoringPeriod": {
+          "1": 89.96
+        },
+        "teamId": 4,
+        "tiebreak": 0.0,
+        "totalPoints": 89.96
+      },
+      "home": {
+        "adjustment": 0.0,
+        "cumulativeScore": {
+          "losses": 0,
+          "statBySlot": null,
+          "ties": 0,
+          "wins": 0
+        },
+        "pointsByScoringPeriod": {
+          "1": 116.5
+        },
+        "teamId": 11,
+        "tiebreak": 0.0,
+        "totalPoints": 116.5
+      },
+      "id": 1,
+      "matchupPeriodId": 1,
+      "playoffTierType": "NONE",
+      "winner": "HOME"
+    },
+    {
+      "away": {
+        "adjustment": 0.0,
+        "cumulativeScore": {
+          "losses": 0,
+          "statBySlot": null,
+          "ties": 0,
+          "wins": 0
+        },
+        "pointsByScoringPeriod": {
+          "14": 108.92
+        },
+        "teamId": 19,
+        "tiebreak": 0.0,
+        "totalPoints": 108.92
+      },
+      "home": {
+        "adjustment": 0.0,
+        "cumulativeScore": {
+          "losses": 0,
+          "statBySlot": null,
+          "ties": 0,
+          "wins": 0
+        },
+        "pointsByScoringPeriod": {
+          "14": 79.9
+        },
+        "teamId": 2,
+        "tiebreak": 0.0,
+        "totalPoints": 79.9
+      },
+      "id": 84,
+      "matchupPeriodId": 14,
+      "playoffTierType": "LOSERS_CONSOLATION_LADDER",
+      "winner": "AWAY"
+    },
+    {
+      "away": {
+        "adjustment": 0.0,
+        "cumulativeScore": {
+          "losses": 0,
+          "statBySlot": null,
+          "ties": 0,
+          "wins": 0
+        },
+        "pointsByScoringPeriod": {
+          "15": 163.62
+        },
+        "teamId": 9,
+        "tiebreak": 0.0,
+        "totalPoints": 163.62
+      },
+      "home": {
+        "adjustment": 0.0,
+        "cumulativeScore": {
+          "losses": 0,
+          "statBySlot": null,
+          "ties": 0,
+          "wins": 0
+        },
+        "pointsByScoringPeriod": {
+          "15": 167.38
+        },
+        "teamId": 7,
+        "tiebreak": 0.0,
+        "totalPoints": 167.38
+      },
+      "id": 85,
+      "matchupPeriodId": 15,
+      "playoffTierType": "WINNERS_BRACKET",
+      "winner": "HOME"
     }
   ],
   "scoringPeriodId": 18,
@@ -121,69 +216,5 @@
       "2019-12-18T08:18:43.287+0000": 2,
       "2019-12-19T09:17:24.415+0000": 1
     }
-  },
-  "teams": [
-    {
-      "id": 1,
-      "roster": {
-        "appliedStatTotal": 134.12,
-        "entries": [
-          {
-            "acquisitionDate": 1566353736994,
-            "acquisitionType": "DRAFT",
-            "injuryStatus": "NORMAL",
-            "lineupSlotId": 2,
-            "pendingTransactionIds": null,
-            "playerId": 3051392,
-            "playerPoolEntry": {
-              "appliedStatTotal": 27.400000000000002,
-              "id": 3051392,
-              "keeperValue": 0,
-              "keeperValueFuture": 1,
-              "lineupLocked": true,
-              "onTeamId": 1,
-              "player": {
-                "active": true,
-                "defaultPositionId": 2,
-                "droppable": false,
-                "eligibleSlots": [
-                  2,
-                  3,
-                  23,
-                  7,
-                  20,
-                  21
-                ],
-                "firstName": "Ezekiel",
-                "fullName": "Ezekiel Elliott",
-                "id": 3051392,
-                "injured": false,
-                "injuryStatus": "ACTIVE",
-                "lastName": "Elliott",
-                "lastNewsDate": 1577672079000,
-                "lastVideoDate": 1575642924000,
-                "proTeamId": 6,
-                "rankings": {
-                  "0": [
-                    {
-                      "auctionValue": 0,
-                      "rank": 3,
-                      "rankSourceId": 7,
-                      "rankType": "STANDARD",
-                      "slotId": 2
-                    }
-                  ]
-                },
-                "universeId": 2
-              },
-              "rosterLocked": true,
-              "status": "ONTEAM",
-              "tradeLocked": false
-            },
-            "status": "NORMAL"
-          }
-        ]
-      }
-    }
-  ]
+  }
 }

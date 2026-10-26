@@ -1,10 +1,41 @@
 {
-  "draftDetail": { "drafted": true, "inProgress": false },
+  "draftDetail": {
+    "completeDate": 1566353736995,
+    "drafted": true,
+    "inProgress": false
+  },
   "gameId": 1,
   "id": 166975,
+  "members": [
+    {
+      "displayName": "member1",
+      "firstName": "Member",
+      "id": "{ABCDEFG-1234-1G5T-AFCB-6344BC69A45B}",
+      "isLeagueCreator": false,
+      "isLeagueManager": false,
+      "lastName": "1"
+    }
+  ],
   "scoringPeriodId": 18,
   "seasonId": 2019,
   "segmentId": 0,
+  "settings": {
+    "acquisitionSettings": {
+      "isUsingAcquisitionBudget": false
+    },
+    "draftSettings": {
+      "keeperCount": 0
+    },
+    "isCustomizable": true,
+    "isPublic": true,
+    "name": "The Gridiron",
+    "rosterSettings": {
+      "isUsingUndroppableList": false
+    },
+    "scoringSettings": {
+      "scoringType": "H2H_POINTS"
+    }
+  },
   "status": {
     "activatedDate": 1563824151595,
     "createdAsLeagueType": 0,
@@ -19,15 +50,22 @@
     "isToBeDeleted": false,
     "isViewable": true,
     "isWaiverOrderEdited": false,
-    "lastUpdateInfo": {
-      "clientAddress": null,
-      "platform": "lm-processor",
-      "source": "NightlyLeagueUpdateTaskProcessor"
-    },
     "latestScoringPeriod": 18,
     "previousSeasons": [
-      2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
-      2017, 2018
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018
     ],
     "standingsUpdateDate": 1583313160111,
     "teamsJoined": 12,
@@ -60,5 +98,18 @@
       "2019-12-18T08:18:43.287+0000": 2,
       "2019-12-19T09:17:24.415+0000": 1
     }
-  }
+  },
+  "teams": [
+    {
+      "abbrev": "DUDE",
+      "id": 1,
+      "location": "Little Lebowski",
+      "logo": "http://shirtoid.com/wp-content/uploads/2009/06/urban-achievers.jpg",
+      "logoType": "CUSTOM_VALID",
+      "nickname": "Urban Achievers",
+      "owners": [
+        "{ABCDEFG-1234-1G5T-AFCB-6344BC69A45B}"
+      ]
+    }
+  ]
 }

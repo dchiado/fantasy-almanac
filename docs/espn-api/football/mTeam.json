@@ -1,43 +1,21 @@
 {
-  "draftDetail": { "drafted": true, "inProgress": false },
+  "draftDetail": {
+    "drafted": true,
+    "inProgress": false
+  },
   "gameId": 1,
   "id": 166975,
   "members": [
     {
-      "displayName": "vballer139",
-      "firstName": "joe",
-      "id": "{0E7C6379-971A-4BB3-B82C-736B6C739C0D}",
-      "lastName": "blow",
+      "displayName": "member1",
+      "firstName": "Member",
+      "id": "{00000000-0000-0000-0000-000000000001}",
+      "lastName": "1",
       "notificationSettings": [
         {
           "enabled": true,
           "id": "4d8778aa-8973-4c59-80a4-73ce9e97de0f",
           "type": "TEAM_PLAYER_INJURY"
-        },
-        {
-          "enabled": true,
-          "id": "9c2c03bc-9638-4e92-a1fa-5b255c855045",
-          "type": "DRAFT"
-        },
-        {
-          "enabled": true,
-          "id": "6f840bcd-3301-45e0-ad6c-7be30684e9c1",
-          "type": "TEAM_PLAYER_NEWS"
-        },
-        {
-          "enabled": true,
-          "id": "5777b2e5-8ddc-4991-9d6d-9d2bdaabe843",
-          "type": "TEAM_PLAYER_STARTBENCH"
-        },
-        {
-          "enabled": true,
-          "id": "3e33db4d-3af2-46fe-8b60-bcf883604b72",
-          "type": "TEAM_TRADE_OFFER"
-        },
-        {
-          "enabled": true,
-          "id": "3f8d2742-93f9-4fce-8493-99d09a92da59",
-          "type": "TEAM_PLAYER_AVAILABILITY"
         }
       ]
     }
@@ -61,8 +39,20 @@
     "isWaiverOrderEdited": false,
     "latestScoringPeriod": 18,
     "previousSeasons": [
-      2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
-      2017, 2018
+      2005,
+      2006,
+      2007,
+      2008,
+      2009,
+      2010,
+      2011,
+      2012,
+      2013,
+      2014,
+      2015,
+      2016,
+      2017,
+      2018
     ],
     "standingsUpdateDate": 1583313160111,
     "teamsJoined": 12,
@@ -104,8 +94,14 @@
       "draftDayProjectedRank": 3,
       "draftStrategy": {
         "draftList": [
-          { "auctionValue": 0, "playerId": 3117251 },
-          { "auctionValue": 0, "playerId": 2587819 }
+          {
+            "auctionValue": 0,
+            "playerId": 3117251
+          },
+          {
+            "auctionValue": 0,
+            "playerId": 2587819
+          }
         ],
         "futureKeeperPlayerIds": [],
         "keeperPlayerIds": []
@@ -116,12 +112,14 @@
       "logo": "http://shirtoid.com/wp-content/uploads/2009/06/urban-achievers.jpg",
       "logoType": "CUSTOM_VALID",
       "nickname": "Urban Achievers",
-      "owners": ["{AB3DD4A6-3944-4D17-AFCB-6344BC69A45B}"],
+      "owners": [
+        "{00000000-0000-0000-0000-000000000002}"
+      ],
       "playoffSeed": 6,
       "points": 1698.02,
       "pointsAdjusted": 0.0,
       "pointsDelta": 0.0,
-      "primaryOwner": "{AB3DD4A6-3944-4D17-AFCB-6344BC69A45B}",
+      "primaryOwner": "{00000000-0000-0000-0000-000000000002}",
       "rankCalculatedFinal": 4,
       "rankFinal": 0,
       "record": {
@@ -206,7 +204,14 @@
       },
       "waiverRank": 10,
       "watchList": [
-        3051806, 2579604, 3127211, 2971718, 16732, 3917846, 15966, 2971618
+        3051806,
+        2579604,
+        3127211,
+        2971718,
+        16732,
+        3917846,
+        15966,
+        2971618
       ]
     }
   ]
