@@ -42,6 +42,20 @@ Resources:
           - - "http://localhost:3000"
         AllowMethods: ["GET", "POST", "OPTIONS"]
         AllowHeaders: ["Content-Type"]
+      # Cost guard: requests over these limits get a 429 and never start a lambda.
+      # Limits are shared by all visitors, not per client.
+      DefaultRouteSettings:
+        ThrottlingRateLimit: 10   # requests per second
+        ThrottlingBurstLimit: 20
+      RouteSettings:
+        # Can trigger a Claude call (via writePowerRankings)
+        "GET /power-rankings":
+          ThrottlingRateLimit: 2
+          ThrottlingBurstLimit: 5
+        # Long-running (300s timeout), fetches every view for every season
+        "POST /cache":
+          ThrottlingRateLimit: 1
+          ThrottlingBurstLimit: 2
 
   UtilsLayer:
     Type: AWS::Serverless::LayerVersion
@@ -338,6 +352,11 @@ Resources:
       Handler: index.handler
       Runtime: nodejs22.x
       Timeout: 60
+      # Cost guard: AWS retries failed async invocations twice by default,
+      # and each retry is another Claude call
+      EventInvokeConfig:
+        MaximumRetryAttempts: 0
+        MaximumEventAgeInSeconds: 60
       Policies:
         - S3WritePolicy:
             BucketName: ffalmanac-data

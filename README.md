@@ -138,5 +138,9 @@ See [docs/espn-api/](docs/espn-api/README.md) for endpoints, views, errors, gotc
 ## TODOs
 
 - Migrate Python lambdas to JS
-- Plain text (AI) queries about the history
-- Better in-game/season tracking: playoff odds charts, win % charts, etc.
+- Cap Claude costs (do before adding more AI features):
+  - Move the app's Anthropic API key to its own Console workspace with a low monthly spend limit (e.g. $5). This is the only hard cap on Claude spend; the AWS budget only alerts.
+  - `powerRankings` calls Claude for any league ID. Add an allowlist (e.g. an `AI_LEAGUES` env var) so only known leagues trigger a writeup.
+  - Before invoking `writePowerRankings`, write a "pending" marker to S3 (and a "failed" marker on error), so simultaneous page loads and repeated failures don't each make a Claude call.
+- Lambda reserved concurrency isn't possible while the account's concurrency limit is 10 (AWS requires leaving 10 unreserved). That limit already caps the whole account at 10 concurrent runs. If it's ever raised, set `ReservedConcurrentExecutions` per function (1–2 for Claude callers).
+- `CacheFunction` runs `nodejs18.x`, which is past end of life; move it to `nodejs22.x` like the other JS lambdas.
