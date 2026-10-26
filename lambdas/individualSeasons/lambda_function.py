@@ -1,6 +1,7 @@
 import json
 import statistics
 from utils import (
+    prefetch,
     espn_handler,
     check_end_year,
     is_bye_week,
@@ -62,6 +63,7 @@ def best_and_worst_seasons(start_year, end_year, count, best, league_id):
     start_year = check_start_year(start_year, league_id)
     end_year = check_end_year(end_year, league_id)
 
+    prefetch(league_id, range(int(start_year), int(end_year) + 1), ['mSettings', 'mMatchupScore', 'mNav'])
     for year in range(int(start_year), int(end_year) + 1):
         all_averages_this_year = []
         all_seasons_this_year = []

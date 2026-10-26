@@ -1,5 +1,6 @@
 import json
 from utils import (
+    prefetch,
     espn_handler,
     is_bye_week,
     latest_season,
@@ -126,6 +127,7 @@ def all_time(owner_id_1, owner_id_2, league_id):
     start_year = current_info["status"]["previousSeasons"][0]
     winners = []
 
+    prefetch(league_id, range(start_year, end_year + 1), ['mSettings', 'mMatchupScore', 'mNav'])
     for year in range(start_year, end_year + 1):
         weeks = number_of_weeks(year, True, league_id)
         if weeks == 0:

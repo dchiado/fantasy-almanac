@@ -1,5 +1,6 @@
 import json
 from utils import (
+    prefetch,
     espn_handler,
     is_bye_week,
     load_matchups,
@@ -39,6 +40,7 @@ def results(start_year, end_year, playoffs, count, blowouts, league_id):
     end_year = check_end_year(end_year, league_id)
     start_year = check_start_year(start_year, league_id)
 
+    prefetch(league_id, range(int(start_year), int(end_year) + 1), ['mSettings', 'mMatchupScore', 'mNav'])
     for year in range(int(start_year), int(end_year) + 1):
         weeks = number_of_weeks(year, playoffs, league_id)
         if weeks == 0:

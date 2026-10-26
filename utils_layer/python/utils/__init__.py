@@ -3,7 +3,8 @@ import collections
 import functools
 import requests
 import boto3
-from contextvars import ContextVar
+from concurrent.futures import ThreadPoolExecutor
+from contextvars import ContextVar, copy_context
 from itertools import groupby
 from datetime import datetime, date
 from botocore.exceptions import ClientError
@@ -12,6 +13,12 @@ s3 = boto3.client('s3')
 CACHE_BUCKET = 'ffalmanac-data'
 
 _espn_s2 = ContextVar('espn_s2', default=None)
+
+# Past seasons never change, so they're kept in memory for as long as the Lambda
+# container stays warm. Callers must treat load_data results as read-only.
+_past_seasons = {}
+# Current-season responses, shared within a single request only
+_request_cache = ContextVar('request_cache', default=None)
 
 
 class EspnError(Exception):
@@ -28,18 +35,21 @@ def espn_handler(handler):
     def wrapper(event, context):
         params = event.get("queryStringParameters") or {}
         token = _espn_s2.set(params.get("espnS2"))
+        cache_token = _request_cache.set({})
         try:
             return handler(event, context)
         except EspnError as e:
             return {"error": e.detail}
         finally:
             _espn_s2.reset(token)
+            _request_cache.reset(cache_token)
     return wrapper
 
 
 def load_data(year, uri, league_id, week=None, headers=None):
     """
-    Load ESPN fantasy data — caching all years to S3 except the current one.
+    Load ESPN fantasy data. Past seasons come from memory, then S3, then ESPN
+    (and are written back to S3); the current season always comes from ESPN.
 
     Args:
         year (int): Season year
@@ -49,26 +59,42 @@ def load_data(year, uri, league_id, week=None, headers=None):
         headers (dict or None): Headers (e.g., for espn_s2 cookie)
 
     Returns:
-        dict: ESPN data
+        dict: ESPN data, or ESPN's error body (with "details") if it refused
     """
-    current_year = datetime.now().year
-    should_cache = year != current_year
+    year = int(year)
+    is_past_season = year != datetime.now().year
+    key = (str(league_id), year, uri, week)
+    request_cache = _request_cache.get()
+
+    if is_past_season and key in _past_seasons:
+        return _past_seasons[key]
+    if not is_past_season and request_cache is not None and key in request_cache:
+        return request_cache[key]
+
+    data = _load_uncached(year, uri, league_id, week, headers, is_past_season)
+    if isinstance(data, dict) and "details" in data:
+        return data  # don't remember errors; a later request may have a valid token
+
+    if is_past_season:
+        _past_seasons[key] = data
+    elif request_cache is not None:
+        request_cache[key] = data
+    return data
+
+
+def _load_uncached(year, uri, league_id, week, headers, is_past_season):
+    """Read a past season from S3, or fetch from ESPN (caching past seasons to S3)."""
     s3_key = f'espn-cache/{league_id}/{year}/{uri}.json'
 
-    # Try to load from S3 first (even current year — could be cached from earlier)
-    try:
-        print(f"Checking S3 for {s3_key}")
-        cached = s3.get_object(Bucket=CACHE_BUCKET, Key=s3_key)
-        body = cached['Body'].read().decode('utf-8')
-        json_body = json.loads(body)
-        print(f"JSON body: {json_body}")
-        if isinstance(json_body, (list, tuple)):
-            return json_body[0] if json_body else None  # optional: handle empty list/tuple
-        return json_body
-    except ClientError as e:
-        if e.response['Error']['Code'] != 'NoSuchKey':
-            raise  # Unexpected error
-        print(f"Not found in cache, calling ESPN API for {year}/{uri}")
+    # The current season is never written to S3, so only past seasons are worth checking
+    if is_past_season:
+        try:
+            cached = s3.get_object(Bucket=CACHE_BUCKET, Key=s3_key)
+            return _unwrap(json.loads(cached['Body'].read().decode('utf-8')))
+        except ClientError as e:
+            if e.response['Error']['Code'] != 'NoSuchKey':
+                raise  # Unexpected error
+            print(f"Not found in cache, calling ESPN API for {year}/{uri}")
 
     # Build the correct ESPN API URL
     if year > 2019:
@@ -76,15 +102,13 @@ def load_data(year, uri, league_id, week=None, headers=None):
             f"https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{year}"
             f"/segments/0/leagues/{league_id}?view={uri}"
         )
-        if week is not None:
-            url += f"&scoringPeriodId={week}"
     else:
         url = (
             f"https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/leagueHistory/{league_id}"
             f"?seasonId={year}&view={uri}"
         )
-        if week is not None:
-            url += f"&scoringPeriodId={week}"
+    if week is not None:
+        url += f"&scoringPeriodId={week}"
 
     espn_s2 = _espn_s2.get()
     if espn_s2:
@@ -103,7 +127,7 @@ def load_data(year, uri, league_id, week=None, headers=None):
         resp.raise_for_status()
     data = resp.json()
 
-    if should_cache:
+    if is_past_season:
         try:
             s3.put_object(
                 Bucket=CACHE_BUCKET,
@@ -114,10 +138,35 @@ def load_data(year, uri, league_id, week=None, headers=None):
             print(f"Cached {s3_key}")
         except Exception as e:
             print(f"Failed to cache {s3_key}: {e}")
-    else:
-        print(f"Skipping cache for current season ({year})")
 
-    return data[0] if year <= 2018 else data
+    return _unwrap(data)
+
+
+def _unwrap(data):
+    """leagueHistory responses are a one-element list holding the season object."""
+    if isinstance(data, (list, tuple)):
+        return data[0] if data else None
+    return data
+
+
+def prefetch(league_id, years, views):
+    """Load every (year, view) pair in parallel so the sequential loops that
+    follow are served from memory. Failures are left for those loops to raise."""
+    def load(year, view):
+        try:
+            load_data(year, view, league_id)
+        except Exception as e:
+            print(f"Prefetch failed for {year}/{view}: {e}")
+
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        # Each task runs in a copy of this request's context so it sees the
+        # espn_s2 token and shares the request cache
+        futures = [
+            pool.submit(copy_context().run, load, year, view)
+            for year in years for view in views
+        ]
+        for future in futures:
+            future.result()
 
 
 def player_info(year, league_id):

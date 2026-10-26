@@ -1,6 +1,7 @@
 import json
 import statistics
 from utils import (
+    prefetch,
     espn_handler,
     check_end_year,
     is_bye_week,
@@ -38,6 +39,7 @@ def best_and_worst_weeks(start_year, end_year, playoffs, count, highest, league_
     start_year = check_start_year(start_year, league_id)
     end_year = check_end_year(end_year, league_id)
 
+    prefetch(league_id, range(start_year, end_year + 1), ['mSettings', 'mMatchupScore', 'mNav'])
     for year in range(start_year, end_year + 1):
         weeks = number_of_weeks(year, playoffs, league_id)
         if weeks == 0:

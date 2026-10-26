@@ -1,5 +1,5 @@
 import json
-from utils import load_data, latest_season, espn_handler
+from utils import load_data, latest_season, espn_handler, prefetch
 
 def list(league_id):
     """Calculate league standings by year and overall for all years.
@@ -36,10 +36,10 @@ def list(league_id):
 
     end_year = latest_season(league_id)
     details = load_data(end_year, 'mNav', league_id)
-    print(details)
     start_year = details["status"]["previousSeasons"][0]
     print('Start year: ', start_year)
 
+    prefetch(league_id, range(int(start_year), int(end_year) + 1), ['mTeam'])
     for year in range(int(start_year), int(end_year) + 1):
         print('Doing year: ', year)
         print('League ID: ', league_id)
@@ -49,7 +49,6 @@ def list(league_id):
             print("Error occurred on year ", year, ": ", e)
             continue
 
-        print(f"team details: {team_details}")
         if team_details["status"]["currentMatchupPeriod"] == 1:
             continue
 
