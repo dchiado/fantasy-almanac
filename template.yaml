@@ -65,7 +65,7 @@ Resources:
       CompatibleRuntimes: [python3.12]
       RetentionPolicy: Delete
 
-  # ── Python lambdas (TODO: migrate to JS) ────────────────────────────────────
+  # ── Python lambdas ──────────────────────────────────────────────────────────
   # All Python lambdas use load_data() which reads/writes S3 for ESPN data
   # caching. S3CrudPolicy covers GetObject + PutObject but NOT ListBucket.
   # ListBucket is added explicitly — without it, GetObject on a missing key
@@ -300,7 +300,7 @@ Resources:
     Properties:
       CodeUri: lambdas/cache/
       Handler: index.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs22.x
       Timeout: 300
       Policies:
         - S3WritePolicy:

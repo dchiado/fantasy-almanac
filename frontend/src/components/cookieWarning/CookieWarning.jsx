@@ -14,7 +14,7 @@ const CookieWarning = ({ initialEspnS2, onCookieSubmit, onCacheComplete }) => {
     const pollStatus = async () => {
       try {
         const res = await fetch(
-          `${process.env.REACT_APP_API_URL}/cache/status?leagueId=${leagueInfo.id}&startYear=${leagueInfo.established}`
+          `${process.env.REACT_APP_API_URL}/cache/status?leagueId=${leagueInfo.id}&startYear=${leagueInfo.established}&endYear=${leagueInfo.year}`
         );
         const data = await res.json();
 

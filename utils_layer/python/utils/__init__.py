@@ -6,18 +6,27 @@ import boto3
 from concurrent.futures import ThreadPoolExecutor
 from contextvars import ContextVar, copy_context
 from itertools import groupby
-from datetime import datetime, date
+from datetime import datetime, date, timedelta, timezone
 from botocore.exceptions import ClientError
 
 s3 = boto3.client('s3')
 CACHE_BUCKET = 'ffalmanac-data'
 
+# ESPN applies stat corrections for a few days after a week ends, so a season
+# whose last week is done is only final once this much time has passed
+FINAL_GRACE_PERIOD = timedelta(days=7)
+# Regular-season weeks left (including the current one) when the stretch run starts
+STRETCH_RUN_WEEKS = 3
+
 _espn_s2 = ContextVar('espn_s2', default=None)
 
-# Past seasons never change, so they're kept in memory for as long as the Lambda
+# Final seasons never change, so they're kept in memory for as long as the Lambda
 # container stays warm. Callers must treat load_data results as read-only.
-_past_seasons = {}
-# Current-season responses, shared within a single request only
+_final_seasons = {}
+# When each league's current season was first seen with every week played,
+# keyed by (league_id, year). Read from the season's _finality.json marker.
+_decided_at = {}
+# Live ESPN responses (errors included), shared within a single request only
 _request_cache = ContextVar('request_cache', default=None)
 
 
@@ -48,8 +57,9 @@ def espn_handler(handler):
 
 def load_data(year, uri, league_id, week=None, headers=None):
     """
-    Load ESPN fantasy data. Past seasons come from memory, then S3, then ESPN
-    (and are written back to S3); the current season always comes from ESPN.
+    Load ESPN fantasy data. Final seasons come from memory, then S3, then ESPN
+    (and are written back to S3); a season that isn't final always comes from
+    ESPN. See "Core rules" in the README.
 
     Args:
         year (int): Season year
@@ -62,40 +72,73 @@ def load_data(year, uri, league_id, week=None, headers=None):
         dict: ESPN data, or ESPN's error body (with "details") if it refused
     """
     year = int(year)
-    is_past_season = year != datetime.now().year
+    if not season_is_final(league_id, year):
+        return _load_live(year, uri, league_id, week, headers)
+
+    key = (str(league_id), year, uri, week)
+    if key in _final_seasons:
+        return _final_seasons[key]
+
+    data = _load_archived(year, uri, league_id, week, headers)
+    if not _is_error(data):
+        _final_seasons[key] = data  # errors aren't remembered; a later request may have a valid token
+    return data
+
+
+def _load_live(year, uri, league_id, week=None, headers=None):
+    """Fetch from ESPN, sharing the response with the rest of this request."""
     key = (str(league_id), year, uri, week)
     request_cache = _request_cache.get()
-
-    if is_past_season and key in _past_seasons:
-        return _past_seasons[key]
-    if not is_past_season and request_cache is not None and key in request_cache:
+    if request_cache is not None and key in request_cache:
         return request_cache[key]
 
-    data = _load_uncached(year, uri, league_id, week, headers, is_past_season)
-    if isinstance(data, dict) and "details" in data:
-        return data  # don't remember errors; a later request may have a valid token
-
-    if is_past_season:
-        _past_seasons[key] = data
-    elif request_cache is not None:
+    data = _unwrap(_fetch(year, uri, league_id, week, headers))
+    if request_cache is not None:
         request_cache[key] = data
     return data
 
 
-def _load_uncached(year, uri, league_id, week, headers, is_past_season):
-    """Read a past season from S3, or fetch from ESPN (caching past seasons to S3)."""
-    s3_key = f'espn-cache/{league_id}/{year}/{uri}.json'
+def _load_archived(year, uri, league_id, week, headers):
+    """Read a final season from S3, or fetch it from ESPN and write it to S3."""
+    s3_key = _archive_key(league_id, year, uri, week)
+    try:
+        cached = s3.get_object(Bucket=CACHE_BUCKET, Key=s3_key)
+        return _unwrap(json.loads(cached['Body'].read().decode('utf-8')))
+    except ClientError as e:
+        if e.response['Error']['Code'] != 'NoSuchKey':
+            raise  # Unexpected error
+        print(f"Not found in cache, calling ESPN API for {year}/{uri}")
 
-    # The current season is never written to S3, so only past seasons are worth checking
-    if is_past_season:
-        try:
-            cached = s3.get_object(Bucket=CACHE_BUCKET, Key=s3_key)
-            return _unwrap(json.loads(cached['Body'].read().decode('utf-8')))
-        except ClientError as e:
-            if e.response['Error']['Code'] != 'NoSuchKey':
-                raise  # Unexpected error
-            print(f"Not found in cache, calling ESPN API for {year}/{uri}")
+    data = _fetch(year, uri, league_id, week, headers)
+    if _is_error(data):
+        return data
 
+    try:
+        s3.put_object(
+            Bucket=CACHE_BUCKET,
+            Key=s3_key,
+            Body=json.dumps(data),
+            ContentType='application/json'
+        )
+        print(f"Cached {s3_key}")
+    except Exception as e:
+        print(f"Failed to cache {s3_key}: {e}")
+
+    return _unwrap(data)
+
+
+def _archive_key(league_id, year, uri, week=None):
+    if week is not None:
+        return f'espn-cache/{league_id}/{year}/weeks/{week}/{uri}.json'
+    return f'espn-cache/{league_id}/{year}/{uri}.json'
+
+
+def _is_error(data):
+    return isinstance(data, dict) and "details" in data
+
+
+def _fetch(year, uri, league_id, week, headers):
+    """Call ESPN. Returns the raw response body, or ESPN's error body (with "details")."""
     # Build the correct ESPN API URL
     if year > 2019:
         url = (
@@ -125,21 +168,7 @@ def _load_uncached(year, uri, league_id, week, headers, is_past_season):
         if isinstance(body, dict) and "details" in body:
             return body
         resp.raise_for_status()
-    data = resp.json()
-
-    if is_past_season:
-        try:
-            s3.put_object(
-                Bucket=CACHE_BUCKET,
-                Key=s3_key,
-                Body=json.dumps(data),
-                ContentType='application/json'
-            )
-            print(f"Cached {s3_key}")
-        except Exception as e:
-            print(f"Failed to cache {s3_key}: {e}")
-
-    return _unwrap(data)
+    return resp.json()
 
 
 def _unwrap(data):
@@ -267,32 +296,87 @@ def latest_season(league_id):
         return status["season"]
 
 
+def current_status(league_id):
+    """Live mStatus for the league's current season, or ESPN's error body.
+
+    This call is also the access check: archived seasons are only served
+    after it succeeds in the same request."""
+    this_year = date.today().year
+    resp = _load_live(this_year, 'mStatus', league_id)
+    # ESPN returns GENERAL_NOT_FOUND for the new calendar year until the league
+    # rolls over, so the season leaks into the next year
+    if _is_error(resp) and resp["details"][0]["type"] == 'GENERAL_NOT_FOUND':
+        resp = _load_live(this_year - 1, 'mStatus', league_id)
+    return resp
+
+
+def _all_weeks_played(status_resp):
+    """True once ESPN has moved past the season's last scoring period."""
+    status = status_resp["status"]
+    return status["latestScoringPeriod"] > status["finalScoringPeriod"]
+
+
+def season_is_final(league_id, year):
+    """Whether a season's ESPN data can no longer change.
+
+    Seasons before the league's current one are final. The current season is
+    final FINAL_GRACE_PERIOD after it was first seen with every week played,
+    which is recorded in espn-cache/{league}/{year}/_finality.json. If ESPN
+    refuses the live status call, nothing is final, so the request goes to
+    ESPN and returns its error."""
+    year = int(year)
+    resp = current_status(league_id)
+    if _is_error(resp) or year > resp["seasonId"]:
+        return False
+    if year < resp["seasonId"]:
+        return True
+    if not _all_weeks_played(resp):
+        return False
+    decided_at = _season_decided_at(league_id, year)
+    return datetime.now(timezone.utc) - decided_at >= FINAL_GRACE_PERIOD
+
+
+def _season_decided_at(league_id, year):
+    """When the season was first seen with every week played, recording now if never."""
+    key = (str(league_id), year)
+    if key in _decided_at:
+        return _decided_at[key]
+
+    s3_key = f'espn-cache/{league_id}/{year}/_finality.json'
+    try:
+        marker = json.loads(s3.get_object(Bucket=CACHE_BUCKET, Key=s3_key)['Body'].read())
+        decided_at = datetime.fromisoformat(marker["decided_at"])
+    except ClientError as e:
+        if e.response['Error']['Code'] != 'NoSuchKey':
+            raise  # Unexpected error
+        decided_at = datetime.now(timezone.utc)
+        s3.put_object(
+            Bucket=CACHE_BUCKET,
+            Key=s3_key,
+            Body=json.dumps({"decided_at": decided_at.isoformat()}),
+            ContentType='application/json'
+        )
+        print(f"Recorded {s3_key}")
+
+    _decided_at[key] = decided_at
+    return decided_at
+
+
 def season_status(league_id):
     """Find the status of the current fantasy season"""
-    this_year = date.today().year
-    resp = load_data(this_year, 'mStatus', league_id)
-    if "details" in resp:
-        # try the year before because the season leaks into January
-        if resp["details"][0]["type"] == 'GENERAL_NOT_FOUND':
-            this_year = int(this_year) - 1
-            resp = load_data(this_year, 'mStatus', league_id)
-            if "details" in resp:
-                return {
-                    "error": resp["details"][0]
-                }
-        else:
-            return {"error": resp["details"][0]}
+    resp = current_status(league_id)
+    if _is_error(resp):
+        return {"error": resp["details"][0]}
 
     status = resp["status"]
     current_season = resp["seasonId"]
     drafted = resp["draftDetail"]["drafted"]
-    finished = status["currentMatchupPeriod"] == status["finalScoringPeriod"]
 
     if not drafted:
         status = "preseason"
     elif status["currentMatchupPeriod"] == 1:
         status = "drafted"
-    elif finished:
+    elif _all_weeks_played(resp):
         status = "postseason"
     else:
         status = "active"
@@ -300,6 +384,48 @@ def season_status(league_id):
     return {
         "season": current_season,
         "status": status
+    }
+
+
+def season_phase(league_id):
+    """Find which phase the league's current season is in. See "Season phases"
+    in the README.
+
+    Returns:
+        {
+            "season": 2026,
+            "phase": "preseason" | "regular_season" | "stretch_run" | "playoffs" | "offseason",
+            "regular_season_weeks": 14,
+            "regular_season_weeks_left": 3  # including the current week
+        }
+    """
+    resp = current_status(league_id)
+    if _is_error(resp):
+        return {"error": resp["details"][0]}
+
+    year = resp["seasonId"]
+    week = resp["status"]["currentMatchupPeriod"]
+    settings = load_data(year, 'mSettings', league_id)
+    regular_season_weeks = settings["settings"]["scheduleSettings"]["matchupPeriodCount"]
+    weeks_left = max(0, regular_season_weeks - week + 1)
+
+    if not resp["draftDetail"]["drafted"]:
+        phase = "preseason"
+    # The champion is known once every week is played, even before the data is final
+    elif _all_weeks_played(resp):
+        phase = "offseason"
+    elif week > regular_season_weeks:
+        phase = "playoffs"
+    elif weeks_left <= STRETCH_RUN_WEEKS:
+        phase = "stretch_run"
+    else:
+        phase = "regular_season"
+
+    return {
+        "season": year,
+        "phase": phase,
+        "regular_season_weeks": regular_season_weeks,
+        "regular_season_weeks_left": weeks_left
     }
 
 
@@ -374,17 +500,12 @@ def win_pct(win, loss):
 
 def check_start_year(year, league_id):
     """Check year passed in is not earlier than first season"""
-    this_year = date.today().year
-    details = load_data(this_year, 'mNav', league_id)
-    if "details" in details:
-        # try the year before because the season leaks into January
-        if details["details"][0]["type"] == 'GENERAL_NOT_FOUND':
-            this_year = int(this_year) - 1
-            details = load_data(this_year, 'mNav', league_id)
-    if "details" in details:
+    details = current_status(league_id)
+    if _is_error(details):
         raise EspnError(details["details"][0])
 
-    actual_start_year = details["status"]["previousSeasons"][0]
+    previous = details["status"]["previousSeasons"]
+    actual_start_year = previous[0] if previous else details["seasonId"]
 
     if year is None or int(year) < actual_start_year:
         return actual_start_year

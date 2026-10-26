@@ -22,10 +22,13 @@ const VIEWS = [
   'players_wl'
 ];
 const TOTAL_VIEWS = VIEWS.length;
+const VIEW_FILES = new Set(VIEWS.map((view) => `${view}.json`));
 
 export const handler = async (event) => {
   const leagueId = event.queryStringParameters?.leagueId;
   const startYear = parseInt(event.queryStringParameters?.startYear, 10);
+  // The league's current season, which isn't archived until it's final (see lambdas/cache)
+  const endYear = parseInt(event.queryStringParameters?.endYear, 10) || new Date().getFullYear();
 
   if (!leagueId || isNaN(startYear)) {
     return {
@@ -34,9 +37,8 @@ export const handler = async (event) => {
     };
   }
 
-  const currentYear = new Date().getFullYear();
   const yearsToCheck = [];
-  for (let year = startYear; year < currentYear; year++) {
+  for (let year = startYear; year < endYear; year++) {
     yearsToCheck.push(year);
   }
 
@@ -47,11 +49,16 @@ export const handler = async (event) => {
 
     const command = new ListObjectsV2Command({
       Bucket: BUCKET,
-      Prefix: prefix
+      Prefix: prefix,
+      // Skip weeks/ subfolders
+      Delimiter: '/'
     });
 
     const response = await s3.send(command);
-    const fileCount = response.Contents?.length || 0;
+    // Count only view files, not markers like _finality.json
+    const fileCount = (response.Contents || [])
+      .filter(({ Key }) => VIEW_FILES.has(Key.slice(prefix.length)))
+      .length;
     console.log('year: ', year, ', fileCount: ', fileCount);
 
     if (fileCount >= TOTAL_VIEWS) {

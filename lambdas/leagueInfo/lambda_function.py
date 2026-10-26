@@ -1,7 +1,6 @@
 import json
-from utils import load_data, season_status, espn_handler
+from utils import load_data, season_phase, espn_handler
 import boto3
-from datetime import datetime
 from botocore.exceptions import ClientError
 
 s3 = boto3.client('s3')
@@ -9,11 +8,11 @@ CACHE_BUCKET = 'ffalmanac-data'
 
 def summary(league_id):
     """Assemble basic league information."""
-    status = season_status(league_id)
-    if "error" in status:
-        return status
+    phase = season_phase(league_id)
+    if "error" in phase:
+        return phase
 
-    year = status["season"]
+    year = phase["season"]
 
     details = load_data(year, 'mNav', league_id)
 
@@ -35,6 +34,9 @@ def summary(league_id):
         "teams": teams,
         "year": year,
         "week": week,
+        "phase": phase["phase"],
+        "regular_season_weeks": phase["regular_season_weeks"],
+        "regular_season_weeks_left": phase["regular_season_weeks_left"],
         "cached": is_cached
     }
 
@@ -42,4 +44,3 @@ def summary(league_id):
 def lambda_handler(event, context):
     league_id = event["queryStringParameters"]["leagueId"]
     return summary(league_id)
-

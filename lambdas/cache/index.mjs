@@ -23,10 +23,22 @@ const VIEWS = [
   'players_wl'
 ];
 
+const espnUrl = (leagueId, year, view) => year > 2019
+  ? `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/segments/0/leagues/${leagueId}?view=${view}`
+  : `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/leagueHistory/${leagueId}?seasonId=${year}&view=${view}`;
+
+// The league's current season per ESPN. ESPN returns GENERAL_NOT_FOUND for the
+// new calendar year until the league rolls over, so fall back a year.
+const currentSeason = async (leagueId, headers) => {
+  const thisYear = new Date().getFullYear();
+  for (const year of [thisYear, thisYear - 1]) {
+    const res = await fetch(espnUrl(leagueId, year, 'mStatus'), { headers });
+    if (res.ok) return (await res.json()).seasonId;
+  }
+  return null;
+};
+
 export const handler = async (event) => {
-  console.log('Event', event);
-  console.log('event.body', event.body);
-  console.log('JSON.parse(event.body)', JSON.parse(event.body));
   const { espn_s2, startYear } = JSON.parse(event.body || '{}');
   const { leagueId } = event.queryStringParameters || {};
 
@@ -37,26 +49,30 @@ export const handler = async (event) => {
     };
   }
 
-  const currentYear = new Date().getFullYear();
+  const headers = {
+    'User-Agent': 'Mozilla/5.0',
+    'Cookie': `espn_s2=${espn_s2}`
+  };
+
+  // Only seasons before the current one are final, so only those are archived.
+  // The current season is archived by the Python lambdas once it's final.
+  const season = await currentSeason(leagueId, headers);
+  if (!season) {
+    return {
+      statusCode: 502,
+      body: JSON.stringify({ error: "Couldn't find the league's current season on ESPN" })
+    };
+  }
+
   const results = [];
 
-  for (let year = startYear; year < currentYear; year++) {
+  for (let year = startYear; year < season; year++) {
     for (const view of VIEWS) {
-      let url;
-      if (year > 2019) {
-        url = `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/segments/0/leagues/${leagueId}?view=${view}`
-      } else {
-        url = `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/leagueHistory/${leagueId}?seasonId=${year}&view=${view}`;
-      }
+      const url = espnUrl(leagueId, year, view);
       const key = `espn-cache/${leagueId}/${year}/${view}.json`;
   
       try {
-        const res = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0',
-            'Cookie': `espn_s2=${espn_s2}`
-          }
-        });
+        const res = await fetch(url, { headers });
 
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);

@@ -111,7 +111,7 @@ def lambda_handler(event, context):
     params = event["queryStringParameters"]
     league_id = params.get('leagueId')
     best = params.get('bestworst') == 'best'
-    playoffs = params.get('playoffs') == True
+    playoffs = params.get('playoffs') == 'true'
     count = int(params.get('count') or 10)
     start_year = params.get('startyear')
     end_year = params.get('endyear')
