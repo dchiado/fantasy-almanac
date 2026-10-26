@@ -43,7 +43,7 @@ All already cached in S3 for past seasons:
 
 Given final records and points, it returns the playoff field, following ESPN's rules: division winners, `playoffSeedingRule` and the tiebreak order. This is the core piece, and the playoff scenarios proposal reuses it.
 
-**Check it first:** run it on every finished season and compare with `playoffSeed` from `mTeam`. Any mismatch points to the rule we got wrong.
+**Done:** `engine/seeding.py`, checked against `playoffSeed` for Gridiron 2019–2025 with `scripts/check_seeding.py`. The rules are in [season phases](season-phases.md#seeding-rules).
 
 ### Score model
 
@@ -68,7 +68,7 @@ With numpy (AWS's managed Lambda layer), one season takes well under a second. P
 
 ### Code
 
-Put pure functions in `utils_layer/python/utils/simulation.py`: `season_state`, `score_model`, `simulate` and `seed_teams`. They take parsed ESPN JSON and return plain data, with no AWS or ESPN calls, so they can be tested locally against saved responses.
+Put the simulation in `utils_layer/python/engine/simulation.py` (`score_model`, `simulate`), next to the season model (`engine/season.py`) and seeding (`engine/seeding.py`). They take a parsed `Season` and return plain data, with no AWS or ESPN calls, so they can be tested locally. Records for a simulated game come from simulated points, not ESPN's `winner`.
 
 ### API and storage
 
@@ -117,7 +117,7 @@ The same highlights can also be ranked across every season, for a league-history
 
 ## First step
 
-Get Gridiron's `mSettings` for one past season and the current one, build the seeding function, and test it against every past season.
+Done: the seeding function, checked against every Gridiron season ESPN serves without a cookie (2019–2025). Next is the score model and simulation.
 
 ## Related
 

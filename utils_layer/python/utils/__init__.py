@@ -8,6 +8,7 @@ from contextvars import ContextVar, copy_context
 from itertools import groupby
 from datetime import datetime, date, timedelta, timezone
 from botocore.exceptions import ClientError
+from engine.season import VIEWS as SEASON_VIEWS, parse_season
 
 s3 = boto3.client('s3')
 CACHE_BUCKET = 'ffalmanac-data'
@@ -213,6 +214,18 @@ def player_info(year, league_id):
     headers = {'x-fantasy-filter': json.dumps(filters)}
     resp = load_data(year, 'kona_player_info', league_id, headers=headers)
     return resp["players"]
+
+
+def load_season(year, league_id):
+    """Load a season as an engine Season (utils_layer/python/engine/season.py)."""
+    prefetch(league_id, [year], SEASON_VIEWS)
+    views = {}
+    for view in SEASON_VIEWS:
+        data = load_data(year, view, league_id)
+        if _is_error(data):
+            raise EspnError(data["details"][0])
+        views[view] = data
+    return parse_season(league_id, year, views)
 
 
 def load_matchups(year, league_id):

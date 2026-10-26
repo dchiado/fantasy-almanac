@@ -1,6 +1,6 @@
 # Proposal: Season phases and a season archive
 
-**Status:** Step 1 done (October 2026). Steps 2–6 not started.
+**Status:** Steps 1 and 2 done (October 2026). Steps 3–6 not started.
 
 ## Problem
 
@@ -70,10 +70,24 @@ Season features take `year` and `throughWeek`. That gives:
 
 ### Backend
 
-- **Season model** (`utils_layer/python/utils/season.py`): one parser from raw views to teams, owners by SWID, settings and a games table (year, week, tier, both sides, scores, margin, winner). New features read this, not raw ESPN. It's also the games table for [plain-text queries](plain-text-queries.md).
-- **Engine modules:** `seeding.py` (checked against `playoffSeed` for every past season), `simulation.py` (numpy), `scenarios.py`, `luck.py`, and later `lineups.py`, `draft.py`, `transactions.py`. Pure functions, testable locally against saved responses.
+- **Engine package** (`utils_layer/python/engine/`), separate from `utils` so it imports nothing from AWS and runs locally with only the standard library. `utils` loads data; `engine` works on it.
+- **Season model** (`engine/season.py`, done): `parse_season` turns `mSettings`, `mMatchupScore` and `mTeam` into `Settings`, `Team`s (with owner SWID and name) and `Game`s (week, tier, both sides, points, winner). `records(season, through_week)` builds regular-season records from ESPN's `winner`, not by comparing points, because some leagues break equal scores. Lambdas call `utils.load_season(year, league_id)`. New features read this, not raw ESPN. It's also the games table for [plain-text queries](plain-text-queries.md).
+- **Seeding** (`engine/seeding.py`, done): `seed_teams(records, rule)` orders every team, as described under [Seeding rules](#seeding-rules).
+- **Later engine modules:** `simulation.py` (numpy), `scenarios.py`, `luck.py`, then `lineups.py`, `draft.py`, `transactions.py`.
 - **One routed lambda** (`SeasonFunction`, Python) for all season features: `GET /season?year=&throughWeek=` returns a bundle for the season page, `GET /season/{artifact}?...` returns one artifact. The account allows 10 concurrent lambdas, so one bundle request beats six parallel ones.
 - New engine code stays in Python, for numpy.
+
+### Seeding rules
+
+Observed from Gridiron's 2019–2025 seasons. All seven match ESPN's `playoffSeed` for every team:
+
+1. Each division's winner is seeded first, best record first.
+2. Every other team follows, best record first.
+3. Ties, including ties for a division, go to `playoffSeedingRule`.
+
+Gridiron only uses `TOTAL_POINTS_SCORED` (and `playoffSeedingRuleBy: 0`, meaning unknown), so that's the only tiebreaker implemented. Any other rule raises `UnsupportedSeedingRule`, so features fail visibly instead of showing wrong seeds. Add a rule when a league that uses it can be checked.
+
+To check a league: `python3 scripts/check_seeding.py <leagueId>`. Gridiron's 2005–2018 seasons need `ESPN_S2` and haven't been checked yet.
 
 ### Frontend
 
@@ -97,7 +111,7 @@ Season features take `year` and `throughWeek`. That gives:
 ## Steps
 
 1. **Done.** Finality-aware caching (`load_data`, the in-memory cache, `POST /cache`, `GET /cache/status`), week-keyed cache keys, phase in `/info`, and the fix for the "Include playoffs" filter being ignored.
-2. Season model and seeding function, checked against every past Gridiron season.
+2. **Done.** Season model (`engine/season.py`, `utils.load_season`) and seeding (`engine/seeding.py`), checked against Gridiron 2019–2025. Unit tests in `tests/`, ESPN check in `scripts/check_seeding.py`.
 3. Playoff odds and luck, `SeasonFunction`, and a basic `/seasons/:year` page.
 4. Playoff scenarios and the phase-aware Home, tested on past seasons with `throughWeek`.
 5. Data checks for the offseason features (transactions, weekly rosters, drafts), then the full season review.
@@ -108,3 +122,4 @@ Season features take `year` and `throughWeek`. That gives:
 - Seasons cached under the old calendar-year rule may have been written mid-final. Check any 2021–2025 season whose `espn-cache/` objects were written before about January 10 of the next year, and delete it so it's refetched.
 - Whether the seven-day grace period is long enough for ESPN's stat corrections.
 - Whether `stretch_run` should also start early when the first team clinches or is eliminated.
+- Whether seeding holds for Gridiron's 2005–2018 seasons (run `scripts/check_seeding.py` with `ESPN_S2`), and what `playoffSeedingRuleBy` means.

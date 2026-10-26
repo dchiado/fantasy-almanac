@@ -33,6 +33,7 @@ Everything it shows is **a function of ESPN data**, built so that nothing has to
 3. **Compute lazily, store by input.** Derived results are computed on first request and saved under a key that names what they depend on: league, season, week, and a model version (`-v2`). Changing a model means bumping the version, not cleaning up old data.
 4. **No scheduled jobs.** If something fails, the next request recomputes it. `POST /cache` is a manual backfill that's safe to rerun.
 5. **Stored data is served only after ESPN grants access.** Every request makes one live `mStatus` call first. If ESPN refuses it (a private league without a valid `espn_s2`), nothing is read from S3.
+6. **Missing beats wrong.** If a league uses a rule we haven't checked against ESPN (such as a seeding tiebreaker), fail clearly instead of guessing. Check rules against ESPN's own results for past seasons (`scripts/check_seeding.py`).
 
 ### S3 layout (`ffalmanac-data`)
 
@@ -81,11 +82,15 @@ lambdas/
   # Baseball — JS
   baseballOverallStandings/  GET /baseball/overall-standings
   baseballDailyScores/       no route — daily MLB scores email via SES
-utils_layer/            Shared Python layer (utils package)
+utils_layer/python/     Shared Python layer
+  utils/                  Loading ESPN data: S3 archive, finality, phases
+  engine/                 Pure season logic (season model, seeding); no AWS or ESPN calls
 frontend/               React app (CRA)
 docs/
   espn-api/             Reference for ESPN's (unofficial) Fantasy API, with sample responses
   proposals/            Write-ups for possible future features
+tests/                  Unit tests for engine/
+scripts/                Local tools, e.g. check_seeding.py
 template.yaml           AWS SAM template
 samconfig.toml          SAM deploy config (dev + prod)
 ```
@@ -122,6 +127,20 @@ sam deploy --config-env prod
 ```
 
 Prod requires a changeset confirmation (`confirm_changeset = true` in `samconfig.toml`).
+
+### Season engine
+
+Season features are built on `utils_layer/python/engine/`, which takes ESPN data and returns plain data with no AWS or ESPN calls. Lambdas get a parsed season from `utils.load_season(year, league_id)` (cached like any other ESPN data), then pass it to engine functions. New features should read the `Season` model rather than raw ESPN views.
+
+The engine needs only the Python standard library, so it runs locally:
+
+```bash
+python3 -m unittest discover tests          # unit tests on made-up seasons
+python3 scripts/check_seeding.py 166975     # our playoff seeds vs ESPN's, every past season
+ESPN_S2=... python3 scripts/check_seeding.py 166975   # include seasons ESPN only serves with a cookie
+```
+
+Don't commit real league responses as test data; they include members' names.
 
 ### Adding a new lambda
 

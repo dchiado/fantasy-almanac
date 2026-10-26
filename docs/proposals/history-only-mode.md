@@ -68,6 +68,8 @@ Edge case: `headToHead` and `headToHeadForm` take team names and owner IDs from 
 
 ## Prerequisites
 
+> **Update (October 2026):** ESPN serves some of a private league's past seasons without a cookie (Gridiron's 2019–2025, through `/seasons/{year}`; see [ESPN API: authentication](../espn-api/README.md#authentication)). For those seasons, history-only mode doesn't depend on what's in S3. The current season, and 2018 and earlier, still need the cookie or the cache. Since step 1 of [season phases](season-phases.md), a season is only archived once it's final, and archived seasons are only served after the live `mStatus` call succeeds. This proposal would relax that for allowlisted leagues.
+
 The feature is only as good as what's in S3. Check coverage before building:
 
 - `GET /cache/status?leagueId=166975&startYear=<established>` reports which years have all 17 views.
