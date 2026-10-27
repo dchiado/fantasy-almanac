@@ -18,7 +18,7 @@ Current season only. Past seasons show as an end-of-season recap without scenari
 
 ## How it works
 
-`utils_layer/python/engine/scenarios.py`, `playoff_scenarios(season, through_week)`, part of the season report (`GET /season`, `scenarios`; `null` outside the stretch run). Shown at the top of the season page and as Home's first card during the stretch run (`frontend/src/components/season/PlayoffPicture.jsx`).
+`utils_layer/python/engine/scenarios.py`, `playoff_scenarios(season, through_week)`, part of the season report (`GET /season`, `scenarios`; `null` outside the stretch run). Shown at the top of Playoff race (`/playoffs`) and as Home's first card during the stretch run (`frontend/src/components/season/PlayoffPicture.jsx`).
 
 - **Every combination of results** for the remaining games: 2¹⁸ = 262,144 with 3 weeks left in a 12-team league. About 4.5 seconds in plain Python.
 - **Certain, whatever the points:** for each combination, a team is "in for sure" if it makes it while losing every tie on record, and "still alive" if it makes it while winning every tie. Under division-winners-first seeding, how other teams' ties break doesn't change how many finish ahead of a team, so this can be counted from records alone (`_Bounds`) instead of running the seeding function. It's exact when ties go to total points (tested against `seed_teams` on random leagues) and conservative for head-to-head: it may miss a clinch head-to-head guarantees, never claim a false one.

@@ -144,57 +144,34 @@ def odds_after_week(season, week, simulations=SIMULATIONS):
 
 
 def playoff_odds(season, simulations=SIMULATIONS):
-    """Odds after every completed week, from week 0 (before any games), plus highlights."""
-    weeks = [odds_after_week(season, week, simulations)
-             for week in range(completed_weeks(season) + 1)]
-    return {"weeks": weeks, "highlights": highlights(season, weeks)}
+    """Odds after every completed week, from week 0 (before any games)."""
+    return {"weeks": [odds_after_week(season, week, simulations)
+                      for week in range(completed_weeks(season) + 1)]}
 
 
 def highlights(season, weeks):
-    """The season's biggest moves in playoff odds. Collapse and comeback need
-    the regular season to be over, since they depend on who made it."""
-    if len(weeks) < 2:
+    """The season's biggest collapse and comeback: the highest odds reached by a
+    team that missed the playoffs, and the lowest reached by one that made it.
+    Only once the regular season is over, and only from week 1: before any
+    games, every team is about even."""
+    if len(weeks) < 2 or weeks[-1]["week"] != season.settings.regular_season_weeks:
         return []
     # Each team's playoff odds by week. Weeks run 0, 1, 2..., so a list index is its week.
     pct = {t: [] for t in season.teams}
     for week_odds in weeks:
         for team in week_odds["teams"]:
             pct[team["team_id"]].append(team["playoff_pct"])
-    moves = [(pct[t][i] - pct[t][i - 1], t, weeks[i]["week"])
-             for t in season.teams for i in range(1, len(weeks))]
 
     found = []
-    gain, team_id, week = max(moves)
-    if gain > 0:
-        found.append({"type": "riser", "team_id": team_id, "week": week,
-                      "from": pct[team_id][week - 1], "to": pct[team_id][week]})
-    drop, team_id, week = min(moves)
-    if drop < 0:
-        found.append({"type": "faller", "team_id": team_id, "week": week,
-                      "from": pct[team_id][week - 1], "to": pct[team_id][week]})
-
-    if weeks[-1]["week"] == season.settings.regular_season_weeks:
-        made = {t for t in season.teams if pct[t][-1] == 1.0}
-        missed = [(max(pct[t]), t) for t in season.teams if t not in made]
-        if missed:
-            peak, team_id = max(missed)
-            found.append({"type": "collapse", "team_id": team_id,
-                          "week": pct[team_id].index(peak), "pct": peak})
-        survivors = [(min(pct[t]), t) for t in made]
-        if survivors:
-            low, team_id = min(survivors)
-            found.append({"type": "comeback", "team_id": team_id,
-                          "week": pct[team_id].index(low), "pct": low})
-
-    # The game whose week moved its two teams' odds the most
-    swings = [(abs(pct[g.home][g.week] - pct[g.home][g.week - 1]) +
-               abs(pct[g.away][g.week] - pct[g.away][g.week - 1]), g)
-              for g in season.regular_season_games(weeks[-1]["week"])]
-    if swings:
-        swing, game = max(swings, key=lambda s: s[0])
-        if swing > 0:
-            found.append({"type": "biggest_game", "week": game.week, "home": game.home,
-                          "away": game.away, "winner": game.winner,
-                          "home_points": game.home_points, "away_points": game.away_points,
-                          "swing": swing})
+    made = {t for t in season.teams if pct[t][-1] == 1.0}
+    missed = [(max(pct[t][1:]), t) for t in season.teams if t not in made]
+    if missed:
+        peak, team_id = max(missed)
+        found.append({"type": "collapse", "team_id": team_id,
+                      "week": pct[team_id].index(peak, 1), "pct": peak})
+    survivors = [(min(pct[t][1:]), t) for t in made]
+    if survivors:
+        low, team_id = min(survivors)
+        found.append({"type": "comeback", "team_id": team_id,
+                      "week": pct[team_id].index(low, 1), "pct": low})
     return found

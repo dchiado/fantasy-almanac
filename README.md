@@ -41,7 +41,7 @@ Everything it shows is **a function of ESPN data**, built so that nothing has to
 espn-cache/{league}/{year}/{view}.json                 raw ESPN, final seasons only
 espn-cache/{league}/{year}/weeks/{week}/{view}.json    raw ESPN for one scoring period
 espn-cache/{league}/{year}/_finality.json              when every week was first seen played
-derived/{league}/{year}/season-report-v{n}.json        season page data (GET /season) for a final season
+derived/{league}/{year}/season-report-v{n}.json        season report (GET /season) for a final season
 derived/{league}/{year}/season-report-v{n}-{inputs}.json   ... for a season in progress, by a hash of its decided games
 power_rankings/league_{league}/{year}/week_{week}/     AI writeups
 ```
@@ -60,7 +60,7 @@ Each league's current season is in one phase. `/info` returns it as `phase` (alo
 
 The phase only changes what Home leads with (`CARDS_BY_PHASE` in `LeagueDashboard.jsx`); every page stays reachable. Past seasons show as an end-of-season recap all year. See [docs/proposals/season-phases.md](docs/proposals/season-phases.md) for the plan.
 
-Navigation is **Home · This season · Seasons · History** (plus League on mobile), defined once in `frontend/src/utils/seasons.js`. *This season* is the current season's page (`/seasons/{year}`) and power rankings; *Seasons* is every other season's recap; *History* holds the all-time pages: standings, head-to-head, records and keepers.
+Navigation is defined once in `frontend/src/utils/seasons.js`. The current season's pages are **Power rankings** (`/power-rankings`), **Playoff race** (`/playoffs`: the stretch-run picture and odds by week) and **Standings** (`/standings`: seed order with playoff odds, all-play, expected wins and luck beside the record), next to **History** (`/history`: past seasons, all-time standings at `/all-time-standings`, head-to-head, records, keepers). On desktop they're the header tabs. On mobile the bottom bar is Home · This season · History · League, and This season has sub-tabs for its three pages. A past season's recap is `/seasons/{year}`.
 
 ---
 
@@ -70,7 +70,7 @@ Navigation is **Home · This season · Seasons · History** (plus League on mobi
 lambdas/
   # Football — Python
   leagueInfo/             GET /info
-  season/                 GET /season   (season page: playoff odds, scenarios, luck)
+  season/                 GET /season   (season report: playoff odds, scenarios, luck)
   standings/              GET /standings
   headToHeadForm/         GET /head-to-head-form
   headToHead/             GET /head-to-head
@@ -148,7 +148,7 @@ python3 scripts/check_scenarios.py 166975   # clinched/eliminated claims vs what
 
 Don't commit real league responses as test data; they include members' names.
 
-The season page (`GET /season?leagueId=&year=`) is one lambda returning one report (`engine/report.py`): standings, playoff odds by week with highlights, stretch-run scenarios, luck and the schedule swap grid. Every report is computed on first request and stored: a final season once, a season in progress once per set of decided games (`report_inputs`), so it's recomputed only after a game finishes. That first computation takes about 2 seconds, or about 7 with three weeks of scenarios. Bump `REPORT_VERSION` when the report or a model behind it changes.
+The season pages (Playoff race, Standings, and past-season recaps) all come from one lambda returning one report (`GET /season?leagueId=&year=`, `engine/report.py`): standings, playoff odds by week, highlights (biggest collapse, biggest comeback, the bubble), stretch-run scenarios, luck and the schedule swap grid. Every report is computed on first request and stored: a final season once, a season in progress once per set of decided games (`report_inputs`), so it's recomputed only after a game finishes. That first computation takes about 2 seconds, or about 7 with three weeks of scenarios. Bump `REPORT_VERSION` when the report or a model behind it changes.
 
 ### Adding a new lambda
 

@@ -4,18 +4,18 @@ import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
 import HomeIcon from '@mui/icons-material/Home';
 import ScoreboardIcon from '@mui/icons-material/Scoreboard';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { activeTab, navTabs } from '../../utils/seasons';
+import { THIS_SEASON_PAGES, activePage, thisSeasonPath } from '../../utils/seasons';
 import './FooterMobile.css';
 
-const ICONS = { 'this-season': <ScoreboardIcon />, seasons: <CalendarMonthIcon />, history: <MenuBookIcon /> };
+// The current season's pages share one tab here; ThisSeasonTabs switches between them
+const tabFor = (page) => (THIS_SEASON_PAGES.some((p) => p.key === page) ? 'this-season' : page);
 
-// Five tabs at phone width, so drop MUI's 80px minimum and most of the side padding
-const actionSx = { minWidth: 0, px: 0.5, '& .MuiBottomNavigationAction-label': { fontSize: 11, whiteSpace: 'nowrap' }, '& .Mui-selected': { fontSize: 11 } };
+// Keep labels on one line, at one size: MUI enlarges the selected one, which wraps "This season"
+const actionSx = { minWidth: 0, px: 0.5, '& .MuiBottomNavigationAction-label, & .MuiBottomNavigationAction-label.Mui-selected': { fontSize: 12, whiteSpace: 'nowrap' } };
 
 const FooterMobile = () => {
   const { pathname } = useLocation();
@@ -23,11 +23,10 @@ const FooterMobile = () => {
 
   return (
     <Paper className='mobile-footer' square elevation={0}>
-      <BottomNavigation showLabels value={activeTab(pathname, leagueInfo)}>
+      <BottomNavigation showLabels value={tabFor(activePage(pathname))}>
         <BottomNavigationAction label="Home" value="home" component={Link} to="/" icon={<HomeIcon />} sx={actionSx} />
-        {navTabs(leagueInfo).map((tab) => (
-          <BottomNavigationAction key={tab.key} label={tab.label} value={tab.key} component={Link} to={tab.to} icon={ICONS[tab.key]} sx={actionSx} />
-        ))}
+        <BottomNavigationAction label="This season" value="this-season" component={Link} to={thisSeasonPath(leagueInfo)} icon={<ScoreboardIcon />} sx={actionSx} />
+        <BottomNavigationAction label="History" value="history" component={Link} to="/history" icon={<MenuBookIcon />} sx={actionSx} />
         <BottomNavigationAction label="League" value="league" component={Link} to="/league-info-mobile" icon={<EditIcon />} sx={actionSx} />
       </BottomNavigation>
     </Paper>

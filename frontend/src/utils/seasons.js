@@ -13,20 +13,27 @@ export const latestRecapSeason = (leagueInfo) => {
 // The current season has nothing to show before its draft
 export const seasonStarted = (leagueInfo) => leagueInfo?.phase !== 'preseason';
 
-// The main navigation, shared by the desktop header and the mobile bottom bar
-export const navTabs = (leagueInfo) => [
-  { key: 'this-season', label: 'This season', to: `/seasons/${currentSeason(leagueInfo)}` },
-  { key: 'seasons', label: 'Seasons', to: '/seasons' },
-  { key: 'history', label: 'History', to: '/history' },
+// The current season's pages: tabs in the desktop header, and sub-tabs under
+// "This season" on mobile
+export const THIS_SEASON_PAGES = [
+  { key: 'rankings', label: 'Power rankings', shortLabel: 'Rankings', to: '/power-rankings' },
+  { key: 'playoffs', label: 'Playoff race', shortLabel: 'Playoff race', to: '/playoffs' },
+  { key: 'standings', label: 'Standings', shortLabel: 'Standings', to: '/standings' },
 ];
 
-const HISTORY_PATHS = ['/history', '/standings', '/head-to-head', '/records', '/keepers'];
+// Where mobile's "This season" tab opens: the playoff race once it's the story
+export const thisSeasonPath = (leagueInfo) => (
+  ['stretch_run', 'playoffs', 'offseason'].includes(leagueInfo?.phase) ? '/playoffs' : '/power-rankings'
+);
 
-// Which tab a page belongs to: 'home', 'this-season', 'seasons', 'history', 'league' or null
-export const activeTab = (pathname, leagueInfo) => {
+const HISTORY_PATHS = ['/history', '/seasons', '/all-time-standings', '/head-to-head', '/records', '/keepers'];
+
+// Which page of the main navigation a path belongs to: 'home', a THIS_SEASON_PAGES
+// key, 'history', 'league' or null
+export const activePage = (pathname) => {
   if (pathname === '/') return 'home';
-  if (pathname === `/seasons/${currentSeason(leagueInfo)}` || pathname.startsWith('/power-rankings')) return 'this-season';
-  if (pathname.startsWith('/seasons')) return 'seasons';
+  const thisSeason = THIS_SEASON_PAGES.find((page) => pathname.startsWith(page.to));
+  if (thisSeason) return thisSeason.key;
   if (HISTORY_PATHS.some((p) => pathname.startsWith(p))) return 'history';
   if (pathname.startsWith('/league-info-mobile') || pathname.startsWith('/suggestions')) return 'league';
   return null;

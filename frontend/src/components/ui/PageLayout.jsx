@@ -3,8 +3,8 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
 // Common page frame: consistent gutters, a left-aligned title row, and an optional actions slot
-// that drops below the title on phones.
-const PageLayout = ({ title, subtitle, actions, maxWidth = 1200, children }) => (
+// that drops below the title on phones. `nav` (e.g. sub-tabs) sits above the title.
+const PageLayout = ({ title, subtitle, actions, nav, maxWidth = 1200, children }) => (
   <Box
     component="main"
     sx={{
@@ -17,6 +17,7 @@ const PageLayout = ({ title, subtitle, actions, maxWidth = 1200, children }) => 
       textAlign: 'left',
     }}
   >
+    {nav}
     {(title || actions) &&
       <Box
         sx={{

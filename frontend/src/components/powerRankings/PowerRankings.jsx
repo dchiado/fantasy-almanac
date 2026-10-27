@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import LoadingState from "../ui/LoadingState";
 import MovementBadge from "../ui/MovementBadge";
 import PageLayout from "../ui/PageLayout";
+import ThisSeasonTabs from "../season/ThisSeasonTabs";
 import SectionCard from "../ui/SectionCard";
 import StatTable from "../ui/StatTable";
 import { DEFAULT_WEIGHTS, rankWithMovement } from "../../utils/powerRankings";
@@ -118,7 +119,7 @@ const PowerRankings = ({ setError }) => {
 	}
 
 	return (
-		<PageLayout maxWidth={1300} title="Power Rankings" subtitle="Arrows show movement since last week.">
+		<PageLayout maxWidth={1300} title="Power Rankings" subtitle="Arrows show movement since last week." nav={<ThisSeasonTabs />}>
 			{parsedRankings.length > 0 &&
 				<Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 4 } }}>
 					<SectionCard title="This week's writeup">

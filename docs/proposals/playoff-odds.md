@@ -68,11 +68,11 @@ It's plain Python, with no numpy: a whole season (every week) takes about 2 seco
 
 ### Code
 
-`utils_layer/python/engine/simulation.py`: `score_model`, `odds_after_week`, `playoff_odds` (every completed week plus highlights) and `completed_weeks`. Records for a simulated game come from simulated points, not ESPN's `winner`. Tests are in `tests/test_odds_and_luck.py`.
+`utils_layer/python/engine/simulation.py`: `score_model`, `odds_after_week`, `playoff_odds` (every completed week), `highlights` (collapse and comeback) and `completed_weeks`. Records for a simulated game come from simulated points, not ESPN's `winner`. Tests are in `tests/test_odds_and_luck.py`.
 
 ### API and storage
 
-- **Endpoint:** odds are part of the season report, `GET /season?leagueId=&year=` (`lambdas/season/`, `engine/report.py`), not their own endpoint. One request loads the whole season page.
+- **Endpoint:** odds are part of the season report, `GET /season?leagueId=&year=` (`lambdas/season/`, `engine/report.py`), not their own endpoint. One request loads a whole season page.
 - **Final seasons:** computed once and saved to `derived/{leagueId}/{year}/season-report-v{REPORT_VERSION}.json`. Bump `REPORT_VERSION` when the model changes.
 - **Current season:** through the last week whose games are all decided, stored under a hash of the decided games (`report_inputs`), so it's recomputed only after a game finishes.
 - **Unsupported tiebreakers:** `playoff_odds` is `null` and `unsupported_seeding_rule` names the rule; the rest of the report still works.
@@ -84,7 +84,6 @@ It's plain Python, with no numpy: a whole season (every week) takes about 2 seco
         { "team_id": 1, "playoff_pct": 0.62, "division_pct": 0.41, "seed_dist": [0.1, 0.2, ...], "avg_wins": 7.8 }
       ]}
     ],
-    "highlights": [{ "type": "collapse", "team_id": 4, "week": 7, "pct": 0.99 }, ...]
   }
   ```
 
@@ -92,24 +91,22 @@ It's plain Python, with no numpy: a whole season (every week) takes about 2 seco
 
 **Chart:** a line chart with weeks on the x-axis, 0–100% on the y-axis and one line per team.
 
-Built as `frontend/src/components/season/` (`/seasons/:year`):
+Built in `frontend/src/components/season/`, on Playoff race (`/playoffs`) and past-season recaps (`/seasons/:year`):
 
 - Twelve colors would be unreadable, so it uses emphasis: every team is a gray context line, and the selected team (the champion by default) is highlighted and labeled at its line end. Tap a team in the table to highlight it. The colors are `chartHighlight`/`chartContext` in `theme.js`, checked with the dataviz palette validator.
-- A crosshair follows the pointer, a drag, or the arrow keys. The table under the chart shows every team for that week (playoff %, change, division %, projected wins), so no value is only in a tooltip. On phones, Change, Division and Projected wins are hidden.
+- A crosshair follows the pointer, a drag, or the arrow keys. The table under the chart shows every team for that week (odds, low, high, change, division %, projected wins), so no value is only in a tooltip. Low and high are each team's range from week 1 to that week, leaving out the last week, which settles everything. On phones, only odds, low and high show.
 - Mid-season odds of 0 or 1 show as `<1%`/`>99%`; only decided results show as 0% or 100%.
 - Season picker in the page header. Checked at 375px and desktop.
 
-**Highlights** for the season, shown as cards above or below the chart:
+**Highlights** for the season, shown as cards above the chart once the regular season is over (`highlights` in the report):
 
 | Highlight | Definition |
 | --- | --- |
-| Biggest riser | Largest single-week gain in playoff % |
-| Biggest faller | Largest single-week drop |
-| Collapse | Highest odds reached by a team that missed the playoffs |
-| Comeback | Lowest odds reached by a team that made the playoffs |
-| Biggest game | The game whose result moved the two teams' odds the most |
+| Biggest collapse | Highest odds reached from week 1 on by a team that missed the playoffs |
+| Biggest comeback | Lowest odds reached from week 1 on by a team that made the playoffs |
+| The bubble | The last team in and the first team out, and what separated them: games, or on equal records the tiebreaker (by how many points) |
 
-Built: riser, faller, collapse, comeback and biggest game (`highlights` in `engine/simulation.py`). Collapse and comeback only appear once the regular season is over. A team's last-week move often wins "biggest jump" or "drop", since the final week settles everything; that's accurate, if less surprising.
+Biggest single-week rises and drops were tried and dropped: they almost always land in week 1 (everyone starts about even) or the last week (which settles everything).
 
 The same highlights can also be ranked across every season, for a league-history page: "biggest collapse in Gridiron history".
 

@@ -95,7 +95,7 @@ To check a league: `python3 scripts/check_seeding.py <leagueId>`, with `ESPN_S2`
 
 ### Frontend
 
-- Navigation (done): **Home · This season · Seasons · History**, plus League on mobile (`frontend/src/utils/seasons.js`). This season is `/seasons/{current year}` and power rankings; Seasons is every other season's recap (`/seasons` opens the latest finished one); History (`/history`) holds the all-time pages (standings, head-to-head, records, keepers, and later career luck and draft history). It replaced the mobile Data menu.
+- Navigation (done, `frontend/src/utils/seasons.js`): the current season's pages, Power rankings, Playoff race (`/playoffs`) and Standings (`/standings`), plus History (`/history`), which holds past seasons (`/seasons/{year}` recaps) and the all-time pages (all-time standings at `/all-time-standings`, head-to-head, records, keepers, and later career luck and draft history). Desktop shows them as header tabs. Mobile's bottom bar is Home · This season · History · League, with sub-tabs across the three current-season pages. History replaced the mobile Data menu.
 - Home (done) picks and orders its cards by phase (`CARDS_BY_PHASE` in `LeagueDashboard.jsx`): the playoff picture in the stretch run, playoff odds in the regular season, and a season recap in the playoffs, offseason and preseason.
 - `leagueInfo` in Redux holds `phase`, `regularSeasonWeeks` and `regularSeasonWeeksLeft`.
 
@@ -116,8 +116,8 @@ To check a league: `python3 scripts/check_seeding.py <leagueId>`, with `ESPN_S2`
 
 1. **Done.** Finality-aware caching (`load_data`, the in-memory cache, `POST /cache`, `GET /cache/status`), week-keyed cache keys, phase in `/info`, and the fix for the "Include playoffs" filter being ignored.
 2. **Done.** Season model (`engine/season.py`, `utils.load_season`) and seeding (`engine/seeding.py`), checked against all 21 Gridiron seasons (2005–2025). Unit tests in `tests/`, ESPN check in `scripts/check_seeding.py`.
-3. **Done.** Playoff odds (`engine/simulation.py`, calibrated with `scripts/check_odds.py`), luck (`engine/luck.py`), the season report (`engine/report.py`) served by `SeasonFunction` (`GET /season`), and `/seasons/:year`. It's linked as "Seasons" in the header and the mobile Data menu; the four-tab navigation waits for step 4. Details are in [playoff odds](playoff-odds.md) and [luck and schedule](luck-and-schedule.md).
-4. **Done.** Playoff scenarios ([playoff scenarios](playoff-scenarios.md), checked with `scripts/check_scenarios.py`), the playoff picture on the season page and Home, Home cards by phase, the four-tab navigation and `/history`. Current-season reports are now stored by a hash of their decided games, so they're computed once per finished game rather than on every request.
+3. **Done.** Playoff odds (`engine/simulation.py`, calibrated with `scripts/check_odds.py`), luck (`engine/luck.py`), the season report (`engine/report.py`) served by `SeasonFunction` (`GET /season`), and `/seasons/:year`. Details are in [playoff odds](playoff-odds.md) and [luck and schedule](luck-and-schedule.md).
+4. **Done.** Playoff scenarios ([playoff scenarios](playoff-scenarios.md), checked with `scripts/check_scenarios.py`), the playoff picture on Playoff race and Home, Home cards by phase, the navigation above, and `/history`. Current-season reports are now stored by a hash of their decided games, so they're computed once per finished game rather than on every request.
 5. Data checks for the offseason features (transactions, weekly rosters, drafts), then the full season review.
 6. Plain-text queries and history-only mode.
 

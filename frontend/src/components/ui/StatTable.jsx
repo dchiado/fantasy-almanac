@@ -24,9 +24,12 @@ const hideBelowSx = (bp) => bp ? { display: { xs: 'none', [bp]: 'table-cell' } }
  *   render?: (row, rowIdx) => node,
  *   cellSx?: (row, rowIdx) => sx,
  * }]
+ *
+ * dense: halve the side padding on phones, for tables that need one more column there
  */
-const StatTable = ({ columns, rows, getRowKey = (_, idx) => idx, ariaLabel, maxWidth = '100%', stickyHeader = false, maxHeight }) => {
+const StatTable = ({ columns, rows, getRowKey = (_, idx) => idx, ariaLabel, maxWidth = '100%', stickyHeader = false, maxHeight, dense = false }) => {
   const alignFor = (col) => col.align ?? (col.numeric ? 'right' : 'left');
+  const denseSx = dense ? { px: { xs: 1, sm: 2 } } : {};
 
   const stickySx = {
     position: 'sticky',
@@ -55,6 +58,7 @@ const StatTable = ({ columns, rows, getRowKey = (_, idx) => idx, ariaLabel, maxW
                   color: 'text.secondary',
                   backgroundColor: 'var(--fa-surface-raised)',
                   py: 1.25,
+                  ...denseSx,
                   minWidth: col.minWidth,
                   ...(col.sticky ? { ...stickySx, zIndex: 3 } : {}),
                   ...hideBelowSx(col.hideBelow),
@@ -85,6 +89,7 @@ const StatTable = ({ columns, rows, getRowKey = (_, idx) => idx, ariaLabel, maxW
                   sx={{
                     fontSize: 'inherit',
                     py: 1,
+                    ...denseSx,
                     whiteSpace: col.wrap ? 'normal' : 'nowrap',
                     minWidth: col.minWidth,
                     ...(col.sticky ? stickySx : {}),

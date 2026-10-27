@@ -4,12 +4,14 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import PeopleIcon from '@mui/icons-material/People';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import LockIcon from '@mui/icons-material/Lock';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import PageLayout from "../ui/PageLayout";
 
 const PAGES = [
-  { to: '/standings', icon: TableChartIcon, title: 'All-time standings', body: "Every owner's record and titles, season by season" },
+  { to: '/seasons', icon: CalendarMonthIcon, title: 'Past seasons', body: 'Each season in review: playoff odds week by week, collapses and comebacks, final standings with luck' },
+  { to: '/all-time-standings', icon: TableChartIcon, title: 'All-time Standings', body: "Every owner's record and titles, season by season" },
   { to: '/head-to-head', icon: PeopleIcon, title: 'Head-to-head', body: 'Any two owners against each other, all-time' },
   { to: '/records', icon: WorkspacePremiumIcon, title: 'Records', body: 'The best and worst weeks, seasons and blowouts' },
   // Keeper rules are Gridiron's own

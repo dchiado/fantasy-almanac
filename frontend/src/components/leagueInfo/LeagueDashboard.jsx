@@ -124,7 +124,7 @@ const summarizeStandings = (standings) => {
 };
 
 const ChampionsCard = ({ summary, loading, error }) => (
-  <DashCard title="Champions" to="/standings" linkLabel="Standings">
+  <DashCard title="Champions" to="/all-time-standings" linkLabel="All-time Standings">
     {loading ? <CardSkeleton lines={3} />
       : error || !summary?.reigning ? <Unavailable>No champions crowned yet.</Unavailable>
       : <>
@@ -154,7 +154,7 @@ const ChampionsCard = ({ summary, loading, error }) => (
 );
 
 const LeadersCard = ({ summary, loading, error }) => (
-  <DashCard title="Active career win %" to="/standings" linkLabel="Standings">
+  <DashCard title="Active career win %" to="/all-time-standings" linkLabel="All-time Standings">
     {loading ? <CardSkeleton lines={5} />
       : error || !summary?.leaders.length ? <Unavailable />
       : summary.leaders.map((o, idx) => (
@@ -217,7 +217,7 @@ const PlayoffOddsCard = ({ leagueId, year }) => {
   const names = Object.fromEntries((report?.teams ?? []).map((t) => [t.team_id, t.name]));
 
   return (
-    <DashCard title={report ? `Playoff odds · after week ${report.completed_weeks}` : 'Playoff odds'} to={`/seasons/${year}`} linkLabel="Season">
+    <DashCard title={report ? `Playoff odds · after week ${report.completed_weeks}` : 'Playoff odds'} to="/playoffs" linkLabel="Playoff race">
       {loading ? <CardSkeleton lines={6} />
         : error || odds.length === 0 ? <Unavailable>Odds start after week 1.</Unavailable>
         : odds.map((t, idx) => (
@@ -245,7 +245,7 @@ const PlayoffPictureCard = ({ leagueId, year }) => {
   const { data: report, loading, error } = useApi(`/season?leagueId=${leagueId}&year=${year}`);
 
   return (
-    <DashCard title={report?.scenarios ? `Playoff picture · week ${report.scenarios.week}` : 'Playoff picture'} to={`/seasons/${year}`} linkLabel="Everyone">
+    <DashCard title={report?.scenarios ? `Playoff picture · week ${report.scenarios.week}` : 'Playoff picture'} to="/playoffs" linkLabel="Everyone">
       {loading ? <CardSkeleton lines={6} />
         : error || !report?.scenarios ? <Unavailable />
         : <PlayoffPicture report={report} limit={report.playoff_team_count + 2} />
@@ -259,7 +259,7 @@ const PlayoffPictureCard = ({ leagueId, year }) => {
 const recapLines = (report) => {
   const names = Object.fromEntries(report.teams.map((t) => [t.team_id, t.name]));
   const champion = report.teams.find((t) => t.final_rank === 1);
-  const highlights = report.playoff_odds?.highlights ?? [];
+  const highlights = report.highlights ?? [];
   const collapse = highlights.find((h) => h.type === 'collapse');
   const comeback = highlights.find((h) => h.type === 'comeback');
   const luckiest = report.luck[0];

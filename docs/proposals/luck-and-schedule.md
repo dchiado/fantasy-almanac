@@ -1,6 +1,6 @@
 # Proposal: Luck and schedule analysis
 
-**Status:** Built per season (October 2026, step 3 of [season phases](season-phases.md)), not yet deployed: all-play, expected wins, luck, close games and the schedule swap grid are on the season page. Not built: luck by owner across seasons ("luckiest seasons in league history").
+**Status:** Built per season (October 2026, step 3 of [season phases](season-phases.md)), not yet deployed: all-play, expected wins, luck, close games and the schedule swap grid are on the Standings page and past-season recaps. Not built: luck by owner across seasons ("luckiest seasons in league history").
 
 ## Idea
 
@@ -24,7 +24,7 @@ Power rankings already counts all-play wins for the current season (`update_over
 - `luck(season, through_week)`: per team, all-play record, expected wins (the sum of its weekly all-play win percentage), luck (actual minus expected wins) and close-game record (`CLOSE_GAME_MARGIN` = 5). Sorted luckiest first. Across a season, luck sums to zero.
 - `schedule_swap(season, through_week)`: each team's record on every other team's schedule. When B's opponent was A, A plays B instead. The diagonal is the actual record, compared on points.
 
-Both are part of the season report (`GET /season`) and shown on `/seasons/:year`. Tests are in `tests/test_odds_and_luck.py`.
+Both are part of the season report (`GET /season`) and shown on Standings (`/standings`) and past-season recaps (`/seasons/:year`), as columns beside each team's record: the record is the context, the luck columns are what ESPN doesn't show. Tests are in `tests/test_odds_and_luck.py`.
 
 ## Notes
 

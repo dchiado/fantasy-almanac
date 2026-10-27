@@ -16,6 +16,7 @@ import LeagueInfoMobile from "./components/leagueInfoMobile/LeagueInfoMobile";
 import History from "./components/history/History";
 import Keepers from "./components/keepers/Keepers";
 import SeasonPage from "./components/season/SeasonPage";
+import CurrentSeasonPage from "./components/season/CurrentSeasonPage";
 import BaseballOverall from "./components/baseballOverall/BaseballOverall";
 import LoadingState from "./components/ui/LoadingState";
 
@@ -205,7 +206,7 @@ const App = () => {
 							/>
 						)}
 					</Route>
-					<Route path="/standings">
+					<Route path="/all-time-standings">
 						<Standings
 							setError={setError}
 						/>
@@ -219,6 +220,16 @@ const App = () => {
 						<PowerRankings
 							setError={setError}
 						/>
+					</Route>
+					<Route path="/playoffs">
+						<CurrentSeasonPage section="playoffs" setError={setError} />
+					</Route>
+					<Route path="/standings">
+						<CurrentSeasonPage section="standings" setError={setError} />
+					</Route>
+					{/* The current season's standings page was briefly called Luck */}
+					<Route path="/luck">
+						<Redirect to="/standings" />
 					</Route>
 					<Route path="/seasons/:year?">
 						<SeasonPage
