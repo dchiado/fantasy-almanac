@@ -10,12 +10,12 @@ import { useSelector } from "react-redux";
 import PageLayout from "../ui/PageLayout";
 
 const PAGES = [
-  { to: '/seasons', icon: CalendarMonthIcon, title: 'Past seasons', body: 'Each season in review: playoff odds week by week, collapses and comebacks, final standings with luck' },
+  { to: '/seasons', icon: CalendarMonthIcon, title: 'Past seasons', body: "Each season's playoff odds, collapses and final standings" },
   { to: '/all-time-standings', icon: TableChartIcon, title: 'All-time Standings', body: "Every owner's record and titles, season by season" },
   { to: '/head-to-head', icon: PeopleIcon, title: 'Head-to-head', body: 'Any two owners against each other, all-time' },
   { to: '/records', icon: WorkspacePremiumIcon, title: 'Records', body: 'The best and worst weeks, seasons and blowouts' },
   // Keeper rules are Gridiron's own
-  { to: '/keepers', icon: LockIcon, title: 'Keepers', body: 'Who each team can keep next season, and in which round', leagueId: '166975' },
+  { to: '/keepers', icon: LockIcon, title: 'Keepers', body: "Each team's keeper options for next season", leagueId: '166975' },
 ];
 
 // The league's all-time pages
@@ -25,7 +25,7 @@ const History = () => {
 
   return (
     <PageLayout maxWidth={900} title="History" subtitle="The whole league, every season">
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))' }, gridAutoRows: '1fr', gap: 2 }}>
         {pages.map(({ to, icon: Icon, title, body }) => (
           <Paper
             key={to}

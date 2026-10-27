@@ -124,7 +124,7 @@ const summarizeStandings = (standings) => {
 };
 
 const ChampionsCard = ({ summary, loading, error }) => (
-  <DashCard title="Champions" to="/all-time-standings" linkLabel="All-time Standings">
+  <DashCard title="Champions" to="/seasons" linkLabel="Past seasons">
     {loading ? <CardSkeleton lines={3} />
       : error || !summary?.reigning ? <Unavailable>No champions crowned yet.</Unavailable>
       : <>
