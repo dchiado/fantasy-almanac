@@ -43,7 +43,7 @@ All already cached in S3 for past seasons:
 
 Given final records and points, it returns the playoff field, following ESPN's rules: division winners, `playoffSeedingRule` and the tiebreak order. This is the core piece, and the playoff scenarios proposal reuses it.
 
-**Done:** `engine/seeding.py`, checked against `playoffSeed` for Gridiron 2019–2025 with `scripts/check_seeding.py`. The rules are in [season phases](season-phases.md#seeding-rules).
+**Done:** `engine/seeding.py`, checked against `playoffSeed` for Gridiron 2005–2025 with `scripts/check_seeding.py`. The rules are in [season phases](season-phases.md#seeding-rules).
 
 ### Score model
 
@@ -117,7 +117,7 @@ The same highlights can also be ranked across every season, for a league-history
 
 ## First step
 
-Done: the seeding function, checked against every Gridiron season ESPN serves without a cookie (2019–2025). Next is the score model and simulation.
+Done: the seeding function, checked against Gridiron 2005–2025. Next is the score model and simulation. The simulation must pass simulated games to `seed_teams` so `H2H_RECORD` leagues can break ties.
 
 ## Related
 

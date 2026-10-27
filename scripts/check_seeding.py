@@ -79,7 +79,8 @@ def check_season(season):
     if any(t.playoff_seed is None for t in season.teams.values()):
         return None, 'skipped: ESPN has no final seeds'
     try:
-        ours = seed_teams(records(season).values(), season.settings.seeding_rule)
+        ours = seed_teams(records(season).values(), season.settings.seeding_rule,
+                          season.regular_season_games())
     except UnsupportedSeedingRule as e:
         return None, f'skipped: unsupported tiebreaker {e}'
 
@@ -95,7 +96,26 @@ def check_season(season):
         lines.append(f'  {seed:>4}  {season.teams[a].name[:20]:<20} '
                      f'{r.wins}-{r.losses}-{r.ties} {r.points_for:8.2f} d{r.division_id}  '
                      f'{season.teams[b].name[:20]}{flag}')
+    if season.settings.seeding_rule == 'H2H_RECORD':
+        lines.extend(head_to_head_lines(season, recs))
     return False, '\n'.join(lines)
+
+
+def head_to_head_lines(season, recs):
+    """Games between teams with the same record, to see how ESPN broke the tie."""
+    lines = []
+    groups = {}
+    for r in recs.values():
+        groups.setdefault((r.wins, r.losses, r.ties), set()).add(r.team_id)
+    for (wins, losses, ties), team_ids in sorted(groups.items(), reverse=True):
+        if len(team_ids) < 2:
+            continue
+        lines.append(f'  head-to-head among teams at {wins}-{losses}-{ties}:')
+        for g in season.regular_season_games():
+            if g.home in team_ids and g.away in team_ids:
+                lines.append(f'    wk {g.week:>2}  {season.teams[g.home].name[:20]:<20} {g.home_points:6.2f}'
+                             f' - {g.away_points:6.2f}  {season.teams[g.away].name[:20]}')
+    return lines
 
 
 def main():

@@ -79,15 +79,21 @@ Season features take `year` and `throughWeek`. That gives:
 
 ### Seeding rules
 
-Observed from Gridiron's 2019–2025 seasons. All seven match ESPN's `playoffSeed` for every team:
+Observed from Gridiron's 2005–2025 seasons (8 to 12 teams, one to four divisions). All 21 seasons match ESPN's `playoffSeed` for every team:
 
 1. Each division's winner is seeded first, best record first.
 2. Every other team follows, best record first.
 3. Ties, including ties for a division, go to `playoffSeedingRule`.
 
-Gridiron only uses `TOTAL_POINTS_SCORED` (and `playoffSeedingRuleBy: 0`, meaning unknown), so that's the only tiebreaker implemented. Any other rule raises `UnsupportedSeedingRule`, so features fail visibly instead of showing wrong seeds. Add a rule when a league that uses it can be checked.
+Tiebreakers implemented:
 
-To check a league: `python3 scripts/check_seeding.py <leagueId>`. Gridiron's 2005–2018 seasons need `ESPN_S2` and haven't been checked yet.
+- `TOTAL_POINTS_SCORED`: more points for. Checked.
+- `H2H_RECORD`: with **two** tied teams, the better record in games between them, then more points for. With **three or more**, ESPN doesn't compare head-to-head across the group. The team with the most points goes first, and the rest are compared again, so head-to-head only decides the last two. Gridiron used this rule in 2005, 2006 and 2012–2014.
+  - An earlier version compared each team's head-to-head record against all the other tied teams at once. It matched 2005, 2006 and 2012, but not 2013 (a four-way tie at 8-6) or 2014 (two three-way ties). The rule above matches all five seasons. On a mismatch, the check script prints the games between tied teams.
+
+Any other rule raises `UnsupportedSeedingRule`, so features fail visibly instead of showing wrong seeds. Add a rule when a league that uses it can be checked. What `playoffSeedingRuleBy` means is unknown (Gridiron's is always 0).
+
+To check a league: `python3 scripts/check_seeding.py <leagueId>`, with `ESPN_S2` set for seasons ESPN doesn't serve publicly.
 
 ### Frontend
 
@@ -111,7 +117,7 @@ To check a league: `python3 scripts/check_seeding.py <leagueId>`. Gridiron's 200
 ## Steps
 
 1. **Done.** Finality-aware caching (`load_data`, the in-memory cache, `POST /cache`, `GET /cache/status`), week-keyed cache keys, phase in `/info`, and the fix for the "Include playoffs" filter being ignored.
-2. **Done.** Season model (`engine/season.py`, `utils.load_season`) and seeding (`engine/seeding.py`), checked against Gridiron 2019–2025. Unit tests in `tests/`, ESPN check in `scripts/check_seeding.py`.
+2. **Done.** Season model (`engine/season.py`, `utils.load_season`) and seeding (`engine/seeding.py`), checked against all 21 Gridiron seasons (2005–2025). Unit tests in `tests/`, ESPN check in `scripts/check_seeding.py`.
 3. Playoff odds and luck, `SeasonFunction`, and a basic `/seasons/:year` page.
 4. Playoff scenarios and the phase-aware Home, tested on past seasons with `throughWeek`.
 5. Data checks for the offseason features (transactions, weekly rosters, drafts), then the full season review.
@@ -122,4 +128,4 @@ To check a league: `python3 scripts/check_seeding.py <leagueId>`. Gridiron's 200
 - Seasons cached under the old calendar-year rule may have been written mid-final. Check any 2021–2025 season whose `espn-cache/` objects were written before about January 10 of the next year, and delete it so it's refetched.
 - Whether the seven-day grace period is long enough for ESPN's stat corrections.
 - Whether `stretch_run` should also start early when the first team clinches or is eliminated.
-- Whether seeding holds for Gridiron's 2005–2018 seasons (run `scripts/check_seeding.py` with `ESPN_S2`), and what `playoffSeedingRuleBy` means.
+- What `playoffSeedingRuleBy` means (always 0 for Gridiron).

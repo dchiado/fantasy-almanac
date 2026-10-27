@@ -45,9 +45,9 @@ Public leagues need no auth. **Private leagues** need ESPN's login cookies:
 Cookie: espn_s2=<token>; SWID=<{GUID}>
 ```
 
-`espn_s2` is the token that matters; in practice it's often enough on its own.
+`espn_s2` is the token that matters; in practice it's often enough on its own. Users copy it from their browser's cookies on espn.com. It lasts months, but eventually expires and has to be copied again. ESPN offers no OAuth or other third-party login.
 
-**Privacy is per season.** For a private league, ESPN may still serve past seasons with no cookie. Observed October 2026 for league 166975: 2019–2025 through `/seasons/{year}` were public; 2026, and 2018 and earlier, needed the cookie. `/seasons/2019` worked without a cookie even though `leagueHistory` for 2019 didn't. Users copy it from their browser's cookies on espn.com. It lasts months, but eventually expires and has to be copied again. ESPN offers no OAuth or other third-party login.
+**Privacy is per season.** For a private league, ESPN may still serve past seasons with no cookie. Observed October 2026 for league 166975: 2019–2025 through `/seasons/{year}` were public; 2026, and 2018 and earlier, needed the cookie. `/seasons/2019` worked without a cookie even though `leagueHistory` for 2019 didn't.
 
 ## Errors
 
@@ -117,7 +117,7 @@ Every view also includes the league envelope: `id`, `gameId`, `seasonId`, `segme
 - **`playoffTierType`** is `NONE` for the regular season, `WINNERS_BRACKET` for the playoffs, `WINNERS_CONSOLATION_LADDER` for placement games among playoff teams (e.g. third place), and `LOSERS_CONSOLATION_LADDER` for consolation games.
 - **Playoff byes** are `WINNERS_BRACKET` entries with only `home` and `winner: "UNDECIDED"`, even after the season ends. Don't use "every matchup decided" to tell that a season is over.
 - **A finished season** has `status.latestScoringPeriod > status.finalScoringPeriod` in `mStatus` (e.g. 18 vs 16 for 2019). During the final week they're equal.
-- **Playoff seeding** (`mTeam` `playoffSeed`, for every team): division winners first, then everyone else, each by record, with ties broken by `scheduleSettings.playoffSeedingRule` (e.g. `TOTAL_POINTS_SCORED`). Checked for one league; see `utils_layer/python/engine/seeding.py`. What `playoffSeedingRuleBy` means is unknown.
+- **Playoff seeding** (`mTeam` `playoffSeed`, for every team): division winners first, then everyone else, each by record, with ties broken by `scheduleSettings.playoffSeedingRule` (`TOTAL_POINTS_SCORED` or `H2H_RECORD` seen so far). With `H2H_RECORD`, head-to-head only settles a two-team tie; in a larger tie, the team with the most points goes first and the rest are compared again. Checked against all 21 seasons (2005–2025) of one league; see `utils_layer/python/engine/seeding.py`. What `playoffSeedingRuleBy` means is unknown.
 - **`winner` decides ties, not points.** Use it rather than comparing `totalPoints`; some leagues break equal scores.
 - **Scoring periods aren't matchup periods.** A matchup period can cover several scoring periods (always in baseball, sometimes in football playoffs). `pointsByScoringPeriod` breaks them out.
 - **Team names:** older responses split names into `location` + `nickname`; newer ones use `name`.

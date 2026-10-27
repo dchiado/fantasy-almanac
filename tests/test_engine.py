@@ -114,9 +114,53 @@ class SeedTeamsTest(unittest.TestCase):
                 self.rec(4, 1, 6, 7, 1700)]
         self.assertEqual(seed_teams(recs, 'TOTAL_POINTS_SCORED'), [2, 3, 1, 4])
 
+    def test_head_to_head(self):
+        # Teams 2 and 3 are 8-5; team 3 has fewer points but beat team 2 twice
+        recs = [self.rec(1, 0, 10, 3, 1500),
+                self.rec(2, 0, 8, 5, 1600),
+                self.rec(3, 1, 8, 5, 1400),
+                self.rec(4, 1, 6, 7, 1700)]
+        games = parse_season(1, 2012, views([matchup(1, 2, 90, 3, 100),
+                                             matchup(2, 3, 110, 2, 100)])).games
+        self.assertEqual(seed_teams(recs, 'H2H_RECORD', games), [1, 3, 2, 4])
+        self.assertEqual(seed_teams(recs, 'TOTAL_POINTS_SCORED', games), [1, 3, 2, 4])
+
+    def test_head_to_head_split_goes_to_points(self):
+        recs = [self.rec(1, 0, 8, 5, 1500),
+                self.rec(2, 0, 8, 5, 1600),
+                self.rec(3, 1, 10, 3, 1400),
+                self.rec(4, 1, 6, 7, 1700)]
+        games = parse_season(1, 2012, views([matchup(1, 1, 100, 2, 90),
+                                             matchup(2, 2, 100, 1, 90)])).games
+        # Division 0 tie: 1-1 head to head, so team 2 wins it on points
+        self.assertEqual(seed_teams(recs, 'H2H_RECORD', games), [3, 2, 1, 4])
+
+    def test_head_to_head_three_way(self):
+        # 2, 3 and 4 tied at 8-5, all in one division behind team 1. Team 2 has the
+        # best record against the other two, but head-to-head isn't used across
+        # three teams: 4 goes first on points, then 2 and 3 split 1-1, so points again.
+        recs = [self.rec(1, 0, 12, 1, 1500),
+                self.rec(2, 0, 8, 5, 1400),
+                self.rec(3, 0, 8, 5, 1600),
+                self.rec(4, 0, 8, 5, 1700)]
+        games = parse_season(1, 2012, views([matchup(1, 2, 100, 3, 90),
+                                             matchup(2, 3, 100, 2, 90),
+                                             matchup(3, 2, 100, 4, 90),
+                                             matchup(4, 3, 100, 4, 90)])).games
+        self.assertEqual(seed_teams(recs, 'H2H_RECORD', games), [1, 4, 3, 2])
+
+    def test_head_to_head_decides_last_two_of_three(self):
+        # 4 goes first on points; 2 beat 3, so 2 is next despite fewer points
+        recs = [self.rec(1, 0, 12, 1, 1500),
+                self.rec(2, 0, 8, 5, 1400),
+                self.rec(3, 0, 8, 5, 1600),
+                self.rec(4, 0, 8, 5, 1700)]
+        games = parse_season(1, 2012, views([matchup(1, 2, 100, 3, 90)])).games
+        self.assertEqual(seed_teams(recs, 'H2H_RECORD', games), [1, 4, 2, 3])
+
     def test_unsupported_rule(self):
         with self.assertRaises(UnsupportedSeedingRule):
-            seed_teams([self.rec(1, 0, 1, 0, 100)], 'H2H_RECORD')
+            seed_teams([self.rec(1, 0, 1, 0, 100)], 'INTRA_DIVISION_RECORD')
 
 
 if __name__ == '__main__':
