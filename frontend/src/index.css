@@ -10,6 +10,8 @@
   --fa-text-muted: #8B9AB0;
   --fa-primary: #5EE6A0;
   --fa-gold: #F5C451;
+  --fa-chart-highlight: #22AD76;
+  --fa-chart-context: #55627A;
   --fa-mobile-nav-height: calc(56px + env(safe-area-inset-bottom));
 }
 

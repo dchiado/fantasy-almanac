@@ -1,6 +1,6 @@
 # Fantasy Almanac
 
-A React app for exploring ESPN Fantasy Football (and Baseball) league history. The frontend calls an API Gateway backed by AWS Lambda functions that fetch data from ESPN's public Fantasy API on the fly.
+A React app for exploring ESPN Fantasy Football (and Baseball) league history. The frontend calls an API Gateway backed by AWS Lambda functions that fetch data from ESPN's Fantasy API, storing finished seasons in S3.
 
 ## Architecture
 
@@ -41,7 +41,7 @@ Everything it shows is **a function of ESPN data**, built so that nothing has to
 espn-cache/{league}/{year}/{view}.json                 raw ESPN, final seasons only
 espn-cache/{league}/{year}/weeks/{week}/{view}.json    raw ESPN for one scoring period
 espn-cache/{league}/{year}/_finality.json              when every week was first seen played
-derived/{league}/{year}/...                            computed results (planned)
+derived/{league}/{year}/season-report-v{n}.json        season page data (GET /season), final seasons only
 power_rankings/league_{league}/{year}/week_{week}/     AI writeups
 ```
 
@@ -57,7 +57,7 @@ Each league's current season is in one phase. `/info` returns it as `phase` (alo
 | `playoffs` | Regular season over, playoffs under way | Final regular-season analysis, playoff odds |
 | `offseason` | Every week played | End-of-season review |
 
-The phase sets what the app leads with for the **current** season. It doesn't hide pages. Past seasons have all their analysis available all year. See [docs/proposals/season-phases.md](docs/proposals/season-phases.md) for the plan.
+The phase sets what the app leads with for the **current** season. It doesn't hide pages. (The "Lead with" column is the plan: the UI doesn't change by phase yet.) Past seasons have all their analysis available all year. See [docs/proposals/season-phases.md](docs/proposals/season-phases.md) for the plan.
 
 ---
 
@@ -67,6 +67,7 @@ The phase sets what the app leads with for the **current** season. It doesn't hi
 lambdas/
   # Football — Python
   leagueInfo/             GET /info
+  season/                 GET /season   (season page: playoff odds, luck)
   standings/              GET /standings
   headToHeadForm/         GET /head-to-head-form
   headToHead/             GET /head-to-head
@@ -84,13 +85,13 @@ lambdas/
   baseballDailyScores/       no route — daily MLB scores email via SES
 utils_layer/python/     Shared Python layer
   utils/                  Loading ESPN data: S3 archive, finality, phases
-  engine/                 Pure season logic (season model, seeding); no AWS or ESPN calls
+  engine/                 Pure season logic (model, seeding, odds, luck); no AWS or ESPN calls
 frontend/               React app (CRA)
 docs/
   espn-api/             Reference for ESPN's (unofficial) Fantasy API, with sample responses
   proposals/            Write-ups for possible future features
 tests/                  Unit tests for engine/
-scripts/                Local tools, e.g. check_seeding.py
+scripts/                Local checks against ESPN: check_seeding.py, check_odds.py
 template.yaml           AWS SAM template
 samconfig.toml          SAM deploy config (dev + prod)
 ```
@@ -138,9 +139,12 @@ The engine needs only the Python standard library, so it runs locally:
 python3 -m unittest discover tests          # unit tests on made-up seasons
 python3 scripts/check_seeding.py 166975     # our playoff seeds vs ESPN's, every past season
 ESPN_S2=... python3 scripts/check_seeding.py 166975   # include seasons ESPN only serves with a cookie
+python3 scripts/check_odds.py 166975        # playoff odds calibration: predicted vs what happened
 ```
 
 Don't commit real league responses as test data; they include members' names.
+
+The season page (`GET /season?leagueId=&year=`) is one lambda returning one report (`engine/report.py`): standings, playoff odds by week with highlights, luck and the schedule swap grid. For final seasons it's computed once and stored; bump `REPORT_VERSION` when the report or a model behind it changes. Seasons still in progress are computed on every request (about 2 seconds of simulation).
 
 ### Adding a new lambda
 

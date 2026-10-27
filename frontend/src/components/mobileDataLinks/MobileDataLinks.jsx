@@ -10,6 +10,7 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import PeopleIcon from '@mui/icons-material/People';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import ListIcon from '@mui/icons-material/List';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { Link } from "react-router-dom";
 import { useSelector } from 'react-redux'
 import "./MobileDataLinks.css";
@@ -28,6 +29,14 @@ const MobileDataLinks = () => {
                   <TableChartIcon sx={{ color: 'primary.main' }}/>
                 </ListItemIcon>
                 <ListItemText primary="All-time Standings" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding component={Link} to="/seasons" sx={{ color: 'text.primary' }}>
+              <ListItemButton>
+                <ListItemIcon>
+                  <ShowChartIcon sx={{ color: 'primary.main' }}/>
+                </ListItemIcon>
+                <ListItemText primary="Seasons" />
               </ListItemButton>
             </ListItem>
             <ListItem disablePadding component={Link} to="/head-to-head" sx={{ color: 'text.primary' }}>

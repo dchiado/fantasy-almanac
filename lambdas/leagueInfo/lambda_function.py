@@ -1,7 +1,5 @@
-import json
 from utils import load_data, season_phase, espn_handler
 import boto3
-from botocore.exceptions import ClientError
 
 s3 = boto3.client('s3')
 CACHE_BUCKET = 'ffalmanac-data'

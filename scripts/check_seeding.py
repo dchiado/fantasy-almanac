@@ -74,6 +74,35 @@ def default_years(league_id):
     sys.exit("Couldn't read the league's seasons from ESPN. Private? Set ESPN_S2.")
 
 
+def add_season_args(parser):
+    """Arguments every check script takes: the league and which seasons to check."""
+    parser.add_argument('league_id')
+    parser.add_argument('--start', type=int, help="first season (default: the league's first)")
+    parser.add_argument('--end', type=int, help='last season (default: the one before the current season)')
+    parser.add_argument('--data-dir', help='read {year}/{view}.json from here instead of ESPN')
+
+
+def season_years(args):
+    """The seasons to check, from add_season_args' arguments."""
+    if args.start and args.end:
+        return range(args.start, args.end + 1)
+    if args.data_dir:
+        sys.exit('--start and --end are required with --data-dir')
+    years = default_years(args.league_id)
+    return range(args.start or years.start, (args.end or years.stop - 1) + 1)
+
+
+def load_season(args, year):
+    """Load one season, or print why it was skipped and return None."""
+    try:
+        return parse_season(args.league_id, year, load_views(args.league_id, year, args.data_dir))
+    except (RuntimeError, OSError) as e:
+        # Without a cookie, ESPN reports private old seasons as not found
+        hint = '' if os.environ.get('ESPN_S2') or args.data_dir else ' (private? set ESPN_S2)'
+        print(f'{year}  skipped: {e}{hint}')
+        return None
+
+
 def check_season(season):
     """Returns (ok, message)."""
     if any(t.playoff_seed is None for t in season.teams.values()):
@@ -120,26 +149,13 @@ def head_to_head_lines(season, recs):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('league_id')
-    parser.add_argument('--start', type=int, help='first season (default: the league\'s first)')
-    parser.add_argument('--end', type=int, help='last season (default: the one before the current season)')
-    parser.add_argument('--data-dir', help='read {year}/{view}.json from here instead of ESPN')
+    add_season_args(parser)
     args = parser.parse_args()
 
-    years = default_years(args.league_id) if not (args.start and args.end) and not args.data_dir else None
-    first = args.start or (years.start if years else None)
-    last = args.end or (years.stop - 1 if years else None)
-    if first is None or last is None:
-        sys.exit('--start and --end are required with --data-dir')
-
     failed = False
-    for year in range(first, last + 1):
-        try:
-            season = parse_season(args.league_id, year, load_views(args.league_id, year, args.data_dir))
-        except (RuntimeError, OSError) as e:
-            # Without a cookie, ESPN reports private old seasons as not found
-            hint = '' if os.environ.get('ESPN_S2') or args.data_dir else ' (private? set ESPN_S2)'
-            print(f'{year}  skipped: {e}{hint}')
+    for year in season_years(args):
+        season = load_season(args, year)
+        if season is None:
             continue
         ok, message = check_season(season)
         failed |= ok is False

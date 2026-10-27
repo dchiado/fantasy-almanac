@@ -1,6 +1,6 @@
 # Proposal: Season phases and a season archive
 
-**Status:** Steps 1 and 2 done (October 2026). Steps 3–6 not started.
+**Status:** Steps 1–3 done (October 2026); step 3 isn't deployed yet. Steps 4–6 not started.
 
 ## Problem
 
@@ -25,7 +25,7 @@ A season is **final** when its ESPN data can't change any more:
 - Seasons before the league's current one (per ESPN) are final.
 - The current season is final `FINAL_GRACE_PERIOD` (7 days) after it was first seen with every week played (`latestScoringPeriod > finalScoringPeriod` in `mStatus`). The first sighting is recorded in `espn-cache/{league}/{year}/_finality.json`. The grace period covers stat corrections.
 
-Only final seasons are written to `espn-cache/`. Before this change the rule was "any year that isn't this calendar year", which would have cached the 2026 season during its final week (Dec 31, 2026 – Jan 4, 2027) and never replaced it.
+Only final seasons are written to `espn-cache/`.
 
 A week is final by the same idea: once the following week has been played and corrected. Results "as of week N" can then be stored permanently in the middle of a season.
 
@@ -73,8 +73,9 @@ Season features take `year` and `throughWeek`. That gives:
 - **Engine package** (`utils_layer/python/engine/`), separate from `utils` so it imports nothing from AWS and runs locally with only the standard library. `utils` loads data; `engine` works on it.
 - **Season model** (`engine/season.py`, done): `parse_season` turns `mSettings`, `mMatchupScore` and `mTeam` into `Settings`, `Team`s (with owner SWID and name) and `Game`s (week, tier, both sides, points, winner). `records(season, through_week)` builds regular-season records from ESPN's `winner`, not by comparing points, because some leagues break equal scores. Lambdas call `utils.load_season(year, league_id)`. New features read this, not raw ESPN. It's also the games table for [plain-text queries](plain-text-queries.md).
 - **Seeding** (`engine/seeding.py`, done): `seed_teams(records, rule)` orders every team, as described under [Seeding rules](#seeding-rules).
-- **Later engine modules:** `simulation.py` (numpy), `scenarios.py`, `luck.py`, then `lineups.py`, `draft.py`, `transactions.py`.
-- **One routed lambda** (`SeasonFunction`, Python) for all season features: `GET /season?year=&throughWeek=` returns a bundle for the season page, `GET /season/{artifact}?...` returns one artifact. The account allows 10 concurrent lambdas, so one bundle request beats six parallel ones.
+- **Odds, luck and the report** (done): `simulation.py` (plain Python; numpy wasn't needed), `luck.py`, and `report.py`, which assembles the season page's one response.
+- **Later engine modules:** `scenarios.py`, then `lineups.py`, `draft.py`, `transactions.py`.
+- **One lambda** (`SeasonFunction`, Python) for season features. Built: `GET /season?leagueId=&year=` returns the whole season page as one report. Planned: a `throughWeek` parameter (for time travel and scenarios) and `GET /season/{artifact}` for single pieces. The account allows 10 concurrent lambdas, so one bundle request beats six parallel ones.
 - New engine code stays in Python, for numpy.
 
 ### Seeding rules
@@ -89,7 +90,6 @@ Tiebreakers implemented:
 
 - `TOTAL_POINTS_SCORED`: more points for. Checked.
 - `H2H_RECORD`: with **two** tied teams, the better record in games between them, then more points for. With **three or more**, ESPN doesn't compare head-to-head across the group. The team with the most points goes first, and the rest are compared again, so head-to-head only decides the last two. Gridiron used this rule in 2005, 2006 and 2012–2014.
-  - An earlier version compared each team's head-to-head record against all the other tied teams at once. It matched 2005, 2006 and 2012, but not 2013 (a four-way tie at 8-6) or 2014 (two three-way ties). The rule above matches all five seasons. On a mismatch, the check script prints the games between tied teams.
 
 Any other rule raises `UnsupportedSeedingRule`, so features fail visibly instead of showing wrong seeds. Add a rule when a league that uses it can be checked. What `playoffSeedingRuleBy` means is unknown (Gridiron's is always 0).
 
@@ -118,7 +118,7 @@ To check a league: `python3 scripts/check_seeding.py <leagueId>`, with `ESPN_S2`
 
 1. **Done.** Finality-aware caching (`load_data`, the in-memory cache, `POST /cache`, `GET /cache/status`), week-keyed cache keys, phase in `/info`, and the fix for the "Include playoffs" filter being ignored.
 2. **Done.** Season model (`engine/season.py`, `utils.load_season`) and seeding (`engine/seeding.py`), checked against all 21 Gridiron seasons (2005–2025). Unit tests in `tests/`, ESPN check in `scripts/check_seeding.py`.
-3. Playoff odds and luck, `SeasonFunction`, and a basic `/seasons/:year` page.
+3. **Done.** Playoff odds (`engine/simulation.py`, calibrated with `scripts/check_odds.py`), luck (`engine/luck.py`), the season report (`engine/report.py`) served by `SeasonFunction` (`GET /season`), and `/seasons/:year`. It's linked as "Seasons" in the header and the mobile Data menu; the four-tab navigation waits for step 4. Details are in [playoff odds](playoff-odds.md) and [luck and schedule](luck-and-schedule.md).
 4. Playoff scenarios and the phase-aware Home, tested on past seasons with `throughWeek`.
 5. Data checks for the offseason features (transactions, weekly rosters, drafts), then the full season review.
 6. Plain-text queries and history-only mode.

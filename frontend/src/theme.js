@@ -11,6 +11,11 @@ export const colors = {
   textMuted: '#8B9AB0',
   primary: '#5EE6A0',
   gold: '#F5C451',
+  // Charts use emphasis: one highlighted series, the rest as context. The
+  // highlight is a darker step of primary, kept in the mark lightness band;
+  // checked with the dataviz palette validator against `surface`.
+  chartHighlight: '#22AD76',
+  chartContext: '#55627A',
 };
 
 const theme = createTheme({

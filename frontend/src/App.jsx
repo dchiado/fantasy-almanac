@@ -15,6 +15,7 @@ import FooterMobile from "./components/footerMobile/FooterMobile";
 import LeagueInfoMobile from "./components/leagueInfoMobile/LeagueInfoMobile";
 import MobileDataLinks from "./components/mobileDataLinks/MobileDataLinks";
 import Keepers from "./components/keepers/Keepers";
+import SeasonPage from "./components/season/SeasonPage";
 import BaseballOverall from "./components/baseballOverall/BaseballOverall";
 import LoadingState from "./components/ui/LoadingState";
 
@@ -216,6 +217,11 @@ const App = () => {
 					</Route>
 					<Route path="/power-rankings">
 						<PowerRankings
+							setError={setError}
+						/>
+					</Route>
+					<Route path="/seasons/:year?">
+						<SeasonPage
 							setError={setError}
 						/>
 					</Route>

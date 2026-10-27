@@ -56,6 +56,10 @@ Resources:
         "POST /cache":
           ThrottlingRateLimit: 1
           ThrottlingBurstLimit: 2
+        # Runs the playoff odds simulation for any season not yet stored
+        "GET /season":
+          ThrottlingRateLimit: 2
+          ThrottlingBurstLimit: 5
 
   UtilsLayer:
     Type: AWS::Serverless::LayerVersion
@@ -291,6 +295,35 @@ Resources:
           Properties:
             ApiId: !Ref Api
             Path: /keepers
+            Method: GET
+
+  # Season page: playoff odds, luck. Lambda CPU scales with memory (1769 MB is
+  # one full vCPU); the simulation takes ~2s per season on a laptop. Final
+  # seasons are computed once and stored.
+  SeasonFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/season/
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      MemorySize: 1769
+      Timeout: 60
+      Layers:
+        - !Ref UtilsLayer
+        - !FindInMap [Layers, !Ref AWS::Region, Dependencies]
+      Policies:
+        - S3CrudPolicy:
+            BucketName: ffalmanac-data
+        - Statement:
+          - Effect: Allow
+            Action: s3:ListBucket
+            Resource: arn:aws:s3:::ffalmanac-data
+      Events:
+        Route:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /season
             Method: GET
 
   # ── JS lambdas ───────────────────────────────────────────────────────────────

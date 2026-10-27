@@ -14,6 +14,7 @@ import { useCookies } from "react-cookie";
 
 const PAGES = [
   { name: 'All-time Standings', link: '/standings' },
+  { name: 'Seasons', link: '/seasons' },
   { name: 'Head-to-Head', link: '/head-to-head' },
   { name: 'Records', link: '/records' },
   { name: 'Power Rankings', link: '/power-rankings' },
