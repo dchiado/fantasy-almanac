@@ -74,7 +74,7 @@ It's plain Python, with no numpy: a whole season (every week) takes about 2 seco
 
 - **Endpoint:** odds are part of the season report, `GET /season?leagueId=&year=` (`lambdas/season/`, `engine/report.py`), not their own endpoint. One request loads the whole season page.
 - **Final seasons:** computed once and saved to `derived/{leagueId}/{year}/season-report-v{REPORT_VERSION}.json`. Bump `REPORT_VERSION` when the model changes.
-- **Current season:** computed on each request, through the last week whose games are all decided.
+- **Current season:** through the last week whose games are all decided, stored under a hash of the decided games (`report_inputs`), so it's recomputed only after a game finishes.
 - **Unsupported tiebreakers:** `playoff_odds` is `null` and `unsupported_seeding_rule` names the rule; the rest of the report still works.
 - **Response** (`playoff_odds` in the report):
   ```json
@@ -147,7 +147,6 @@ The same highlights can also be ranked across every season, for a league-history
 ## Not built yet
 
 - Wire-to-wire highlight, and marks for the week each team clinched or was eliminated.
-- Storing current-season odds for completed weeks, so they aren't recomputed on every request.
 - Highlights ranked across every season (a league-history page).
 - Comparing the current week with ESPN's `currentSimulationResults`.
 

@@ -9,20 +9,13 @@ import Tooltip from '@mui/material/Tooltip';
 import SportsFootballIcon from '@mui/icons-material/SportsFootball';
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import { useSelector } from 'react-redux'
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useCookies } from "react-cookie";
-
-const PAGES = [
-  { name: 'All-time Standings', link: '/standings' },
-  { name: 'Seasons', link: '/seasons' },
-  { name: 'Head-to-Head', link: '/head-to-head' },
-  { name: 'Records', link: '/records' },
-  { name: 'Power Rankings', link: '/power-rankings' },
-  { name: 'Keepers', link: '/keepers' }
-];
+import { activeTab, navTabs } from "../../utils/seasons";
 
 const Header = () => {
   const leagueInfo = useSelector((state) => state.leagueInfo)
+  const { pathname } = useLocation();
 	const [,, removeCookie] = useCookies(["league_id"]);
 
   const handleRemoveCookie = () => {
@@ -56,11 +49,12 @@ const Header = () => {
 
         {leagueInfo?.name &&
           <Box component="nav" sx={{ flexGrow: 1, display: { xs: 'none', sm: 'flex' }, gap: 0.5, overflowX: 'auto' }}>
-            {PAGES.map((page) => (
+            {navTabs(leagueInfo).map((tab) => (
               <Button
-                key={page.name}
+                key={tab.key}
                 component={NavLink}
-                to={page.link}
+                to={tab.to}
+                isActive={() => activeTab(pathname, leagueInfo) === tab.key}
                 sx={{
                   color: 'text.secondary',
                   whiteSpace: 'nowrap',
@@ -69,7 +63,7 @@ const Header = () => {
                   '&.active': { color: 'text.primary', backgroundColor: 'rgba(94,230,160,0.12)' },
                 }}
               >
-                {page.name}
+                {tab.label}
               </Button>
             ))}
           </Box>

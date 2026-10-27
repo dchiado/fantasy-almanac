@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, ButtonBase, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, Typography } from "@mui/material";
+import { Box, Button, ButtonBase, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, Typography } from "@mui/material";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useSelector } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
+import { Link, Redirect, useHistory, useParams } from "react-router-dom";
 import useApi from "../../hooks/useApi";
 import LoadingState from "../ui/LoadingState";
 import PageLayout from "../ui/PageLayout";
 import SectionCard from "../ui/SectionCard";
 import StatTable from "../ui/StatTable";
 import OddsChart from "./OddsChart";
+import PlayoffPicture from "./PlayoffPicture";
+import { currentSeason, latestRecapSeason, seasonStarted } from "../../utils/seasons";
 import { formatPct, formatRecord, formatSigned } from "./format";
 
 const weekLabel = (week) => (week === 0 ? 'Preseason' : `Week ${week}`);
@@ -193,7 +195,9 @@ const SeasonPage = ({ setError }) => {
   const { year: yearParam } = useParams();
   const history = useHistory();
 
-  const path = leagueInfo.id ? `/season?leagueId=${leagueInfo.id}${yearParam ? `&year=${yearParam}` : ''}` : null;
+  // Before its draft, the current season has no games to report on
+  const notStarted = Number(yearParam) === currentSeason(leagueInfo) && !seasonStarted(leagueInfo);
+  const path = leagueInfo.id && yearParam && !notStarted ? `/season?leagueId=${leagueInfo.id}&year=${yearParam}` : null;
   const { data: report, loading, error } = useApi(path);
 
   useEffect(() => {
@@ -217,21 +221,31 @@ const SeasonPage = ({ setError }) => {
   const shownYear = report?.year ?? (yearParam ? Number(yearParam) : '');
 
   const picker = years.length > 0 && (
-    <FormControl sx={{ minWidth: 120 }}>
-      <InputLabel id="season-year-label">Season</InputLabel>
-      <Select
-        labelId="season-year-label"
-        id="season-year"
-        label="Season"
-        value={years.includes(shownYear) ? shownYear : ''}
-        onChange={(e) => history.push(`/seasons/${e.target.value}`)}
-      >
-        {years.map((y) => <MenuItem value={y} key={y}>{y}</MenuItem>)}
-      </Select>
-    </FormControl>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      {report && !report.final && report.year === currentSeason(leagueInfo) &&
+        <Button component={Link} to="/power-rankings" variant="outlined">Power rankings</Button>
+      }
+      <FormControl sx={{ minWidth: 120 }}>
+        <InputLabel id="season-year-label">Season</InputLabel>
+        <Select
+          labelId="season-year-label"
+          id="season-year"
+          label="Season"
+          value={years.includes(shownYear) ? shownYear : ''}
+          onChange={(e) => history.push(`/seasons/${e.target.value}`)}
+        >
+          {years.map((y) => <MenuItem value={y} key={y}>{y}</MenuItem>)}
+        </Select>
+      </FormControl>
+    </Box>
   );
 
-  const subtitle = report && (report.final
+  if (!yearParam) {
+    const year = latestRecapSeason(leagueInfo);
+    return year ? <Redirect to={`/seasons/${year}`} /> : <LoadingState rows={12} />;
+  }
+
+  const subtitle = notStarted ? 'Not started yet' : report && (report.final
     ? `Final · ${report.teams.length} teams · ${report.playoff_team_count} made the playoffs`
     : report.completed_weeks === 0
       ? 'No games played yet'
@@ -239,9 +253,28 @@ const SeasonPage = ({ setError }) => {
 
   return (
     <PageLayout maxWidth={1000} title={shownYear ? `${shownYear} season` : 'Season'} subtitle={subtitle} actions={picker}>
-      {loading || !report
+      {notStarted
+        ? <SectionCard>
+            <Typography color="text.secondary">
+              The {yearParam} season starts after the draft.{' '}
+              <Link to={`/seasons/${latestRecapSeason(leagueInfo)}`} style={{ color: 'var(--fa-primary)' }}>
+                See the {latestRecapSeason(leagueInfo)} season
+              </Link>
+            </Typography>
+          </SectionCard>
+        : loading || !report
         ? <LoadingState inline rows={12} title={false} />
         : <>
+            {report.scenarios &&
+              <SectionCard title={`Playoff picture · week ${report.scenarios.week}`} sx={{ mb: 3 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  {report.scenarios.weeks_left === 1 ? 'Last week' : `${report.scenarios.weeks_left} weeks left`} of the regular season.
+                  Clinched and eliminated are certain; when a spot could come down to total points, it shows as odds instead.
+                  The line marks the playoff cutoff.
+                </Typography>
+                <PlayoffPicture report={report} />
+              </SectionCard>
+            }
             {report.playoff_odds
               ? <PlayoffOdds report={report} names={names} selected={selected} onSelect={setSelected} />
               : <SectionCard title="Playoff odds by week" sx={{ mb: 3 }}>

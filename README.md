@@ -41,7 +41,8 @@ Everything it shows is **a function of ESPN data**, built so that nothing has to
 espn-cache/{league}/{year}/{view}.json                 raw ESPN, final seasons only
 espn-cache/{league}/{year}/weeks/{week}/{view}.json    raw ESPN for one scoring period
 espn-cache/{league}/{year}/_finality.json              when every week was first seen played
-derived/{league}/{year}/season-report-v{n}.json        season page data (GET /season), final seasons only
+derived/{league}/{year}/season-report-v{n}.json        season page data (GET /season) for a final season
+derived/{league}/{year}/season-report-v{n}-{inputs}.json   ... for a season in progress, by a hash of its decided games
 power_rankings/league_{league}/{year}/week_{week}/     AI writeups
 ```
 
@@ -49,15 +50,17 @@ power_rankings/league_{league}/{year}/week_{week}/     AI writeups
 
 Each league's current season is in one phase. `/info` returns it as `phase` (along with `regular_season_weeks` and `regular_season_weeks_left`), and the frontend keeps it in `leagueInfo`.
 
-| Phase | When | Lead with |
+| Phase | When | Home leads with |
 | --- | --- | --- |
-| `preseason` | League rolled over, not drafted yet | Keepers, last season in review |
-| `regular_season` | 4+ regular-season weeks left | Power rankings, how the season is going |
-| `stretch_run` | Last 3 regular-season weeks | Playoff scenarios: who's in, who's out, what each team needs |
-| `playoffs` | Regular season over, playoffs under way | Final regular-season analysis, playoff odds |
-| `offseason` | Every week played | End-of-season review |
+| `preseason` | League rolled over, not drafted yet | Last season's recap |
+| `regular_season` | 4+ regular-season weeks left | Power rankings, playoff odds |
+| `stretch_run` | Last 3 regular-season weeks | Playoff picture: who's clinched or out, and what each team needs this week |
+| `playoffs` | Regular season over, playoffs under way | Regular-season recap, power rankings |
+| `offseason` | Every week played | Season recap: champion, collapses, luck |
 
-The phase sets what the app leads with for the **current** season. It doesn't hide pages. (The "Lead with" column is the plan: the UI doesn't change by phase yet.) Past seasons have all their analysis available all year. See [docs/proposals/season-phases.md](docs/proposals/season-phases.md) for the plan.
+The phase only changes what Home leads with (`CARDS_BY_PHASE` in `LeagueDashboard.jsx`); every page stays reachable. Past seasons show as an end-of-season recap all year. See [docs/proposals/season-phases.md](docs/proposals/season-phases.md) for the plan.
+
+Navigation is **Home · This season · Seasons · History** (plus League on mobile), defined once in `frontend/src/utils/seasons.js`. *This season* is the current season's page (`/seasons/{year}`) and power rankings; *Seasons* is every other season's recap; *History* holds the all-time pages: standings, head-to-head, records and keepers.
 
 ---
 
@@ -67,7 +70,7 @@ The phase sets what the app leads with for the **current** season. It doesn't hi
 lambdas/
   # Football — Python
   leagueInfo/             GET /info
-  season/                 GET /season   (season page: playoff odds, luck)
+  season/                 GET /season   (season page: playoff odds, scenarios, luck)
   standings/              GET /standings
   headToHeadForm/         GET /head-to-head-form
   headToHead/             GET /head-to-head
@@ -85,13 +88,13 @@ lambdas/
   baseballDailyScores/       no route — daily MLB scores email via SES
 utils_layer/python/     Shared Python layer
   utils/                  Loading ESPN data: S3 archive, finality, phases
-  engine/                 Pure season logic (model, seeding, odds, luck); no AWS or ESPN calls
+  engine/                 Pure season logic (model, seeding, odds, scenarios, luck); no AWS or ESPN calls
 frontend/               React app (CRA)
 docs/
   espn-api/             Reference for ESPN's (unofficial) Fantasy API, with sample responses
   proposals/            Write-ups for possible future features
 tests/                  Unit tests for engine/
-scripts/                Local checks against ESPN: check_seeding.py, check_odds.py
+scripts/                Local checks against ESPN: check_seeding.py, check_odds.py, check_scenarios.py
 template.yaml           AWS SAM template
 samconfig.toml          SAM deploy config (dev + prod)
 ```
@@ -140,11 +143,12 @@ python3 -m unittest discover tests          # unit tests on made-up seasons
 python3 scripts/check_seeding.py 166975     # our playoff seeds vs ESPN's, every past season
 ESPN_S2=... python3 scripts/check_seeding.py 166975   # include seasons ESPN only serves with a cookie
 python3 scripts/check_odds.py 166975        # playoff odds calibration: predicted vs what happened
+python3 scripts/check_scenarios.py 166975   # clinched/eliminated claims vs what happened
 ```
 
 Don't commit real league responses as test data; they include members' names.
 
-The season page (`GET /season?leagueId=&year=`) is one lambda returning one report (`engine/report.py`): standings, playoff odds by week with highlights, luck and the schedule swap grid. For final seasons it's computed once and stored; bump `REPORT_VERSION` when the report or a model behind it changes. Seasons still in progress are computed on every request (about 2 seconds of simulation).
+The season page (`GET /season?leagueId=&year=`) is one lambda returning one report (`engine/report.py`): standings, playoff odds by week with highlights, stretch-run scenarios, luck and the schedule swap grid. Every report is computed on first request and stored: a final season once, a season in progress once per set of decided games (`report_inputs`), so it's recomputed only after a game finishes. That first computation takes about 2 seconds, or about 7 with three weeks of scenarios. Bump `REPORT_VERSION` when the report or a model behind it changes.
 
 ### Adding a new lambda
 

@@ -9,3 +9,30 @@ export const formatPct = (p, certain = false) => {
 export const formatRecord = ({ wins, losses, ties }) => `${wins}-${losses}${ties ? `-${ties}` : ''}`;
 
 export const formatSigned = (n, digits = 1) => `${n > 0 ? '+' : n < 0 ? '−' : ''}${Math.abs(n).toFixed(digits)}`;
+
+export const STATUS_LABELS = {
+  clinched: 'Clinched',
+  eliminated: 'Eliminated',
+  win_out: 'In if they win out',
+  needs_help: 'Needs help',
+};
+
+// One scenario condition (engine/scenarios.py) as text: the team's own result
+// reads "win"/"loss", anyone else's reads "Team X loss"
+const conditionPart = ({ team_id: id, result }, teamId, names) => (id === teamId ? result : `${names[id]} ${result}`);
+
+/**
+ * "Clinches with win AND Team X loss", "Eliminated with loss OR Team X win".
+ * verb is "Clinches" or "Eliminated"; returns null when it can't happen this week.
+ */
+export const conditionText = (condition, verb, teamId, names) => {
+  if (!condition) return null;
+  if (condition.complex) return verb === 'Clinches' ? 'Can clinch this week with help' : 'Can be eliminated this week';
+  const all = condition.all;
+  // The team's own result first: "win AND Team X loss"
+  const parts = [...(all ?? condition.any)]
+    .sort((a, b) => (b.team_id === teamId) - (a.team_id === teamId))
+    .map((c) => conditionPart(c, teamId, names));
+  const text = `${verb} with ${parts.join(all ? ' AND ' : ' OR ')}`;
+  return condition.partial ? `${text}, among other ways` : text;
+};

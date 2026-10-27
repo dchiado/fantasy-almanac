@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import useApi from "../../hooks/useApi";
 import MovementBadge from "../ui/MovementBadge";
 import { DEFAULT_WEIGHTS, rankWithMovement } from "../../utils/powerRankings";
+import PlayoffPicture from "../season/PlayoffPicture";
+import { formatPct, formatRecord, formatSigned } from "../season/format";
 
 const DashCard = ({ title, to, linkLabel, children }) => (
   <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -199,9 +201,126 @@ const BestWeeksCard = ({ leagueId }) => {
   );
 };
 
+// The season report's latest playoff odds, best first, with the change since the week before
+const latestOdds = (report) => {
+  const weeks = report.playoff_odds?.weeks ?? [];
+  const [previous, latest] = weeks.slice(-2);
+  if (!latest || latest.week === 0) return [];
+  return latest.teams
+    .map((t) => ({ ...t, change: t.playoff_pct - (previous?.teams.find((p) => p.team_id === t.team_id)?.playoff_pct ?? t.playoff_pct) }))
+    .sort((a, b) => b.playoff_pct - a.playoff_pct);
+};
+
+const PlayoffOddsCard = ({ leagueId, year }) => {
+  const { data: report, loading, error } = useApi(`/season?leagueId=${leagueId}&year=${year}`);
+  const odds = report ? latestOdds(report).slice(0, report.playoff_team_count) : [];
+  const names = Object.fromEntries((report?.teams ?? []).map((t) => [t.team_id, t.name]));
+
+  return (
+    <DashCard title={report ? `Playoff odds · after week ${report.completed_weeks}` : 'Playoff odds'} to={`/seasons/${year}`} linkLabel="Season">
+      {loading ? <CardSkeleton lines={6} />
+        : error || odds.length === 0 ? <Unavailable>Odds start after week 1.</Unavailable>
+        : odds.map((t, idx) => (
+            <RankRow
+              key={t.team_id}
+              place={idx + 1}
+              name={names[t.team_id]}
+              extra={null}
+              value={
+                <>
+                  {Math.abs(t.change) >= 0.005 &&
+                    <Box component="span" sx={{ color: 'text.secondary', fontWeight: 500, mr: 1.5 }}>{formatSigned(t.change * 100, 0)}</Box>
+                  }
+                  {formatPct(t.playoff_pct)}
+                </>
+              }
+            />
+          ))
+      }
+    </DashCard>
+  );
+};
+
+const PlayoffPictureCard = ({ leagueId, year }) => {
+  const { data: report, loading, error } = useApi(`/season?leagueId=${leagueId}&year=${year}`);
+
+  return (
+    <DashCard title={report?.scenarios ? `Playoff picture · week ${report.scenarios.week}` : 'Playoff picture'} to={`/seasons/${year}`} linkLabel="Everyone">
+      {loading ? <CardSkeleton lines={6} />
+        : error || !report?.scenarios ? <Unavailable />
+        : <PlayoffPicture report={report} limit={report.playoff_team_count + 2} />
+      }
+    </DashCard>
+  );
+};
+
+// One line per highlight worth leading with: the champion, the biggest collapse
+// and comeback, and the luckiest and unluckiest teams
+const recapLines = (report) => {
+  const names = Object.fromEntries(report.teams.map((t) => [t.team_id, t.name]));
+  const champion = report.teams.find((t) => t.final_rank === 1);
+  const highlights = report.playoff_odds?.highlights ?? [];
+  const collapse = highlights.find((h) => h.type === 'collapse');
+  const comeback = highlights.find((h) => h.type === 'comeback');
+  const luckiest = report.luck[0];
+  const unluckiest = report.luck[report.luck.length - 1];
+  return [
+    champion && { label: 'Champion', name: champion.name, value: formatRecord(champion) },
+    collapse && { label: 'Biggest collapse', name: names[collapse.team_id], value: `peaked at ${formatPct(collapse.pct)}` },
+    comeback && { label: 'Biggest comeback', name: names[comeback.team_id], value: `was at ${formatPct(comeback.pct)}` },
+    luckiest && { label: 'Luckiest', name: names[luckiest.team_id], value: `${formatSigned(luckiest.luck)} wins` },
+    unluckiest && { label: 'Unluckiest', name: names[unluckiest.team_id], value: `${formatSigned(unluckiest.luck)} wins` },
+  ].filter(Boolean);
+};
+
+const SeasonRecapCard = ({ leagueId, year }) => {
+  const { data: report, loading, error } = useApi(`/season?leagueId=${leagueId}&year=${year}`);
+  const lines = report ? recapLines(report) : [];
+
+  return (
+    <DashCard title={`${year} season`} to={`/seasons/${year}`} linkLabel="Recap">
+      {loading ? <CardSkeleton lines={5} />
+        : error || lines.length === 0 ? <Unavailable />
+        : lines.map((line) => (
+            <Box key={line.label} sx={{ py: 0.75, borderBottom: '1px solid var(--fa-border)', '&:last-of-type': { borderBottom: 0 } }}>
+              <Typography variant="body2" color="text.secondary">{line.label}</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+                <Typography sx={{ fontWeight: 600, minWidth: 0 }} noWrap>{line.name}</Typography>
+                <Typography color="text.secondary" sx={{ flexShrink: 0 }}>{line.value}</Typography>
+              </Box>
+            </Box>
+          ))
+      }
+    </DashCard>
+  );
+};
+
+// Which cards Home shows, in order, for each phase of the current season
+// (see "Season phases" in the README)
+const CARDS_BY_PHASE = {
+  preseason: ['recap', 'champions', 'leaders', 'bestWeeks'],
+  regular_season: ['powerRankings', 'odds', 'champions', 'leaders'],
+  stretch_run: ['picture', 'powerRankings', 'champions', 'leaders'],
+  playoffs: ['recap', 'powerRankings', 'champions', 'leaders'],
+  offseason: ['recap', 'champions', 'leaders', 'bestWeeks'],
+};
+
 const LeagueDashboard = ({ leagueInfo }) => {
   const standings = useApi(`/standings?leagueId=${leagueInfo.id}`);
   const summary = useMemo(() => standings.data?.teams ? summarizeStandings(standings.data) : null, [standings.data]);
+
+  const year = Number(leagueInfo.year);
+  // During the playoffs the regular season is over, so its recap is the current season's
+  const recapYear = ['playoffs', 'offseason'].includes(leagueInfo.phase) ? year : year - 1;
+  const cards = {
+    powerRankings: <PowerRankingsCard key="powerRankings" leagueId={leagueInfo.id} />,
+    odds: <PlayoffOddsCard key="odds" leagueId={leagueInfo.id} year={year} />,
+    picture: <PlayoffPictureCard key="picture" leagueId={leagueInfo.id} year={year} />,
+    recap: <SeasonRecapCard key="recap" leagueId={leagueInfo.id} year={recapYear} />,
+    champions: <ChampionsCard key="champions" summary={summary} loading={standings.loading} error={standings.error} />,
+    leaders: <LeadersCard key="leaders" summary={summary} loading={standings.loading} error={standings.error} />,
+    bestWeeks: <BestWeeksCard key="bestWeeks" leagueId={leagueInfo.id} />,
+  };
 
   const facts = [
     leagueInfo.established && `Est. ${leagueInfo.established}`,
@@ -219,10 +338,7 @@ const LeagueDashboard = ({ leagueInfo }) => {
       </Typography>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>
-        <PowerRankingsCard leagueId={leagueInfo.id} />
-        <ChampionsCard summary={summary} loading={standings.loading} error={standings.error} />
-        <LeadersCard summary={summary} loading={standings.loading} error={standings.error} />
-        <BestWeeksCard leagueId={leagueInfo.id} />
+        {(CARDS_BY_PHASE[leagueInfo.phase] ?? CARDS_BY_PHASE.regular_season).map((card) => cards[card])}
       </Box>
     </Box>
   );

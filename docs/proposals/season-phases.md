@@ -1,6 +1,6 @@
 # Proposal: Season phases and a season archive
 
-**Status:** Steps 1–3 done (October 2026); step 3 isn't deployed yet. Steps 4–6 not started.
+**Status:** Steps 1–4 done (October 2026); steps 3–4 aren't deployed yet. Steps 5–6 not started.
 
 ## Problem
 
@@ -61,12 +61,9 @@ ffalmanac-data/
 
 The phase uses "every week played", not "final", so the review is available as soon as the champion is known. It fills in with corrected numbers once the season is final.
 
-### Time travel
+### Testing phase screens off-season
 
-Season features take `year` and `throughWeek`. That gives:
-
-- "What everyone needed going into Week 12 of 2019" for free.
-- A way to build and test the stretch-run and playoff screens on past seasons in October.
+Engine functions take a `through_week`, so the stretch-run and playoff screens can be built and tested on a past season stopped at any week, through unit tests, local scripts, or a mock API serving a report generated that way. Viewing a past season as of a past week isn't a user-facing feature: past seasons show as an end-of-season recap.
 
 ### Backend
 
@@ -74,8 +71,9 @@ Season features take `year` and `throughWeek`. That gives:
 - **Season model** (`engine/season.py`, done): `parse_season` turns `mSettings`, `mMatchupScore` and `mTeam` into `Settings`, `Team`s (with owner SWID and name) and `Game`s (week, tier, both sides, points, winner). `records(season, through_week)` builds regular-season records from ESPN's `winner`, not by comparing points, because some leagues break equal scores. Lambdas call `utils.load_season(year, league_id)`. New features read this, not raw ESPN. It's also the games table for [plain-text queries](plain-text-queries.md).
 - **Seeding** (`engine/seeding.py`, done): `seed_teams(records, rule)` orders every team, as described under [Seeding rules](#seeding-rules).
 - **Odds, luck and the report** (done): `simulation.py` (plain Python; numpy wasn't needed), `luck.py`, and `report.py`, which assembles the season page's one response.
-- **Later engine modules:** `scenarios.py`, then `lineups.py`, `draft.py`, `transactions.py`.
-- **One lambda** (`SeasonFunction`, Python) for season features. Built: `GET /season?leagueId=&year=` returns the whole season page as one report. Planned: a `throughWeek` parameter (for time travel and scenarios) and `GET /season/{artifact}` for single pieces. The account allows 10 concurrent lambdas, so one bundle request beats six parallel ones.
+- **Scenarios** (done): `scenarios.py`, see [playoff scenarios](playoff-scenarios.md).
+- **Later engine modules:** `lineups.py`, `draft.py`, `transactions.py`.
+- **One lambda** (`SeasonFunction`, Python) for season features. Built: `GET /season?leagueId=&year=` returns the whole season page as one report. Possible later: `GET /season/{artifact}` for single pieces. The account allows 10 concurrent lambdas, so one bundle request beats six parallel ones.
 - New engine code stays in Python, for numpy.
 
 ### Seeding rules
@@ -97,9 +95,9 @@ To check a league: `python3 scripts/check_seeding.py <leagueId>`, with `ESPN_S2`
 
 ### Frontend
 
-- Navigation: **Home · This Season · Seasons · History**, which fits the mobile bottom bar. Seasons is `/seasons/:year`, a review page per year. History holds the all-time pages (standings, head-to-head, records, and later career luck and draft history). Keepers stays a per-league extra.
-- Home picks and orders its cards by phase.
-- `leagueInfo` in Redux holds `phase`, `regularSeasonWeeks` and `regularSeasonWeeksLeft`. Add a dev-only `?phase=` override.
+- Navigation (done): **Home · This season · Seasons · History**, plus League on mobile (`frontend/src/utils/seasons.js`). This season is `/seasons/{current year}` and power rankings; Seasons is every other season's recap (`/seasons` opens the latest finished one); History (`/history`) holds the all-time pages (standings, head-to-head, records, keepers, and later career luck and draft history). It replaced the mobile Data menu.
+- Home (done) picks and orders its cards by phase (`CARDS_BY_PHASE` in `LeagueDashboard.jsx`): the playoff picture in the stretch run, playoff odds in the regular season, and a season recap in the playoffs, offseason and preseason.
+- `leagueInfo` in Redux holds `phase`, `regularSeasonWeeks` and `regularSeasonWeeksLeft`.
 
 ## How the other proposals fit
 
@@ -107,7 +105,7 @@ To check a league: `python3 scripts/check_seeding.py <leagueId>`, with `ESPN_S2`
 | --- | --- | --- |
 | [Playoff odds](playoff-odds.md) | Regular season onward, plus every past season | Build first; the seeding function is the base for scenarios |
 | [Luck and schedule](luck-and-schedule.md) | Any phase | No new data; shares the score model with odds |
-| [Playoff scenarios](playoff-scenarios.md) | Stretch run, plus past seasons via `throughWeek` | Depends on seeding |
+| [Playoff scenarios](playoff-scenarios.md) | Stretch run, current season only | Depends on seeding |
 | [Lineup efficiency](lineup-efficiency.md) | Any phase | Uses the weekly cache keys; about 17 ESPN calls per season, once |
 | [Draft review](draft-review.md) | Offseason | Check past-season data first; `kona_player_info`'s filter header isn't part of the cache key |
 | [Trades and waivers](trades-and-waivers.md) | Offseason | Check that `mTransactions2` keeps past seasons. If not, cover only what ESPN keeps; no snapshot job |
@@ -119,7 +117,7 @@ To check a league: `python3 scripts/check_seeding.py <leagueId>`, with `ESPN_S2`
 1. **Done.** Finality-aware caching (`load_data`, the in-memory cache, `POST /cache`, `GET /cache/status`), week-keyed cache keys, phase in `/info`, and the fix for the "Include playoffs" filter being ignored.
 2. **Done.** Season model (`engine/season.py`, `utils.load_season`) and seeding (`engine/seeding.py`), checked against all 21 Gridiron seasons (2005–2025). Unit tests in `tests/`, ESPN check in `scripts/check_seeding.py`.
 3. **Done.** Playoff odds (`engine/simulation.py`, calibrated with `scripts/check_odds.py`), luck (`engine/luck.py`), the season report (`engine/report.py`) served by `SeasonFunction` (`GET /season`), and `/seasons/:year`. It's linked as "Seasons" in the header and the mobile Data menu; the four-tab navigation waits for step 4. Details are in [playoff odds](playoff-odds.md) and [luck and schedule](luck-and-schedule.md).
-4. Playoff scenarios and the phase-aware Home, tested on past seasons with `throughWeek`.
+4. **Done.** Playoff scenarios ([playoff scenarios](playoff-scenarios.md), checked with `scripts/check_scenarios.py`), the playoff picture on the season page and Home, Home cards by phase, the four-tab navigation and `/history`. Current-season reports are now stored by a hash of their decided games, so they're computed once per finished game rather than on every request.
 5. Data checks for the offseason features (transactions, weekly rosters, drafts), then the full season review.
 6. Plain-text queries and history-only mode.
 
@@ -127,5 +125,4 @@ To check a league: `python3 scripts/check_seeding.py <leagueId>`, with `ESPN_S2`
 
 - Seasons cached under the old calendar-year rule may have been written mid-final. Check any 2021–2025 season whose `espn-cache/` objects were written before about January 10 of the next year, and delete it so it's refetched.
 - Whether the seven-day grace period is long enough for ESPN's stat corrections.
-- Whether `stretch_run` should also start early when the first team clinches or is eliminated.
 - What `playoffSeedingRuleBy` means (always 0 for Gridiron).

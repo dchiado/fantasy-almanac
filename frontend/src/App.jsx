@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
 import Header from "./components/header/Header";
-import { BrowserRouter, Route, Switch} from 'react-router-dom';
+import { BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
 
 import Suggestions from "./components/suggestions/Suggestions";
 import LeagueInfo from "./components/leagueInfo/LeagueInfo";
@@ -13,7 +13,7 @@ import PowerRankings from "./components/powerRankings/PowerRankings";
 import Records from "./components/records/Records";
 import FooterMobile from "./components/footerMobile/FooterMobile";
 import LeagueInfoMobile from "./components/leagueInfoMobile/LeagueInfoMobile";
-import MobileDataLinks from "./components/mobileDataLinks/MobileDataLinks";
+import History from "./components/history/History";
 import Keepers from "./components/keepers/Keepers";
 import SeasonPage from "./components/season/SeasonPage";
 import BaseballOverall from "./components/baseballOverall/BaseballOverall";
@@ -240,8 +240,12 @@ const App = () => {
 							setError={setError}
 						/>
 					</Route>
+					<Route path="/history">
+						<History />
+					</Route>
+					{/* The old mobile "Data" menu, now History */}
 					<Route path="/mobile-data-links">
-						<MobileDataLinks />
+						<Redirect to="/history" />
 					</Route>
 					<Route path="/suggestions">
 						<Suggestions />

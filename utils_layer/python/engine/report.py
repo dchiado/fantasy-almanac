@@ -1,13 +1,18 @@
 """The season page's data, all in one response: teams and standings, playoff
-odds by week, and luck. Plain dicts and lists, ready to serialize as JSON."""
+odds by week, stretch-run scenarios, and luck. Plain dicts and lists, ready to
+serialize as JSON."""
+import hashlib
+from dataclasses import replace
+
 from .luck import luck, schedule_swap
+from .scenarios import playoff_scenarios
 from .season import records
 from .seeding import UnsupportedSeedingRule, seed_teams
 from .simulation import SIMULATIONS, completed_weeks, playoff_odds
 
 # Bump when the output or any model behind it changes, so stored reports are
 # recomputed (they're saved under a key that includes this)
-REPORT_VERSION = 1
+REPORT_VERSION = 2
 
 
 def season_report(season, simulations=SIMULATIONS):
@@ -57,6 +62,18 @@ def season_report(season, simulations=SIMULATIONS):
         "divisions": [{"id": i, "name": n} for i, n in season.settings.divisions.items()],
         "teams": teams,
         "playoff_odds": playoff_odds(season, simulations) if supported else None,
+        # Only in the last weeks of the regular season. Scenarios treat every tie
+        # as undecided, so they work with any tiebreaker.
+        "scenarios": playoff_scenarios(season, week),
         "luck": luck(season, week),
         "schedule_swap": schedule_swap(season, week),
     }
+
+
+def report_inputs(season):
+    """A short hash of everything season_report reads, so a stored report can be
+    reused until a game finishes or a team changes. Points in games still being
+    played are left out: the report only uses decided games."""
+    games = [g if g.decided else replace(g, home_points=0.0, away_points=0.0) for g in season.games]
+    inputs = repr((REPORT_VERSION, season.settings, season.teams, games))
+    return hashlib.sha256(inputs.encode()).hexdigest()[:16]
