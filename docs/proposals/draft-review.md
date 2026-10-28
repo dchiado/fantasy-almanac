@@ -22,3 +22,4 @@ ESPN grades drafts before the season starts and never revisits them.
 - How far back ESPN keeps draft picks and player season totals for `leagueHistory` seasons.
 - Whether to measure value by points, or by points above a replacement-level player at the same position.
 - Keepers: leave them out, or score them separately.
+- `kona_player_info` takes an `x-fantasy-filter` header that isn't part of the S3 cache key, so two different filters for the same season would share one archived file. Fix the key before archiving player totals.

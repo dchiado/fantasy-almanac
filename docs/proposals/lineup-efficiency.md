@@ -14,11 +14,13 @@ ESPN doesn't show any of this.
 
 ## Data
 
+Weekly responses are archived under `espn-cache/{league}/{year}/weeks/{week}/{view}.json` (`load_data(..., week=N)`), once the season is final.
+
 `mRoster` (or `mMatchup`) with `scoringPeriodId`, once per week. It gives each player's lineup slot (`lineupSlotId`) and points for that week. The roster rules (`rosterSettings` in `mSettings`) say which slots each position can fill.
 
 That's about 17 ESPN calls per season, so it's the most expensive feature here.
 
 ## Before starting
 
-- **Fix the S3 cache key.** `load_data` saves past seasons to `espn-cache/{league}/{year}/{view}.json`, without the week (`utils_layer/python/utils/__init__.py`). Weekly responses would overwrite each other. The in-memory cache key already includes the week.
-- **Check how far back it goes.** Not yet checked: whether `leagueHistory` (2019 and earlier) returns weekly rosters.
+- **How far back it goes.** Checked October 2026 for [weekly recap](weekly-recap.md): weekly `mRoster` works for Gridiron 2019–2025, and starters' points add up exactly to final scores. Not yet checked: 2018 and earlier, which need a cookie and go through `leagueHistory`.
+- **Slot eligibility.** The best possible lineup needs each player's `eligibleSlots` and the slot counts in `rosterSettings`. Weekly recap's "bench blunder" needs the same function, so build it once.

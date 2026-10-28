@@ -122,6 +122,9 @@ Every view also includes the league envelope: `id`, `gameId`, `seasonId`, `segme
 - **Scoring periods aren't matchup periods.** A matchup period can cover several scoring periods (always in baseball, sometimes in football playoffs). `pointsByScoringPeriod` breaks them out.
 - **Team names:** older responses split names into `location` + `nickname`; newer ones use `name`.
 - **Owners vs teams:** team IDs can be handed from one owner to another over the years. To track a person across seasons, use the owner's member ID (SWID), not the team ID.
+- **Weekly lineups and player points** come from `mRoster` with `scoringPeriodId=N`, including for past seasons. Each entry's `lineupSlotId` is that week's slot (20 is the bench, 21 IR). A player's points that week are in `player.stats`, in the entry with `scoringPeriodId` N and `statSourceId` 0 (1 is ESPN's projection). For Gridiron 2019 week 10 and 2025 week 5, starters' points added up exactly to every team's final score. A team with an empty slot has fewer entries.
+- **`acquisitionType` and `acquisitionDate` are null in past seasons' `mRoster`** (2019 and 2025 checked). To tell how a player joined a team, use `mTransactions2`.
+- **`mTransactions2` needs `scoringPeriodId`.** Without it, a past season returns no transactions. With `scoringPeriodId=N` it returns that week's transactions, executed and not: drafts (in week 1, as `DRAFT` items), free-agent and waiver adds (`bidAmount`), drops, trades and lineup moves. Checked for Gridiron 2019 (every week) and 2025.
 - **Data is in IDs.** Positions, lineup slots, pro teams and stat IDs are all numeric. The [cwendt94/espn-api](https://github.com/cwendt94/espn-api) project maintains the lookup tables (`espn_api/football/constant.py`, `espn_api/baseball/constant.py`).
 
 ## Further reading

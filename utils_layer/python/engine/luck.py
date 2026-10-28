@@ -1,5 +1,5 @@
 """How much of each team's record came from luck and the schedule rather than
-scoring. See docs/proposals/luck-and-schedule.md."""
+scoring. See docs/season-engine.md."""
 from .season import records
 
 # Games decided by less than this many points count as close

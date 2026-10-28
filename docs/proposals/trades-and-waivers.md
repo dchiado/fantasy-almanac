@@ -12,6 +12,6 @@
 
 `mTransactions2`: trades, waiver claims (with `bidAmount`), adds and drops. Points after a transaction need weekly player points, the same data as [lineup efficiency](lineup-efficiency.md).
 
-## Before starting
+## Data check
 
-Check what `mTransactions2` returns for a finished season. The saved sample only has current-season pending waiver claims, so it's unknown whether ESPN keeps full transaction history for past seasons.
+Done October 2026 for [weekly recap](weekly-recap.md): ESPN keeps full transaction history for past seasons, but only per week (`mTransactions2` with `scoringPeriodId`; without it, a past season returns nothing). Gridiron 2019 has 16–55 transactions a week, with trades, waiver bids, adds and drops. A season is about 17 calls, archived once it's final. 2018 and earlier aren't checked yet.

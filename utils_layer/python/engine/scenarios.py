@@ -1,5 +1,5 @@
 """Playoff scenarios for the stretch run: who has clinched, who is out, and
-what each team needs this week. See docs/proposals/playoff-scenarios.md.
+what each team needs this week. See docs/season-engine.md.
 
 Every combination of win/loss results for the remaining regular-season games
 is checked. Points for those games are unknown, so any tie on record could

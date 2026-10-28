@@ -1,6 +1,6 @@
 """Playoff odds by week, simulated from the scores so far.
 
-See docs/proposals/playoff-odds.md. For each week N, games through week N are
+See docs/season-engine.md. For each week N, games through week N are
 final and every later regular-season game is simulated, so the same code gives
 odds for any week of any season, past or current.
 """

@@ -58,7 +58,7 @@ Each league's current season is in one phase. `/info` returns it as `phase` (alo
 | `playoffs` | Regular season over, playoffs under way | Regular-season recap, power rankings |
 | `offseason` | Every week played | Season recap: champion, collapses, luck |
 
-The phase only changes what Home leads with (`CARDS_BY_PHASE` in `LeagueDashboard.jsx`); every page stays reachable. Past seasons show as an end-of-season recap all year. See [docs/proposals/season-phases.md](docs/proposals/season-phases.md) for the plan.
+The phase only changes what Home leads with (`CARDS_BY_PHASE` in `LeagueDashboard.jsx`); every page stays reachable. Past seasons show as an end-of-season recap all year.
 
 Navigation is defined once in `frontend/src/utils/seasons.js`. The current season's pages are **Power rankings** (`/power-rankings`), **Playoff race** (`/playoffs`: the stretch-run picture and odds by week) and **Standings** (`/standings`: seed order with playoff odds, all-play, expected wins and luck beside the record), next to **History** (`/history`: past seasons, all-time standings at `/all-time-standings`, head-to-head, records, keepers). On desktop they're the header tabs. On mobile the bottom bar is Home · This season · History · League, and This season has sub-tabs for its three pages. A past season's recap is `/seasons/{year}`.
 
@@ -92,6 +92,7 @@ utils_layer/python/     Shared Python layer
 frontend/               React app (CRA)
 docs/
   espn-api/             Reference for ESPN's (unofficial) Fantasy API, with sample responses
+  season-engine.md      How seeding, playoff odds, scenarios and luck work
   proposals/            Write-ups for possible future features
 tests/                  Unit tests for engine/
 scripts/                Local checks against ESPN: check_seeding.py, check_odds.py, check_scenarios.py
@@ -148,7 +149,7 @@ python3 scripts/check_scenarios.py 166975   # clinched/eliminated claims vs what
 
 Don't commit real league responses as test data; they include members' names.
 
-The season pages (Playoff race, Standings, and past-season recaps) all come from one lambda returning one report (`GET /season?leagueId=&year=`, `engine/report.py`): standings, playoff odds by week, highlights (biggest collapse, biggest comeback, the bubble), stretch-run scenarios, luck and the schedule swap grid. Every report is computed on first request and stored: a final season once, a season in progress once per set of decided games (`report_inputs`), so it's recomputed only after a game finishes. That first computation takes about 2 seconds, or about 7 with three weeks of scenarios. Bump `REPORT_VERSION` when the report or a model behind it changes.
+The season pages (Playoff race, Standings, and past-season recaps) all come from one lambda returning one report (`GET /season?leagueId=&year=`, `engine/report.py`): standings, playoff odds by week, highlights (biggest collapse, biggest comeback, the bubble), stretch-run scenarios, luck and the schedule swap grid. Every report is computed on first request and stored: a final season once, a season in progress once per set of decided games (`report_inputs`), so it's recomputed only after a game finishes. That first computation takes about 2 seconds, or about 7 with three weeks of scenarios. Bump `REPORT_VERSION` when the report or a model behind it changes. How seeding, odds, scenarios and luck work, and how they were checked, is in [docs/season-engine.md](docs/season-engine.md).
 
 ### Adding a new lambda
 

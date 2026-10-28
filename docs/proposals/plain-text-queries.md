@@ -1,6 +1,6 @@
 # Proposal: Plain-text queries
 
-**Status:** Proposed, not scoped.
+**Status:** Backburnered (October 2026). Standalone; not part of any other plan.
 
 ## Idea
 
@@ -10,7 +10,7 @@ A text box where a visitor asks a question about league history in plain English
 
 Claude only turns the question into a query; our code finds the answer. Claude never calls ESPN or computes a number.
 
-1. **Games table.** Build one table of every game in league history from the cached `mMatchupScore` and `mNav` data: year, week, both teams and owners (by SWID), both scores, margin, winner, and whether it was the regular season or playoffs. The `matchups` lambda already does most of this work. Twenty seasons is about 2,000 rows.
+1. **Games table.** Every game in league history: year, week, both teams and owners (by SWID), both scores, margin, winner, and whether it was the regular season or playoffs. Most of this exists: `utils.load_season` returns each season's `Game`s with week, tier, both sides, points and winner, and `Team`s with owner SWID ([season engine](../season-engine.md#season-model)). Flatten every final season into one list. Twenty seasons is about 2,000 rows.
 2. **Question to query.** Send Claude the question, the league's team and owner names, and the query format. Claude fills in a query using structured outputs, which guarantee the response matches the format exactly:
    ```json
    {
@@ -36,6 +36,8 @@ They work the same as every other page. The frontend already sends `espnS2` to t
 - Which filters and outputs to support first. Questions that come back `unsupported` show what to add next.
 - Rate limiting: the site is public, so it needs a per-league limit, a cap on response length, and caching for repeat questions.
 - Whether to log questions, to learn what people ask.
+- Storage: S3 is enough for a 2,000-row table loaded per request. DynamoDB only if a later version needs indexed queries.
+- The README's "Cap Claude costs" TODOs should be done first.
 
 ## Later
 
