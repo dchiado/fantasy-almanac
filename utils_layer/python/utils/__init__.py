@@ -458,7 +458,8 @@ def season_phase(league_id):
             "season": 2026,
             "phase": "preseason" | "regular_season" | "stretch_run" | "playoffs" | "offseason",
             "regular_season_weeks": 14,
-            "regular_season_weeks_left": 3  # including the current week
+            "regular_season_weeks_left": 3,  # including the current week
+            "has_playoffs": True  # False when first place wins the title
         }
     """
     resp = current_status(league_id)
@@ -469,6 +470,7 @@ def season_phase(league_id):
     week = resp["status"]["currentMatchupPeriod"]
     settings = load_data(year, 'mSettings', league_id)
     regular_season_weeks = settings["settings"]["scheduleSettings"]["matchupPeriodCount"]
+    has_playoffs = settings["settings"]["scheduleSettings"]["playoffTeamCount"] > 0
     weeks_left = max(0, regular_season_weeks - week + 1)
 
     if not resp["draftDetail"]["drafted"]:
@@ -487,7 +489,8 @@ def season_phase(league_id):
         "season": year,
         "phase": phase,
         "regular_season_weeks": regular_season_weeks,
-        "regular_season_weeks_left": weeks_left
+        "regular_season_weeks_left": weeks_left,
+        "has_playoffs": has_playoffs
     }
 
 

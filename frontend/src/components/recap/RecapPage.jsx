@@ -22,9 +22,9 @@ export const RecapItemCard = ({ item }) => (
   </Paper>
 );
 
-// "Playoff odds 74% · 97% with a win · 49% with a loss"
-const stakesText = (side) => {
-  const parts = [`Playoff odds ${side.now}`];
+// "Playoff odds 74% · 97% with a win · 49% with a loss"; odds is "Playoff" or "Title"
+const stakesText = (side, odds) => {
+  const parts = [`${odds} odds ${side.now}`];
 
   if (side.win) {
     parts.push(`${side.win} with a win`);
@@ -43,7 +43,7 @@ const GameOfTheWeek = ({ game }) => (
       {game.sides.map((side) => (
         <Box key={side.name} sx={{ minWidth: 0 }}>
           <Typography sx={{ fontWeight: 700 }} noWrap>{side.name}</Typography>
-          <Typography variant="body2" color="text.secondary">{stakesText(side)}</Typography>
+          <Typography variant="body2" color="text.secondary">{stakesText(side, game.odds)}</Typography>
         </Box>
       ))}
     </Box>

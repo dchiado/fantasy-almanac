@@ -12,6 +12,7 @@ def luck(season, through_week=None):
     All-play: a team's record if it had played every other team every week.
     Expected wins: the wins its scores were worth on average, i.e. the sum of
     its weekly all-play win percentage. Luck is actual wins minus expected wins.
+    Only head-to-head games count: a weekly bonus win has no luck in it.
 
     Returns:
         list of {"team_id", "wins", "losses", "ties", "all_play_wins",
@@ -19,7 +20,7 @@ def luck(season, through_week=None):
                  "close_wins", "close_losses"}, luckiest first
     """
     games = season.regular_season_games(through_week)
-    recs = records(season, through_week)
+    recs = records(season, through_week, bonus=False)
 
     weekly = {}
     for game in games:

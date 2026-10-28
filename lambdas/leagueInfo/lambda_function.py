@@ -35,6 +35,7 @@ def summary(league_id):
         "phase": phase["phase"],
         "regular_season_weeks": phase["regular_season_weeks"],
         "regular_season_weeks_left": phase["regular_season_weeks_left"],
+        "has_playoffs": phase["has_playoffs"],
         "cached": is_cached
     }
 

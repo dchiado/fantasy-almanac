@@ -9,7 +9,7 @@ from test_engine import matchup, views  # also puts utils_layer/python on the pa
 
 from engine.luck import luck, schedule_swap  # noqa: E402
 from engine.report import season_report  # noqa: E402
-from engine.season import parse_season  # noqa: E402
+from engine.season import TOP_HALF_BONUS, parse_season  # noqa: E402
 from engine.simulation import completed_weeks, odds_after_week, playoff_odds  # noqa: E402
 
 
@@ -70,9 +70,42 @@ class ReportTest(unittest.TestCase):
                                              regular_weeks=3))
         report = season_report(season, simulations=50)
         self.assertIsNone(report["playoff_odds"])
-        self.assertEqual(report["unsupported_seeding_rule"], 'INTRA_DIVISION_RECORD')
+        self.assertEqual(report["unsupported_rule"], 'INTRA_DIVISION_RECORD')
         self.assertEqual([t["seed"] for t in report["teams"]], [None] * 4)
         self.assertEqual(len(report["luck"]), 4)
+
+    def test_unsupported_bonus_leaves_out_seeds_and_odds(self):
+        season = parse_season(1, 2025, views(round_robin_schedule(), regular_weeks=3, bonus='SOMETHING_NEW'))
+        report = season_report(season, simulations=50)
+        self.assertIsNone(report["playoff_odds"])
+        self.assertEqual(report["unsupported_rule"], 'SOMETHING_NEW')
+
+    def test_no_playoffs_gives_title_odds(self):
+        season = parse_season(1, 2025, views(round_robin_schedule(), regular_weeks=3, playoff_teams=0))
+        report = season_report(season, simulations=50)
+        self.assertFalse(report["has_playoffs"])
+        for week in report["playoff_odds"]["weeks"]:
+            self.assertAlmostEqual(sum(t["playoff_pct"] for t in week["teams"]), 1)
+        final = {t["team_id"]: t["playoff_pct"] for t in report["playoff_odds"]["weeks"][-1]["teams"]}
+        self.assertEqual(final, {1: 1, 2: 0, 3: 0, 4: 0})
+        self.assertNotIn("bubble", [h["type"] for h in report["highlights"]])
+
+
+class TopHalfBonusTest(unittest.TestCase):
+    def season(self):
+        return parse_season(1, 2025, views(round_robin_schedule(week3_played=False), regular_weeks=3,
+                                           bonus=TOP_HALF_BONUS))
+
+    def test_simulated_weeks_get_the_bonus(self):
+        # Each week has 2 game wins and 2 bonus wins, simulated week 3 included
+        teams = odds_after_week(self.season(), 2, simulations=200)["teams"]
+        self.assertAlmostEqual(sum(t["avg_wins"] for t in teams), 3 * (2 + 2))
+        self.assertAlmostEqual(sum(t["playoff_pct"] for t in teams), 2)
+
+    def test_luck_counts_head_to_head_only(self):
+        teams = {t["team_id"]: t for t in luck(self.season())}
+        self.assertEqual((teams[1]["wins"], teams[1]["losses"]), (2, 0))
+        self.assertEqual(teams[1]["luck"], 2 - teams[1]["expected_wins"])
 
 
 class LuckTest(unittest.TestCase):

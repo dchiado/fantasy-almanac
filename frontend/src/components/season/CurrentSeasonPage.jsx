@@ -27,6 +27,9 @@ const CurrentSeasonPage = ({ section, setError }) => {
     : report.completed_weeks === report.regular_season_weeks ? `${year} season · regular season over`
     : `${year} season · through week ${report.completed_weeks} of ${report.regular_season_weeks}`;
 
+  // A league without playoffs races for first place
+  const title = section === 'playoffs' && leagueInfo.hasPlayoffs === false ? 'Title race' : TITLES[section];
+
   let content;
   if (!started) {
     content = (
@@ -60,7 +63,7 @@ const CurrentSeasonPage = ({ section, setError }) => {
   }
 
   return (
-    <PageLayout maxWidth={1000} title={TITLES[section]} subtitle={subtitle} nav={<ThisSeasonTabs />}>
+    <PageLayout maxWidth={1000} title={title} subtitle={subtitle} nav={<ThisSeasonTabs />}>
       {content}
     </PageLayout>
   );

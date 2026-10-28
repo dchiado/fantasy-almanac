@@ -8,7 +8,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'utils_layer' / 'python'))
 
-from engine.season import CONSOLATION, PLAYOFF, REGULAR, Record, parse_season, records  # noqa: E402
+from engine.season import (  # noqa: E402
+    CONSOLATION, PLAYOFF, REGULAR, TOP_HALF_BONUS, Record, parse_season, records, top_half_bonus)
 from engine.seeding import UnsupportedSeedingRule, seed_teams  # noqa: E402
 
 
@@ -24,16 +25,19 @@ def matchup(week, home, home_pts, away=None, away_pts=None, tier='NONE', winner=
     return m
 
 
-def views(schedule, divisions=None, rule='TOTAL_POINTS_SCORED', regular_weeks=2):
+def views(schedule, divisions=None, rule='TOTAL_POINTS_SCORED', regular_weeks=2, playoff_teams=2, bonus='NONE'):
     """Four teams; teams 1 and 2 in division 0, teams 3 and 4 in division 1."""
     divisions = divisions or {1: 0, 2: 0, 3: 1, 4: 1}
     return {
-        'mSettings': {'settings': {'scheduleSettings': {
-            'matchupPeriodCount': regular_weeks,
-            'playoffTeamCount': 2,
-            'playoffSeedingRule': rule,
-            'divisions': [{'id': 0, 'name': 'East'}, {'id': 1, 'name': 'West'}],
-        }}},
+        'mSettings': {'settings': {
+            'scheduleSettings': {
+                'matchupPeriodCount': regular_weeks,
+                'playoffTeamCount': playoff_teams,
+                'playoffSeedingRule': rule,
+                'divisions': [{'id': 0, 'name': 'East'}, {'id': 1, 'name': 'West'}],
+            },
+            'scoringSettings': {'scoringEnhancementType': bonus},
+        }},
         'mTeam': {
             'teams': [{'id': t, 'name': f'Team {t}', 'abbrev': f'T{t}', 'divisionId': d,
                        'primaryOwner': f'{{owner-{t}}}', 'playoffSeed': 0}
@@ -94,6 +98,29 @@ class ParseSeasonTest(unittest.TestCase):
         recs = records(season)
 
         self.assertEqual((recs[1].losses, recs[2].wins), (1, 1))
+
+    def test_top_half_bonus(self):
+        self.assertEqual(top_half_bonus({1: 100, 2: 90, 3: 80, 4: 70}),
+                         {1: 'win', 2: 'win', 3: 'loss', 4: 'loss'})
+        # Level on the halfway line: both get a tie
+        self.assertEqual(top_half_bonus({1: 100, 2: 90, 3: 90, 4: 70}),
+                         {1: 'win', 2: 'tie', 3: 'tie', 4: 'loss'})
+        self.assertEqual(top_half_bonus({1: 100}), {})
+
+    def test_records_with_top_half_bonus(self):
+        season = parse_season(1, 2025, views([
+            matchup(1, 1, 100, 2, 90), matchup(1, 3, 80, 4, 70),
+            matchup(2, 1, 60, 3, 75), matchup(2, 2, 0, 4, 0, winner='UNDECIDED'),
+        ], bonus=TOP_HALF_BONUS))
+        self.assertEqual(season.settings.win_bonus, TOP_HALF_BONUS)
+        recs = records(season)
+
+        # Week 1's top half is 1 and 2; week 2 is still being played, so no bonus yet
+        self.assertEqual((recs[1].wins, recs[1].losses), (2, 1))
+        self.assertEqual((recs[2].wins, recs[2].losses), (1, 1))
+        self.assertEqual((recs[3].wins, recs[3].losses), (2, 1))
+        self.assertEqual((recs[4].wins, recs[4].losses), (0, 2))
+        self.assertEqual(records(season, bonus=False)[1].wins, 1)
 
 
 class SeedTeamsTest(unittest.TestCase):

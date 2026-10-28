@@ -19,6 +19,10 @@ The phase uses "every week played", not "final", so the recap is available as so
 
 `engine/season.py`: `parse_season` turns `mSettings`, `mMatchupScore` and `mTeam` into `Settings`, `Team`s (with owner SWID and name) and `Game`s (week, tier, both sides, points, winner). `records(season, through_week)` builds regular-season records from ESPN's `winner`, not by comparing points, because some leagues break equal scores.
 
+**Weekly bonus win.** With `scoringEnhancementType` `WIN_BONUS_TOP_HALF`, each team also gets a win for every week it scores in the top half of the league, and a loss otherwise, so a 17-week season has 34 results. `records` includes it, as ESPN's standings do; this matches ESPN's records exactly for league 9003602 (2024–2026). We haven't seen a tie on the halfway line, so teams level there get a tie as a guess. The simulation hands out the bonus each simulated week. Luck counts head-to-head games only, and there are no scenarios (below). Any other `scoringEnhancementType` is unsupported, like an unsupported seeding rule.
+
+**No playoffs.** A league with `playoffTeamCount` 0 has no bracket: first place wins the title (ESPN's final rank matched the seed order in 9003602's seasons). `Settings.spots` is then 1, so the playoff odds, clinches and scenarios are all about finishing first, and the report's `has_playoffs: false` tells the frontend to call them title odds. There's no bubble highlight.
+
 Engine functions take a `through_week`, so stretch-run and playoff screens can be tested on a past season stopped at any week. That isn't a user-facing feature: past seasons show as an end-of-season recap.
 
 ## Seeding
@@ -34,7 +38,7 @@ Tiebreakers implemented:
 - `TOTAL_POINTS_SCORED`: more points for.
 - `H2H_RECORD`: with **two** tied teams, the better record in games between them, then more points for. With **three or more**, ESPN doesn't compare head-to-head across the group. The team with the most points goes first, and the rest are compared again, so head-to-head only decides the last two. Gridiron used this rule in 2005, 2006 and 2012–2014.
 
-Any other rule raises `UnsupportedSeedingRule`; the report then has `playoff_odds: null` and `unsupported_seeding_rule` naming the rule, and the rest still works. Add a rule when a league that uses it can be checked with `scripts/check_seeding.py`.
+Any other rule raises `UnsupportedSeedingRule`; the report then has `playoff_odds: null` and `unsupported_rule` naming the rule, and the rest still works. Add a rule when a league that uses it can be checked with `scripts/check_seeding.py`.
 
 ## Playoff odds
 
@@ -77,7 +81,7 @@ Biggest single-week rises and drops were tried and dropped: they almost always l
 
 ## Playoff scenarios
 
-`engine/scenarios.py`, `playoff_scenarios(season, through_week)`; `null` outside the last 3 regular-season weeks.
+`engine/scenarios.py`, `playoff_scenarios(season, through_week)`; `null` outside the last 3 regular-season weeks, and in leagues with a weekly bonus win, where who's in depends on every team's score and not just who wins.
 
 - Each team gets a status (*Clinched*, *Eliminated*, *In if they win out*, *Needs help*) and, when short enough, this week's conditions: "Clinches with win AND Team X loss". Conditions only cover this week's games. When no one- or two-clause statement is exact, the one covering the most results is shown as "…, among other ways"; failing that, "Can clinch this week with help".
 - **Clinched and eliminated mean certain**, however the points fall, matching ESPN's clinch markers.

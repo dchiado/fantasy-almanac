@@ -6,6 +6,13 @@ export const formatPct = (p, certain = false) => {
   return `${Math.round(p * 100)}%`;
 };
 
+// In a league without playoffs, first place wins the title, so the odds
+// (engine/report.py) are title odds: "Playoff odds" or "Title odds"
+export const oddsName = (report) => (report.has_playoffs ? 'Playoff' : 'Title');
+
+// How many top seeds the odds are about: the playoff teams, or first place
+export const spots = (report) => (report.has_playoffs ? report.playoff_team_count : 1);
+
 export const formatRecord = ({ wins, losses, ties }) => `${wins}-${losses}${ties ? `-${ties}` : ''}`;
 
 export const formatSigned = (n, digits = 1) => `${n > 0 ? '+' : n < 0 ? '−' : ''}${Math.abs(n).toFixed(digits)}`;

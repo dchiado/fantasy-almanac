@@ -99,7 +99,8 @@ const App = () => {
 							week: data.week,
 							phase: data.phase,
 							regularSeasonWeeks: data.regular_season_weeks,
-							regularSeasonWeeksLeft: data.regular_season_weeks_left
+							regularSeasonWeeksLeft: data.regular_season_weeks_left,
+							hasPlayoffs: data.has_playoffs
 						}));
 
             setIsCached(data.cached);

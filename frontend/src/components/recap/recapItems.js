@@ -1,6 +1,6 @@
 // A weekly recap (GET /recap, engine/recap.py) as display text: one item per
 // story, each { key, title, name, detail, badge }.
-import { formatPct } from "../season/format";
+import { formatPct, oddsName } from "../season/format";
 
 // Exact all-time ranks only near the top, where they mean something
 const EXACT_RANKS = 25;
@@ -188,7 +188,7 @@ const oddsMovers = (recap, names) => {
     key,
     title,
     name: names[mover.team_id],
-    detail: `Playoff odds ${formatPct(mover.before)} → ${formatPct(mover.after)}`,
+    detail: `${oddsName(recap)} odds ${formatPct(mover.before)} → ${formatPct(mover.after)}`,
   });
 
   if (movers.rise) {
@@ -202,7 +202,7 @@ const oddsMovers = (recap, names) => {
   if (movers.clinched.length > 0) {
     items.push({
       key: 'clinched',
-      title: 'Clinched a playoff spot',
+      title: recap.has_playoffs ? 'Clinched a playoff spot' : 'Clinched the title',
       name: movers.clinched.map((t) => names[t]).join(', '),
     });
   }
@@ -293,6 +293,7 @@ export const gameOfTheWeek = (recap, names) => {
 
   return {
     week: game.week,
+    odds: oddsName(recap),
     sides: [side(game.home), side(game.away)],
     series: seriesText(game.head_to_head, names[game.home.team_id], names[game.away.team_id]),
   };

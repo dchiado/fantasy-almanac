@@ -70,7 +70,8 @@ const SeasonPage = ({ setError }) => {
     </FormControl>
   );
 
-  const subtitle = report && `${report.teams.length} teams · ${report.playoff_team_count} made the playoffs`;
+  const finish = report?.has_playoffs ? `${report.playoff_team_count} made the playoffs` : 'no playoffs';
+  const subtitle = report && `${report.teams.length} teams · ${finish}`;
 
   return (
     <PageLayout maxWidth={1000} title={`${year} season`} subtitle={subtitle} actions={picker}>

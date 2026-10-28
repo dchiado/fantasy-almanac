@@ -11,7 +11,7 @@ miss a clinch that head-to-head guarantees, but never claims a false one).
 from bisect import bisect_left, bisect_right
 from itertools import product
 
-from .season import REGULAR, records
+from .season import NO_BONUS, REGULAR, records
 
 # Scenarios are worked out this many regular-season weeks from the end, or fewer
 SCENARIO_WEEKS = 3
@@ -19,7 +19,8 @@ SCENARIO_WEEKS = 3
 
 def playoff_scenarios(season, through_week):
     """Scenarios with games through `through_week` final, or None outside the
-    last SCENARIO_WEEKS weeks of the regular season.
+    last SCENARIO_WEEKS weeks of the regular season. Also None in leagues with
+    a weekly bonus win, which turns on every team's score, not just who wins.
 
     Returns:
         {"week": 12,  # the week the conditions are about
@@ -37,7 +38,7 @@ def playoff_scenarios(season, through_week):
     """
     settings = season.settings
     weeks_left = settings.regular_season_weeks - through_week
-    if not 1 <= weeks_left <= SCENARIO_WEEKS:
+    if not 1 <= weeks_left <= SCENARIO_WEEKS or settings.win_bonus != NO_BONUS:
         return None
 
     team_ids = list(season.teams)
@@ -57,7 +58,7 @@ def playoff_scenarios(season, through_week):
     divisions = {}
     for t in team_ids:
         divisions.setdefault(season.teams[t].division_id, []).append(index[t])
-    bounds = _Bounds(list(divisions.values()), settings.playoff_team_count)
+    bounds = _Bounds(list(divisions.values()), settings.spots)
 
     def outcome_pcts(results):
         """Final win percentages, given (home index, away index, home won) per game."""

@@ -10,7 +10,7 @@ from .scenarios import SCENARIO_WEEKS, playoff_scenarios
 from .season import CONSOLATION, PLAYOFF, REGULAR
 
 # Bump when the output changes, so stored recaps are recomputed
-RECAP_VERSION = 1
+RECAP_VERSION = 2
 
 # A score gets its all-time rank in the recap only if it's in the top or bottom
 # share of every score in league history. At 10% the week's high score made it
@@ -47,6 +47,8 @@ def weekly_recap(season, week, lineups, adds, report, history):
         "week": week,
         "playoffs": not regular,
         "regular_season_weeks": season.settings.regular_season_weeks,
+        # False when first place wins the title: the odds are then title odds
+        "has_playoffs": season.settings.has_playoffs,
         "teams": [{"team_id": t.id, "name": t.name, "abbrev": t.abbrev, "logo": t.logo,
                    "owner_name": t.owner_name} for t in season.teams.values()],
         "games": [{"home": g.home, "away": g.away, "home_points": g.home_points,

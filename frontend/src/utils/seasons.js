@@ -21,6 +21,17 @@ export const THIS_SEASON_PAGES = [
   { key: 'standings', label: 'Standings', shortLabel: 'Standings', to: '/standings' },
 ];
 
+// THIS_SEASON_PAGES as named for this league: a league without playoffs races for the title
+export const thisSeasonPages = (leagueInfo) => {
+  if (leagueInfo?.hasPlayoffs !== false) {
+    return THIS_SEASON_PAGES;
+  }
+
+  return THIS_SEASON_PAGES.map((page) => (
+    page.key === 'playoffs' ? { ...page, label: 'Title race', shortLabel: 'Title race' } : page
+  ));
+};
+
 // Where mobile's "This season" tab opens: the playoff race once it's the story
 export const thisSeasonPath = (leagueInfo) => (
   ['stretch_run', 'playoffs', 'offseason'].includes(leagueInfo?.phase) ? '/playoffs' : '/power-rankings'

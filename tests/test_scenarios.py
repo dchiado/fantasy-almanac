@@ -4,6 +4,7 @@
 """
 import random
 import unittest
+from dataclasses import replace
 from itertools import product
 
 from test_engine import matchup, views  # also puts utils_layer/python on the path
@@ -99,6 +100,19 @@ class ScenariosTest(unittest.TestCase):
     def test_only_in_the_last_weeks(self):
         self.assertIsNone(playoff_scenarios(self.season(), 3))  # season over
         self.assertIsNotNone(playoff_scenarios(self.season(), 0))  # three weeks left
+
+    def test_none_with_a_weekly_bonus(self):
+        season = self.season()
+        settings = replace(season.settings, win_bonus='WIN_BONUS_TOP_HALF')
+        self.assertIsNone(playoff_scenarios(replace(season, settings=settings), 2))
+
+    def test_no_playoffs_is_about_first_place(self):
+        season = self.season()
+        season = replace(season, settings=replace(season.settings, playoff_team_count=0))
+        teams = {t["team_id"]: t for t in playoff_scenarios(season, 2)["teams"]}
+        # 1 (2-0) finishes first with a win over 3; 4 (0-2) can't get there
+        self.assertEqual(teams[1]["clinch"], {"all": [{"team_id": 1, "result": "win"}]})
+        self.assertEqual(teams[4]["status"], "eliminated")
 
 
 if __name__ == '__main__':

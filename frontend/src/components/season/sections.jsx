@@ -10,7 +10,7 @@ import SectionCard from "../ui/SectionCard";
 import StatTable from "../ui/StatTable";
 import OddsChart from "./OddsChart";
 import PlayoffPicture from "./PlayoffPicture";
-import { formatPct, formatRecord, formatSigned } from "./format";
+import { formatPct, formatRecord, formatSigned, oddsName, spots } from "./format";
 
 // The report for one season, with team id -> name and abbreviation lookups
 export const useSeasonReport = (leagueId, year, setError) => {
@@ -27,16 +27,19 @@ export const useSeasonReport = (leagueId, year, setError) => {
 const games = (n) => (n === 1 ? 'a game' : n === 0.5 ? 'half a game' : `${n} games`);
 
 // One card per highlight in the report: collapse, comeback, bubble
-const highlightText = (h, names, seedingRule) => {
+const highlightText = (h, names, report) => {
+  const missed = report.has_playoffs ? 'missed the playoffs' : "didn't win the title";
+  const made = report.has_playoffs ? 'made the playoffs' : 'won the title';
+
   switch (h.type) {
     case 'collapse':
-      return { title: 'Biggest collapse', name: names[h.team_id], body: `Peaked at ${formatPct(h.pct)} in week ${h.week}, missed the playoffs` };
+      return { title: 'Biggest collapse', name: names[h.team_id], body: `Peaked at ${formatPct(h.pct)} in week ${h.week}, ${missed}` };
     case 'comeback':
-      return { title: 'Biggest comeback', name: names[h.team_id], body: `Down to ${formatPct(h.pct)} in week ${h.week}, made the playoffs` };
+      return { title: 'Biggest comeback', name: names[h.team_id], body: `Down to ${formatPct(h.pct)} in week ${h.week}, ${made}` };
     case 'bubble': {
       const how = h.games_ahead > 0 ? `by ${games(h.games_ahead)}`
         : h.games_ahead < 0 ? 'as a division winner'
-        : seedingRule === 'TOTAL_POINTS_SCORED' ? `with the same record, by ${h.points_ahead.toFixed(1)} points`
+        : report.seeding_rule === 'TOTAL_POINTS_SCORED' ? `with the same record, by ${h.points_ahead.toFixed(1)} points`
         : 'on the tiebreaker';
       return { title: 'The bubble', name: `${names[h.team_id]} over ${names[h.out_team_id]}`, body: `Took the last playoff spot ${how}` };
     }
@@ -47,7 +50,7 @@ const highlightText = (h, names, seedingRule) => {
 
 // A swipeable row on phones, so the chart isn't pushed below the fold; a grid from sm up
 export const Highlights = ({ report, names }) => {
-  const cards = (report.highlights ?? []).map((h) => highlightText(h, names, report.seeding_rule)).filter(Boolean);
+  const cards = (report.highlights ?? []).map((h) => highlightText(h, names, report)).filter(Boolean);
   if (cards.length === 0) return null;
 
   return (
@@ -76,11 +79,11 @@ export const Highlights = ({ report, names }) => {
 };
 
 export const PlayoffPictureSection = ({ report }) => (
-  <SectionCard title={`Playoff picture · week ${report.scenarios.week}`} sx={{ mb: 3 }}>
+  <SectionCard title={`${oddsName(report)} picture · week ${report.scenarios.week}`} sx={{ mb: 3 }}>
     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
       {report.scenarios.weeks_left === 1 ? 'Last week' : `${report.scenarios.weeks_left} weeks left`} of the regular season.
       Clinched and eliminated are certain; when a spot could come down to total points, it shows as odds instead.
-      The line marks the playoff cutoff.
+      {report.has_playoffs ? 'The line marks the playoff cutoff.' : 'First place wins the title.'}
     </Typography>
     <PlayoffPicture report={report} />
   </SectionCard>
@@ -147,8 +150,9 @@ export const PlayoffOdds = ({ report, names }) => {
   ];
 
   return (
-    <SectionCard title="Playoff odds by week" sx={{ mb: 3 }}>
+    <SectionCard title={`${oddsName(report)} odds by week`} sx={{ mb: 3 }}>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        {!report.has_playoffs && 'This league has no playoffs, so these are the odds of finishing first. '}
         Simulated {report.final ? 'week by week, using only the games played so far each week' : 'from the games played so far'}.
         Low and high are each team's range from week 1 to the week shown, not counting the last week, which settles everything.
         Tap a team to highlight it, or the chart to pick a week.
@@ -170,7 +174,7 @@ export const PlayoffOdds = ({ report, names }) => {
         </Box>
       </Box>
       <StatTable dense columns={columns} rows={rows} getRowKey={(row) => row.team_id}
-                 ariaLabel={week === 0 ? 'Playoff odds before week 1' : `Playoff odds after week ${week}`} />
+                 ariaLabel={week === 0 ? `${oddsName(report)} odds before week 1` : `${oddsName(report)} odds after week ${week}`} />
     </SectionCard>
   );
 };
@@ -179,16 +183,16 @@ export const PlayoffOdds = ({ report, names }) => {
 export const PlayoffOddsOrReason = ({ report, names }) => (
   report.playoff_odds
     ? <PlayoffOdds report={report} names={names} />
-    : <SectionCard title="Playoff odds by week" sx={{ mb: 3 }}>
+    : <SectionCard title={`${oddsName(report)} odds by week`} sx={{ mb: 3 }}>
         <Typography color="text.secondary">
-          Playoff odds aren't available for this season: it breaks ties with a rule the Almanac
-          doesn't support yet ({report.unsupported_seeding_rule}).
+          {oddsName(report)} odds aren't available for this season: it uses a standings rule the
+          Almanac doesn't support yet ({report.unsupported_rule}).
         </Typography>
       </SectionCard>
 );
 
 // Standings in seed order, with what ESPN doesn't show next to the record:
-// playoff odds, all-play record, expected wins, luck and close games
+// playoff (or title) odds, all-play record, expected wins, luck and close games
 export const StandingsTable = ({ report, names }) => {
   const luck = Object.fromEntries(report.luck.map((t) => [t.team_id, t]));
   const latest = report.playoff_odds?.weeks[report.playoff_odds.weeks.length - 1];
@@ -197,8 +201,8 @@ export const StandingsTable = ({ report, names }) => {
   const showOdds = latest && report.completed_weeks < report.regular_season_weeks;
   const rows = report.teams.map((t) => ({ ...luck[t.team_id], ...t, name: names[t.team_id] }));
 
-  // A heavier line under the last playoff seed
-  const cutoffSx = (row, idx) => (idx === report.playoff_team_count - 1 && row.seed ? { borderBottom: '2px solid var(--fa-text-muted)' } : {});
+  // A heavier line under the last playoff seed, or first place
+  const cutoffSx = (row, idx) => (idx === spots(report) - 1 && row.seed ? { borderBottom: '2px solid var(--fa-text-muted)' } : {});
   const withCutoff = (cellSx) => (row, idx) => ({ ...cutoffSx(row, idx), ...(cellSx ? cellSx(row, idx) : {}) });
 
   const columns = [

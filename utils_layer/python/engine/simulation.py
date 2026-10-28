@@ -10,7 +10,7 @@ import zlib
 from collections import namedtuple
 
 from .scenarios import SCENARIO_WEEKS
-from .season import REGULAR, Record, records
+from .season import REGULAR, TOP_HALF_BONUS, Record, records, top_half_bonus
 from .seeding import seed_teams
 
 SIMULATIONS = 2000
@@ -80,6 +80,7 @@ def odds_after_week(season, week, simulations=SIMULATIONS):
     divisions = [season.teams[t].division_id for t in team_ids]
     division_count = len(set(divisions))
     head_to_head = settings.seeding_rule == 'H2H_RECORD'
+    bonus = settings.win_bonus == TOP_HALF_BONUS
 
     played = season.regular_season_games(week)
     remaining = [g for g in season.games
@@ -111,6 +112,7 @@ def odds_after_week(season, week, simulations=SIMULATIONS):
         points = [base[t].points_for for t in team_ids]
         sim_games = list(played) if head_to_head else ()
         next_results = []  # (winner index, loser index)
+        week_scores = {}  # week -> team index -> points, for the bonus
 
         for game in remaining:
             h, a = index[game.home], index[game.away]
@@ -132,6 +134,18 @@ def odds_after_week(season, week, simulations=SIMULATIONS):
                 next_results.append(result)
             if head_to_head:
                 sim_games.append(_SimGame(game.home, game.away, winner))
+            if bonus:
+                scores = week_scores.setdefault(game.week, {})
+                scores[h], scores[a] = home_points, away_points
+
+        for scores in week_scores.values():
+            for i, result in top_half_bonus(scores).items():
+                if result == 'win':
+                    wins[i] += 1
+                elif result == 'loss':
+                    losses[i] += 1
+                else:
+                    ties[i] += 1
 
         sim_records = [Record(t, divisions[i], wins[i], losses[i], ties[i], points[i])
                        for i, t in enumerate(team_ids)]
@@ -139,14 +153,14 @@ def odds_after_week(season, week, simulations=SIMULATIONS):
         for seed, team_id in enumerate(order):
             i = index[team_id]
             seed_counts[i][seed] += 1
-            if seed < settings.playoff_team_count:
+            if seed < settings.spots:
                 made_playoffs[i] += 1
             if seed < division_count:
                 won_division[i] += 1
         for i in range(len(team_ids)):
             total_wins[i] += wins[i]
         if next_results:
-            in_playoffs = set(order[:settings.playoff_team_count])
+            in_playoffs = set(order[:settings.spots])
             for w, l in next_results:
                 next_wins[w] += 1
                 next_losses[l] += 1

@@ -50,7 +50,7 @@ power_rankings/league_{league}/{year}/week_{week}/     AI writeups (rankings.md)
 
 ## Season phases
 
-Each league's current season is in one phase. `/info` returns it as `phase` (along with `regular_season_weeks` and `regular_season_weeks_left`), and the frontend keeps it in `leagueInfo`.
+Each league's current season is in one phase. `/info` returns it as `phase` (along with `regular_season_weeks`, `regular_season_weeks_left` and `has_playoffs`, false when first place wins the title), and the frontend keeps it in `leagueInfo`.
 
 | Phase | When | Home leads with |
 | --- | --- | --- |

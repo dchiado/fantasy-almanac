@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Chip, Typography } from "@mui/material";
-import { STATUS_LABELS, conditionText, formatPct, formatRecord } from "./format";
+import { STATUS_LABELS, conditionText, formatPct, formatRecord, spots } from "./format";
 
 const statusChipProps = {
   clinched: { color: 'success' },
@@ -30,7 +30,7 @@ const PlayoffPicture = ({ report, limit }) => {
           conditionText(scenario.clinch, 'Clinches', team.team_id, names),
           conditionText(scenario.eliminate, 'Eliminated', team.team_id, names),
         ].filter(Boolean);
-        const cutoff = idx === report.playoff_team_count - 1 && !limit;
+        const cutoff = idx === spots(report) - 1 && !limit;
 
         return (
           <Box

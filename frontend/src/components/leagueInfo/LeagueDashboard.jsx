@@ -7,7 +7,7 @@ import useApi from "../../hooks/useApi";
 import MovementBadge from "../ui/MovementBadge";
 import { DEFAULT_WEIGHTS, rankWithMovement } from "../../utils/powerRankings";
 import PlayoffPicture from "../season/PlayoffPicture";
-import { formatPct, formatRecord, formatSigned } from "../season/format";
+import { formatPct, formatRecord, formatSigned, oddsName, spots } from "../season/format";
 import { homeItems, recapItems } from "../recap/recapItems";
 import { recapPath } from "../../utils/seasons";
 
@@ -213,13 +213,18 @@ const latestOdds = (report) => {
     .sort((a, b) => b.playoff_pct - a.playoff_pct);
 };
 
+// Teams the odds card shows: the playoff teams, or the top few title contenders
+const TITLE_CONTENDERS = 4;
+
 const PlayoffOddsCard = ({ leagueId, year }) => {
   const { data: report, loading, error } = useApi(`/season?leagueId=${leagueId}&year=${year}`);
-  const odds = report ? latestOdds(report).slice(0, report.playoff_team_count) : [];
+  const shown = report?.has_playoffs ? report.playoff_team_count : TITLE_CONTENDERS;
+  const odds = report ? latestOdds(report).slice(0, shown) : [];
   const names = Object.fromEntries((report?.teams ?? []).map((t) => [t.team_id, t.name]));
+  const name = report ? oddsName(report) : 'Playoff';
 
   return (
-    <DashCard title={report ? `Playoff odds · after week ${report.completed_weeks}` : 'Playoff odds'} to="/playoffs" linkLabel="Playoff race">
+    <DashCard title={report ? `${name} odds · after week ${report.completed_weeks}` : `${name} odds`} to="/playoffs" linkLabel={`${name} race`}>
       {loading ? <CardSkeleton lines={6} />
         : error || odds.length === 0 ? <Unavailable>Odds start after week 1.</Unavailable>
         : odds.map((t, idx) => (
@@ -247,10 +252,10 @@ const PlayoffPictureCard = ({ leagueId, year }) => {
   const { data: report, loading, error } = useApi(`/season?leagueId=${leagueId}&year=${year}`);
 
   return (
-    <DashCard title={report?.scenarios ? `Playoff picture · week ${report.scenarios.week}` : 'Playoff picture'} to="/playoffs" linkLabel="Everyone">
+    <DashCard title={report?.scenarios ? `${oddsName(report)} picture · week ${report.scenarios.week}` : 'Playoff picture'} to="/playoffs" linkLabel="Everyone">
       {loading ? <CardSkeleton lines={6} />
         : error || !report?.scenarios ? <Unavailable />
-        : <PlayoffPicture report={report} limit={report.playoff_team_count + 2} />
+        : <PlayoffPicture report={report} limit={spots(report) + 2} />
       }
     </DashCard>
   );
