@@ -43,7 +43,7 @@ espn-cache/{league}/{year}/weeks/{week}/{view}.json    raw ESPN for one scoring 
 espn-cache/{league}/{year}/_finality.json              when every week was first seen played
 derived/{league}/{year}/season-report-v{n}.json        season report (GET /season) for a final season
 derived/{league}/{year}/season-report-v{n}-{inputs}.json   ... for a season in progress, by a hash of its decided games
-power_rankings/league_{league}/{year}/week_{week}/     AI writeups
+power_rankings/league_{league}/{year}/week_{week}/     AI writeups (rankings.md) and their status.json
 ```
 
 ## Season phases
@@ -165,6 +165,15 @@ Secrets are stored in AWS SSM Parameter Store and referenced in `template.yaml` 
 aws ssm put-parameter --name /ffalmanac/ANTHROPIC_API_KEY --value "sk-..." --type SecureString --region us-east-2
 ```
 
+### Claude costs
+
+Any feature that calls Claude follows the power rankings writeup's guards:
+
+- **Spend limit:** the Anthropic API key is in its own Console workspace with a low monthly limit. It's the only hard cap; the AWS budget only alerts.
+- **Allowlist:** only leagues in `AI_LEAGUES` (`template.yaml`, comma-separated) get a writeup. Other leagues get the rankings, and the page leaves the writeup card out. The writer's prompt is written for Gridiron, so check it before adding a league.
+- **One call per league-week:** before invoking `writePowerRankings`, `powerRankings` claims `status.json` next to `rankings.md` with a conditional write, so simultaneous page loads make one call. The writer marks it `failed` on any error, and a `pending` marker older than 5 minutes counts as failed. A failed writeup is never retried; delete its `status.json` to try again.
+- **No async retries:** `writePowerRankings` has `MaximumRetryAttempts: 0`.
+
 ---
 
 ## Frontend
@@ -204,8 +213,4 @@ See [docs/espn-api/](docs/espn-api/README.md) for endpoints, views, errors, gotc
 ## TODOs
 
 - Audit seasons cached under the old calendar-year rule. Any 2021–2025 season whose `espn-cache/` objects were written before about January 10 of the next year may have been saved mid-final; delete those objects so they're refetched.
-- Cap Claude costs (do before adding more AI features):
-  - Move the app's Anthropic API key to its own Console workspace with a low monthly spend limit (e.g. $5). This is the only hard cap on Claude spend; the AWS budget only alerts.
-  - `powerRankings` calls Claude for any league ID. Add an allowlist (e.g. an `AI_LEAGUES` env var) so only known leagues trigger a writeup.
-  - Before invoking `writePowerRankings`, write a "pending" marker to S3 (and a "failed" marker on error), so simultaneous page loads and repeated failures don't each make a Claude call.
 - Lambda reserved concurrency isn't possible while the account's concurrency limit is 10 (AWS requires leaving 10 unreserved). That limit already caps the whole account at 10 concurrent runs. If it's ever raised, set `ReservedConcurrentExecutions` per function (1–2 for Claude callers).

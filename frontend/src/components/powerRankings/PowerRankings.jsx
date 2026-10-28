@@ -50,6 +50,7 @@ const PowerRankings = ({ setError }) => {
 	const [loading, setLoading] = useState(true);
 	const [rankingsData, setRankingsData] = useState([]);
 	const [writeup, setWriteup] = useState(null);
+	const [writeupStatus, setWriteupStatus] = useState(null);
 	const [writeupExpanded, setWriteupExpanded] = useState(false);
 	const [writeupOverflows, setWriteupOverflows] = useState(false);
 	const writeupRef = useRef(null);
@@ -61,9 +62,8 @@ const PowerRankings = ({ setError }) => {
 			.then((data) => {
 				setRankingsData(data.teams);
 
-				if (data.writeup) {
-					setWriteup(data.writeup);
-				}
+				setWriteup(data.writeup || null);
+				setWriteupStatus(data.writeup_status || null);
 
 				setLoading(false);
 			})
@@ -122,6 +122,8 @@ const PowerRankings = ({ setError }) => {
 		<PageLayout maxWidth={1300} title="Power Rankings" subtitle="Arrows show movement since last week." nav={<ThisSeasonTabs />}>
 			{parsedRankings.length > 0 &&
 				<Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 4 } }}>
+					{/* Only leagues in AI_LEAGUES get a writeup; for the rest, and for failed ones, the card is left out */}
+					{(writeup || writeupStatus === 'pending') &&
 					<SectionCard title="This week's writeup">
 						{writeup
 							? <>
@@ -137,6 +139,7 @@ const PowerRankings = ({ setError }) => {
 							: <Typography color="text.secondary">Check back later for the power rankings writeup.</Typography>
 						}
 					</SectionCard>
+					}
 
 					<Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 1fr) 260px' }, gap: 3, alignItems: 'start' }}>
 						<Box>

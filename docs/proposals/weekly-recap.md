@@ -75,7 +75,7 @@ The gotchas are in [ESPN API: gotchas](../espn-api/README.md#gotchas).
 One Claude call per league-week, turning the recap's JSON into a few lines per item in the Gazette's voice. Same pattern as `writePowerRankings`: invoked asynchronously, stored in S3, and the page shows the plain recap until the writeup is ready.
 
 - Generated only for a decided week, stored under the recap's input hash, so a stat correction or a prompt change (`-v{n}`) produces a new one. It's never regenerated for the same inputs.
-- **First:** the README's "Cap Claude costs" TODOs (spend limit, `AI_LEAGUES` allowlist, pending marker). Past weeks are generated only on request for allowlisted leagues, never backfilled across a league's history.
+- Same guards as power rankings (README, "Claude costs"): only `AI_LEAGUES`, a claimed `status.json` per league-week, and a failure is never retried. Past weeks are generated only on request for allowlisted leagues, never backfilled across a league's history.
 - Claude sees team names, owner names and scores, the same as the power rankings writeups.
 
 ## Stretch goal: pick 'em

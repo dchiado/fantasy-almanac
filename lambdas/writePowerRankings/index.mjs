@@ -16,12 +16,36 @@ async function getApiKey() {
   return _apiKey;
 }
 
+const prefix = ({ year, week, league_id }) => `power_rankings/league_${league_id}/${year}/week_${week}`;
+
+// Marks the week's writeup as failed, so powerRankings stops showing it as
+// pending and never retries it (every retry would be another Claude call)
+async function markFailed(event) {
+  try {
+    await s3.send(new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: `${prefix(event)}/status.json`,
+      Body: JSON.stringify({ status: 'failed' }),
+      ContentType: 'application/json',
+    }));
+  } catch (error) {
+    console.error('Error writing failed marker:', error);
+  }
+}
+
 export const handler = async (event) => {
+  try {
+    return await writeRankings(event);
+  } catch (error) {
+    console.error('Writeup failed:', error);
+    await markFailed(event);
+  }
+};
+
+async function writeRankings(data) {
   const apiKey = await getApiKey();
-  const data = event;
   console.log('Got data: ');
   console.log(data);
-  const { year, week, league_id } = data;
 
   const prompt = `
 You are a fantasy sports analyst writing weekly power rankings for a fantasy league. 
@@ -84,9 +108,8 @@ ${JSON.stringify(data)}
   });
 
   if (!response.ok) {
-    console.error('Claude API error', response.status, await response.text());
-    return;
-  }  
+    throw new Error(`Claude API error ${response.status}: ${await response.text()}`);
+  }
 
   const resp = await response.json();
   console.log(resp);
@@ -95,24 +118,15 @@ ${JSON.stringify(data)}
   console.log('LLM response: ');
   console.log(llm_response);
 
-  // Create a unique S3 key
-  const key = `power_rankings/league_${league_id}/${year}/week_${week}/rankings.md`;
-
-  try {
-    const command = new PutObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-      Body: llm_response,
-      ContentType: 'text/markdown'
-    });
-
-    await s3.send(command);
-  } catch (error) {
-    console.error('Error writing to S3:', error);
-  }
+  await s3.send(new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: `${prefix(data)}/rankings.md`,
+    Body: llm_response,
+    ContentType: 'text/markdown'
+  }));
 
   return {
     statusCode: 200,
     body: llm_response,
   };
-};
+}

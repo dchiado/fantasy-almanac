@@ -37,7 +37,7 @@ They work the same as every other page. The frontend already sends `espnS2` to t
 - Rate limiting: the site is public, so it needs a per-league limit, a cap on response length, and caching for repeat questions.
 - Whether to log questions, to learn what people ask.
 - Storage: S3 is enough for a 2,000-row table loaded per request. DynamoDB only if a later version needs indexed queries.
-- The README's "Cap Claude costs" TODOs should be done first.
+- Follow the guards in the README's "Claude costs" (an `AI_LEAGUES`-style allowlist, one call per input).
 
 ## Later
 

@@ -183,6 +183,9 @@ Resources:
       Environment:
         Variables:
           WRITE_POWER_RANKINGS_FUNCTION: !Ref WritePowerRankingsFunction
+          # Comma-separated league IDs that get a Claude writeup; others get rankings only.
+          # The writer's prompt is written for Gridiron, so check it before adding a league.
+          AI_LEAGUES: "166975"
       Policies:
         - S3CrudPolicy:
             BucketName: ffalmanac-data
