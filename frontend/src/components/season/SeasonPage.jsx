@@ -1,14 +1,43 @@
 import React from "react";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
-import { Redirect, useHistory, useParams } from "react-router-dom";
+import { Link, Redirect, useHistory, useParams } from "react-router-dom";
 import LoadingState from "../ui/LoadingState";
 import PageLayout from "../ui/PageLayout";
+import SectionCard from "../ui/SectionCard";
 import { PlayoffOddsOrReason, ScheduleSwap, StandingsTable, useSeasonReport } from "./sections";
-import { latestRecapSeason } from "../../utils/seasons";
+import { latestRecapSeason, recapPath } from "../../utils/seasons";
+
+// Links to every week's recap, regular season then playoffs
+const WeeklyRecaps = ({ report }) => {
+  const weeks = Array.from({ length: report.weeks_played ?? 0 }, (_, i) => i + 1);
+  if (weeks.length === 0) return null;
+  const groups = [
+    ['Regular season', weeks.filter((w) => w <= report.regular_season_weeks)],
+    ['Playoffs', weeks.filter((w) => w > report.regular_season_weeks)],
+  ].filter(([, group]) => group.length > 0);
+
+  return (
+    <SectionCard title="Weekly recaps" sx={{ mb: 3 }}>
+      {groups.map(([label, group]) => (
+        <Box key={label} sx={{ '& + &': { mt: 1.5 } }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>{label}</Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(48px, 1fr))', gap: 1 }}>
+            {group.map((w) => (
+              <Button key={w} component={Link} to={recapPath(report.year, w)} variant="outlined" size="small" sx={{ minWidth: 0 }}>
+                {w}
+              </Button>
+            ))}
+          </Box>
+        </Box>
+      ))}
+    </SectionCard>
+  );
+};
 
 // A past season's recap (History → Past seasons): odds by week with the
-// highlights, final standings with luck, and the schedule swap grid
+// highlights, links to each week's recap, final standings with luck, and the
+// schedule swap grid
 const SeasonPage = ({ setError }) => {
   const leagueInfo = useSelector((state) => state.leagueInfo);
   const { year: yearParam } = useParams();
@@ -49,6 +78,7 @@ const SeasonPage = ({ setError }) => {
         ? <LoadingState inline rows={12} title={false} />
         : <>
             <PlayoffOddsOrReason report={report} names={names} />
+            <WeeklyRecaps report={report} />
             <StandingsTable report={report} names={names} />
             <ScheduleSwap report={report} names={names} abbrevs={abbrevs} />
           </>

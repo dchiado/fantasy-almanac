@@ -60,6 +60,10 @@ Resources:
         "GET /season":
           ThrottlingRateLimit: 2
           ThrottlingBurstLimit: 5
+        # Same lambda; a recap not yet stored fetches a week of rosters and every past season
+        "GET /recap":
+          ThrottlingRateLimit: 2
+          ThrottlingBurstLimit: 5
 
   UtilsLayer:
     Type: AWS::Serverless::LayerVersion
@@ -300,7 +304,7 @@ Resources:
             Path: /keepers
             Method: GET
 
-  # Season page: playoff odds, luck. Lambda CPU scales with memory (1769 MB is
+  # Season page (playoff odds, luck) and weekly recaps. Lambda CPU scales with memory (1769 MB is
   # one full vCPU); the simulation takes ~2s per season on a laptop. Final
   # seasons are computed once and stored.
   SeasonFunction:
@@ -327,6 +331,12 @@ Resources:
           Properties:
             ApiId: !Ref Api
             Path: /season
+            Method: GET
+        RecapRoute:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /recap
             Method: GET
 
   # ── JS lambdas ───────────────────────────────────────────────────────────────

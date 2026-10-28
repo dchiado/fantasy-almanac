@@ -6,13 +6,13 @@ from dataclasses import replace
 
 from .luck import luck, schedule_swap
 from .scenarios import playoff_scenarios
-from .season import records
+from .season import last_played_week, records
 from .seeding import UnsupportedSeedingRule, seed_teams
 from .simulation import SIMULATIONS, completed_weeks, highlights as odds_highlights, playoff_odds
 
 # Bump when the output or any model behind it changes, so stored reports are
 # recomputed (they're saved under a key that includes this)
-REPORT_VERSION = 3
+REPORT_VERSION = 4
 
 
 def season_report(season, simulations=SIMULATIONS):
@@ -60,6 +60,8 @@ def season_report(season, simulations=SIMULATIONS):
         "version": REPORT_VERSION,
         "year": season.year,
         "completed_weeks": week,
+        # Including the playoffs: the weeks with a recap (GET /recap)
+        "weeks_played": last_played_week(season),
         "regular_season_weeks": season.settings.regular_season_weeks,
         "playoff_team_count": season.settings.playoff_team_count,
         "seeding_rule": season.settings.seeding_rule,

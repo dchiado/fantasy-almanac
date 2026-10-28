@@ -23,7 +23,7 @@ const VIEWS = [
   'players_wl'
 ];
 
-const espnUrl = (leagueId, year, view) => year > 2019
+const espnUrl = (leagueId, year, view) => year >= 2019
   ? `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/${year}/segments/0/leagues/${leagueId}?view=${view}`
   : `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/leagueHistory/${leagueId}?seasonId=${year}&view=${view}`;
 

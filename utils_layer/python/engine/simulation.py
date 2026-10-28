@@ -9,6 +9,7 @@ import statistics
 import zlib
 from collections import namedtuple
 
+from .scenarios import SCENARIO_WEEKS
 from .season import REGULAR, Record, records
 from .seeding import seed_teams
 
@@ -68,6 +69,10 @@ def odds_after_week(season, week, simulations=SIMULATIONS):
         {"week": 3, "teams": [{"team_id", "playoff_pct", "division_pct",
                                "seed_dist", "avg_wins"}, ...]}
         seed_dist[i] is the chance of finishing as seed i + 1.
+
+        In the last SCENARIO_WEEKS weeks, teams playing the next week also get
+        "if_win_pct" and "if_loss_pct": their playoff odds in the simulated
+        seasons where they won or lost that game (None if that never happened).
     """
     settings = season.settings
     team_ids = list(season.teams)
@@ -82,6 +87,8 @@ def odds_after_week(season, week, simulations=SIMULATIONS):
                  and week < g.week <= settings.regular_season_weeks]
     if not remaining:
         simulations = 1  # nothing left to chance
+    # What's at stake next week, only once the stretch run starts
+    stakes = settings.regular_season_weeks - week <= SCENARIO_WEEKS
 
     base = records(season, week)
     means, spread = score_model(season, week)
@@ -93,6 +100,9 @@ def odds_after_week(season, week, simulations=SIMULATIONS):
     won_division = [0] * len(team_ids)
     seed_counts = [[0] * len(team_ids) for _ in team_ids]
     total_wins = [0] * len(team_ids)
+    # Next week's results: simulations each team won or lost, and made the playoffs after
+    next_wins, next_win_made = [0] * len(team_ids), [0] * len(team_ids)
+    next_losses, next_loss_made = [0] * len(team_ids), [0] * len(team_ids)
 
     for _ in range(simulations):
         wins = [base[t].wins for t in team_ids]
@@ -100,6 +110,7 @@ def odds_after_week(season, week, simulations=SIMULATIONS):
         ties = [base[t].ties for t in team_ids]
         points = [base[t].points_for for t in team_ids]
         sim_games = list(played) if head_to_head else ()
+        next_results = []  # (winner index, loser index)
 
         for game in remaining:
             h, a = index[game.home], index[game.away]
@@ -111,10 +122,14 @@ def odds_after_week(season, week, simulations=SIMULATIONS):
                 wins[h] += 1
                 losses[a] += 1
                 winner = game.home
+                result = (h, a)
             else:
                 wins[a] += 1
                 losses[h] += 1
                 winner = game.away
+                result = (a, h)
+            if stakes and game.week == week + 1:
+                next_results.append(result)
             if head_to_head:
                 sim_games.append(_SimGame(game.home, game.away, winner))
 
@@ -130,17 +145,28 @@ def odds_after_week(season, week, simulations=SIMULATIONS):
                 won_division[i] += 1
         for i in range(len(team_ids)):
             total_wins[i] += wins[i]
+        if next_results:
+            in_playoffs = set(order[:settings.playoff_team_count])
+            for w, l in next_results:
+                next_wins[w] += 1
+                next_losses[l] += 1
+                next_win_made[w] += team_ids[w] in in_playoffs
+                next_loss_made[l] += team_ids[l] in in_playoffs
 
-    return {
-        "week": week,
-        "teams": [{
+    teams = []
+    for i, t in enumerate(team_ids):
+        team = {
             "team_id": t,
             "playoff_pct": made_playoffs[i] / simulations,
             "division_pct": won_division[i] / simulations,
             "seed_dist": [c / simulations for c in seed_counts[i]],
             "avg_wins": total_wins[i] / simulations,
-        } for i, t in enumerate(team_ids)],
-    }
+        }
+        if next_wins[i] or next_losses[i]:
+            team["if_win_pct"] = next_win_made[i] / next_wins[i] if next_wins[i] else None
+            team["if_loss_pct"] = next_loss_made[i] / next_losses[i] if next_losses[i] else None
+        teams.append(team)
+    return {"week": week, "teams": teams}
 
 
 def playoff_odds(season, simulations=SIMULATIONS):

@@ -52,6 +52,9 @@ class Settings:
     playoff_team_count: int
     seeding_rule: str  # ESPN's playoffSeedingRule: the tiebreaker
     divisions: dict  # division id -> name
+    # Matchup period -> its scoring periods. Usually one each, but a playoff
+    # matchup can span two.
+    matchup_periods: dict
 
 
 @dataclass(frozen=True)
@@ -69,6 +72,10 @@ class Season:
             last = min(last, through_week)
         return [g for g in self.games
                 if g.tier == REGULAR and g.decided and g.week <= last]
+
+    def scoring_periods(self, week):
+        """The scoring periods (ESPN's scoringPeriodId) a matchup period covers."""
+        return self.settings.matchup_periods.get(week, (week,))
 
 
 @dataclass
@@ -98,6 +105,8 @@ def parse_season(league_id, year, views):
         playoff_team_count=schedule_settings['playoffTeamCount'],
         seeding_rule=schedule_settings['playoffSeedingRule'],
         divisions={d['id']: d['name'] for d in schedule_settings.get('divisions', [])},
+        matchup_periods={int(w): tuple(periods)
+                         for w, periods in schedule_settings.get('matchupPeriods', {}).items()},
     )
 
     mteam = views['mTeam']
@@ -150,6 +159,21 @@ def _parse_game(matchup):
         decided=decided,
         winner=winner,
     )
+
+
+def last_played_week(season):
+    """The last week, regular season or playoffs, whose games are all decided
+    (0 if none). Consolation games and playoff byes don't count."""
+    weeks = {}
+    for game in season.games:
+        if game.tier != CONSOLATION and not game.is_bye:
+            weeks.setdefault(game.week, []).append(game.decided)
+    last = 0
+    for week in sorted(weeks):
+        if not all(weeks[week]):
+            break
+        last = week
+    return last
 
 
 def records(season, through_week=None):

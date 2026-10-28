@@ -23,7 +23,7 @@ const FooterMobile = () => {
 
   return (
     <Paper className='mobile-footer' square elevation={0}>
-      <BottomNavigation showLabels value={tabFor(activePage(pathname))}>
+      <BottomNavigation showLabels value={tabFor(activePage(pathname, leagueInfo))}>
         <BottomNavigationAction label="Home" value="home" component={Link} to="/" icon={<HomeIcon />} sx={actionSx} />
         <BottomNavigationAction label="This season" value="this-season" component={Link} to={thisSeasonPath(leagueInfo)} icon={<ScoreboardIcon />} sx={actionSx} />
         <BottomNavigationAction label="History" value="history" component={Link} to="/history" icon={<MenuBookIcon />} sx={actionSx} />

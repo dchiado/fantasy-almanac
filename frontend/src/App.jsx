@@ -15,6 +15,7 @@ import FooterMobile from "./components/footerMobile/FooterMobile";
 import LeagueInfoMobile from "./components/leagueInfoMobile/LeagueInfoMobile";
 import History from "./components/history/History";
 import Keepers from "./components/keepers/Keepers";
+import RecapPage from "./components/recap/RecapPage";
 import SeasonPage from "./components/season/SeasonPage";
 import CurrentSeasonPage from "./components/season/CurrentSeasonPage";
 import BaseballOverall from "./components/baseballOverall/BaseballOverall";
@@ -230,6 +231,9 @@ const App = () => {
 					{/* The current season's standings page was briefly called Luck */}
 					<Route path="/luck">
 						<Redirect to="/standings" />
+					</Route>
+					<Route path="/seasons/:year/weeks/:week">
+						<RecapPage />
 					</Route>
 					<Route path="/seasons/:year?">
 						<SeasonPage

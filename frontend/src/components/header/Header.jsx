@@ -56,7 +56,7 @@ const Header = () => {
                 key={page.key}
                 component={NavLink}
                 to={page.to}
-                isActive={() => activePage(pathname) === page.key}
+                isActive={() => activePage(pathname, leagueInfo) === page.key}
                 sx={{
                   color: 'text.secondary',
                   whiteSpace: 'nowrap',

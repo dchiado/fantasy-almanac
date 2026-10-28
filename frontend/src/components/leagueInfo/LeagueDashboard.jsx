@@ -8,9 +8,11 @@ import MovementBadge from "../ui/MovementBadge";
 import { DEFAULT_WEIGHTS, rankWithMovement } from "../../utils/powerRankings";
 import PlayoffPicture from "../season/PlayoffPicture";
 import { formatPct, formatRecord, formatSigned } from "../season/format";
+import { homeItems, recapItems } from "../recap/recapItems";
+import { recapPath } from "../../utils/seasons";
 
-const DashCard = ({ title, to, linkLabel, children }) => (
-  <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+const DashCard = ({ title, to, linkLabel, sx, children }) => (
+  <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, display: 'flex', flexDirection: 'column', minWidth: 0, ...sx }}>
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
       <Typography variant="overline" component="h2" color="text.secondary">{title}</Typography>
       {to &&
@@ -295,12 +297,64 @@ const SeasonRecapCard = ({ leagueId, year }) => {
   );
 };
 
+// The latest week's recap: the few items worth leading with
+const WeeklyRecapCard = ({ leagueId, year, established }) => {
+  const { data: recap, loading, error } = useApi(`/recap?leagueId=${leagueId}&year=${year}`);
+  const names = useMemo(() => Object.fromEntries((recap?.teams ?? []).map((t) => [t.team_id, t.name])), [recap]);
+  const items = recap ? homeItems(recapItems(recap, names, established)) : [];
+
+  let content;
+  if (loading) {
+    content = <CardSkeleton lines={4} />;
+  } else if (error || items.length === 0) {
+    content = <Unavailable>The first recap comes after week 1.</Unavailable>;
+  } else {
+    // Two columns from md up, so no border under the last row there
+    const lastRowStart = items.length - (items.length % 2 || 2);
+
+    content = (
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'repeat(2, minmax(0, 1fr))' }, columnGap: 3 }}>
+        {items.map((item, index) => {
+          const border = '1px solid var(--fa-border)';
+          const borderBottom = {
+            xs: index === items.length - 1 ? 0 : border,
+            md: index >= lastRowStart ? 0 : border,
+          };
+
+          return (
+            <Box key={item.key} sx={{ py: 0.75, borderBottom }}>
+              <Typography variant="body2" color="text.secondary">{item.title}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{item.name}</Typography>
+              {/* An all-time rank or "won it for them" says more than the detail */}
+              {(item.badge || item.detail) &&
+                <Typography variant="body2" color="text.secondary">{item.badge || item.detail}</Typography>
+              }
+            </Box>
+          );
+        })}
+      </Box>
+    );
+  }
+
+  return (
+    <DashCard
+      title={recap ? `Week ${recap.week} recap` : 'Weekly recap'}
+      to={recap && recapPath(year, recap.week)}
+      linkLabel="Full recap"
+      // Full width, so the four cards after it pair up evenly
+      sx={{ gridColumn: '1 / -1' }}
+    >
+      {content}
+    </DashCard>
+  );
+};
+
 // Which cards Home shows, in order, for each phase of the current season
 // (see "Season phases" in the README)
 const CARDS_BY_PHASE = {
   preseason: ['recap', 'champions', 'leaders', 'bestWeeks'],
-  regular_season: ['powerRankings', 'odds', 'champions', 'leaders'],
-  stretch_run: ['picture', 'powerRankings', 'champions', 'leaders'],
+  regular_season: ['weeklyRecap', 'powerRankings', 'odds', 'champions', 'leaders'],
+  stretch_run: ['weeklyRecap', 'picture', 'powerRankings', 'champions', 'leaders'],
   playoffs: ['recap', 'powerRankings', 'champions', 'leaders'],
   offseason: ['recap', 'champions', 'leaders', 'bestWeeks'],
 };
@@ -317,6 +371,7 @@ const LeagueDashboard = ({ leagueInfo }) => {
     odds: <PlayoffOddsCard key="odds" leagueId={leagueInfo.id} year={year} />,
     picture: <PlayoffPictureCard key="picture" leagueId={leagueInfo.id} year={year} />,
     recap: <SeasonRecapCard key="recap" leagueId={leagueInfo.id} year={recapYear} />,
+    weeklyRecap: <WeeklyRecapCard key="weeklyRecap" leagueId={leagueInfo.id} year={year} established={Number(leagueInfo.established)} />,
     champions: <ChampionsCard key="champions" summary={summary} loading={standings.loading} error={standings.error} />,
     leaders: <LeadersCard key="leaders" summary={summary} loading={standings.loading} error={standings.error} />,
     bestWeeks: <BestWeeksCard key="bestWeeks" leagueId={leagueInfo.id} />,

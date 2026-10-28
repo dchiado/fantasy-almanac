@@ -11,7 +11,7 @@ A season is **final** when its ESPN data can't change any more:
 - Seasons before the league's current one (per ESPN) are final.
 - The current season is final `FINAL_GRACE_PERIOD` (7 days) after it was first seen with every week played (`latestScoringPeriod > finalScoringPeriod` in `mStatus`). The first sighting is recorded in `espn-cache/{league}/{year}/_finality.json`. The grace period covers stat corrections.
 
-A week is final by the same idea: once the following week has been played and corrected.
+A week (one scoring period's views, such as `mRoster`) is final by the same idea: once ESPN is two scoring periods past it, so the following week has been played too, about 7 days. No marker is needed: `week_is_final` reads `latestScoringPeriod` from the live `mStatus`. Until then a weekly recap is computed from live data and stored by a hash of the week's scores, so it can show the morning after the week ends.
 
 The phase uses "every week played", not "final", so the recap is available as soon as the champion is known. It fills in with corrected numbers once the season is final.
 

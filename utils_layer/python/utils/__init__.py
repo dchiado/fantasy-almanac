@@ -58,9 +58,10 @@ def espn_handler(handler):
 
 def load_data(year, uri, league_id, week=None, headers=None):
     """
-    Load ESPN fantasy data. Final seasons come from memory, then S3, then ESPN
-    (and are written back to S3); a season that isn't final always comes from
-    ESPN. See "Core rules" in the README.
+    Load ESPN fantasy data. Final data comes from memory, then S3, then ESPN
+    (and is written back to S3); data that isn't final always comes from ESPN.
+    A view for one week is final once that week is (week_is_final). See "Core
+    rules" in the README.
 
     Args:
         year (int): Season year
@@ -73,7 +74,8 @@ def load_data(year, uri, league_id, week=None, headers=None):
         dict: ESPN data, or ESPN's error body (with "details") if it refused
     """
     year = int(year)
-    if not season_is_final(league_id, year):
+    final = season_is_final(league_id, year) if week is None else week_is_final(league_id, year, week)
+    if not final:
         return _load_live(year, uri, league_id, week, headers)
 
     key = (str(league_id), year, uri, week)
@@ -140,8 +142,9 @@ def _is_error(data):
 
 def _fetch(year, uri, league_id, week, headers):
     """Call ESPN. Returns the raw response body, or ESPN's error body (with "details")."""
-    # Build the correct ESPN API URL
-    if year > 2019:
+    # Build the correct ESPN API URL. leagueHistory refuses 2019 without a
+    # cookie, though /seasons/2019 serves it.
+    if year >= 2019:
         url = (
             f"https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/{year}"
             f"/segments/0/leagues/{league_id}?view={uri}"
@@ -179,21 +182,21 @@ def _unwrap(data):
     return data
 
 
-def prefetch(league_id, years, views):
-    """Load every (year, view) pair in parallel so the sequential loops that
+def prefetch(league_id, years, views, weeks=(None,)):
+    """Load every (year, view, week) in parallel so the sequential loops that
     follow are served from memory. Failures are left for those loops to raise."""
-    def load(year, view):
+    def load(year, view, week):
         try:
-            load_data(year, view, league_id)
+            load_data(year, view, league_id, week=week)
         except Exception as e:
-            print(f"Prefetch failed for {year}/{view}: {e}")
+            print(f"Prefetch failed for {year}/{view}/{week}: {e}")
 
     with ThreadPoolExecutor(max_workers=16) as pool:
         # Each task runs in a copy of this request's context so it sees the
         # espn_s2 token and shares the request cache
         futures = [
-            pool.submit(copy_context().run, load, year, view)
-            for year in years for view in views
+            pool.submit(copy_context().run, load, year, view, week)
+            for year in years for view in views for week in weeks
         ]
         for future in futures:
             future.result()
@@ -226,6 +229,40 @@ def load_season(year, league_id):
             raise EspnError(data["details"][0])
         views[view] = data
     return parse_season(league_id, year, views)
+
+
+def load_history(league_id, start_year, end_year):
+    """Seasons start_year up to (not including) end_year, oldest first. Stops at
+    the newest season ESPN refuses (older seasons can need a cookie), so the
+    seasons returned are always consecutive up to end_year."""
+    years = range(int(start_year), int(end_year))
+    prefetch(league_id, years, SEASON_VIEWS)
+    seasons = []
+    for year in reversed(years):
+        try:
+            seasons.append(load_season(year, league_id))
+        except EspnError as e:
+            print(f"History stops at {year + 1}: {e}")
+            break
+    return seasons[::-1]
+
+
+def load_week_views(year, league_id, scoring_periods):
+    """mRoster and mTransactions2 for each scoring period, loaded in parallel.
+
+    Returns:
+        [(scoring period, mRoster, transactions), ...]
+    """
+    prefetch(league_id, [year], ['mRoster', 'mTransactions2'], weeks=scoring_periods)
+    loaded = []
+    for period in scoring_periods:
+        roster = load_data(year, 'mRoster', league_id, week=period)
+        transactions = load_data(year, 'mTransactions2', league_id, week=period)
+        for data in (roster, transactions):
+            if _is_error(data):
+                raise EspnError(data["details"][0])
+        loaded.append((period, roster, transactions.get("transactions", [])))
+    return loaded
 
 
 def load_matchups(year, league_id):
@@ -347,6 +384,18 @@ def season_is_final(league_id, year):
         return False
     decided_at = _season_decided_at(league_id, year)
     return datetime.now(timezone.utc) - decided_at >= FINAL_GRACE_PERIOD
+
+
+def week_is_final(league_id, year, scoring_period):
+    """Whether one scoring period's ESPN data can no longer change: its season
+    is final, or ESPN has moved two periods past it, so the period after it has
+    been played too. That's about a week, time for stat corrections."""
+    if season_is_final(league_id, year):
+        return True
+    resp = current_status(league_id)
+    if _is_error(resp) or int(year) != resp["seasonId"]:
+        return False
+    return resp["status"]["latestScoringPeriod"] > int(scoring_period) + 1
 
 
 def _season_decided_at(league_id, year):

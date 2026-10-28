@@ -28,13 +28,34 @@ export const thisSeasonPath = (leagueInfo) => (
 
 const HISTORY_PATHS = ['/history', '/seasons', '/all-time-standings', '/head-to-head', '/records', '/keepers'];
 
+// A week's recap page
+export const recapPath = (year, week) => `/seasons/${year}/weeks/${week}`;
+
 // Which page of the main navigation a path belongs to: 'home', a THIS_SEASON_PAGES
-// key, 'history', 'league' or null
-export const activePage = (pathname) => {
-  if (pathname === '/') return 'home';
+// key, 'history', 'league' or null. The current season's weekly recaps are led
+// from Home, so they count as Home.
+export const activePage = (pathname, leagueInfo) => {
+  if (pathname === '/') {
+    return 'home';
+  }
+
+  const year = currentSeason(leagueInfo);
+  if (year && pathname.startsWith(`/seasons/${year}/weeks/`)) {
+    return 'home';
+  }
+
   const thisSeason = THIS_SEASON_PAGES.find((page) => pathname.startsWith(page.to));
-  if (thisSeason) return thisSeason.key;
-  if (HISTORY_PATHS.some((p) => pathname.startsWith(p))) return 'history';
-  if (pathname.startsWith('/league-info-mobile') || pathname.startsWith('/suggestions')) return 'league';
+  if (thisSeason) {
+    return thisSeason.key;
+  }
+
+  if (HISTORY_PATHS.some((p) => pathname.startsWith(p))) {
+    return 'history';
+  }
+
+  if (pathname.startsWith('/league-info-mobile') || pathname.startsWith('/suggestions')) {
+    return 'league';
+  }
+
   return null;
 };

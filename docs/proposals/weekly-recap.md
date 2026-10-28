@@ -1,6 +1,16 @@
 # Proposal: Weekly recap
 
-**Status:** Proposed, data checked (October 2026). AI writeups and pick 'em are stretch goals.
+**Status:** Version 1 built (October 2026), with these changes from the design below:
+
+- **High and low score** always show; a score gets its all-time rank only in the top or bottom 5% of league history (10% flagged the week's high score about 72% of weeks). Other scores that week in that 5% are listed too. Ranks count only games up to that week, so a stored recap never goes stale.
+- **Luckiest win and unluckiest loss** are by place among the week's scores: the lowest-scoring winner if it was in the bottom half, the highest-scoring loser if in the top half. If the top half all won, neither shows.
+- **Best pickup** is limited to adds made that week, so it needs one `mTransactions2` per week rather than weeks 1 to N. One that started and outscored the margin "won it for them"; otherwise it's the highest-scoring add, started or not.
+- **What's at stake** became **Game of the week**: only in the stretch run (next week is one of the last 3 regular-season weeks), the one game whose result moves the two teams' playoff odds the most, with the owners' head-to-head record.
+- **Clinched and eliminated** come from the scenarios (last 3 weeks) or the final standings, never from a simulated 100%.
+- **Playoff weeks** use winners-bracket games only. A matchup spanning two scoring periods adds both.
+- **Week finality** is stateless: final once ESPN is two scoring periods past it.
+
+AI writeups and pick 'em are still stretch goals.
 **Motivating league:** 166975 (Gridiron), which used to get a weekly newsletter, *The Gridiron Gazette*.
 
 ## Idea
