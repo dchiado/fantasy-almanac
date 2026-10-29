@@ -1,5 +1,6 @@
 // A weekly recap (GET /recap, engine/recap.py) as display text: one item per
 // story, each { key, title, name, detail, badge }.
+import { listText } from "../../utils/text";
 import { formatPct, oddsName } from "../season/format";
 
 // Exact all-time ranks only near the top, where they mean something
@@ -156,6 +157,33 @@ const bestPickup = (recap, names) => {
   };
 };
 
+// Highest-scoring first, so the two sides of a swap line up
+const byPoints = (players) => [...players].sort((a, b) => b.points - a.points);
+
+// "Daniel Jones (36.18) and Trey McBride (20.8)", "A (1), B (2), and C (3)"
+const playersWithPoints = (players) => listText(byPoints(players).map((p) => `${p.name} (${points(p.points)})`));
+
+const mostLeft = (recap, names) => {
+  const found = recap.most_left;
+  if (!found) {
+    return null;
+  }
+
+  // A bench blunder already shows its points left in the Bench blunders list
+  const blundered = (recap.bench_blunders ?? []).some((b) => b.team_id === found.team_id);
+  if (blundered) {
+    return null;
+  }
+
+  return {
+    key: 'bench',
+    title: 'Most points left on the bench',
+    name: names[found.team_id],
+    detail: `Left ${points(found.left)} points on the bench. `
+      + `Should have started ${listText(byPoints(found.should_have_started).map((p) => p.name))}.`,
+  };
+};
+
 const marginItem = (game, key, title, names) => ({
   key,
   title,
@@ -203,7 +231,7 @@ const oddsMovers = (recap, names) => {
     items.push({
       key: 'clinched',
       title: recap.has_playoffs ? 'Clinched a playoff spot' : 'Clinched the title',
-      name: movers.clinched.map((t) => names[t]).join(', '),
+      name: listText(movers.clinched.map((t) => names[t])),
     });
   }
 
@@ -211,7 +239,7 @@ const oddsMovers = (recap, names) => {
     items.push({
       key: 'eliminated',
       title: 'Eliminated',
-      name: movers.eliminated.map((t) => names[t]).join(', '),
+      name: listText(movers.eliminated.map((t) => names[t])),
     });
   }
 
@@ -229,6 +257,7 @@ export const recapItems = (recap, names, established) => {
     unluckiestLoss(recap, names),
     hadWho(recap, names),
     bestPickup(recap, names),
+    mostLeft(recap, names),
   ];
 
   if (recap.biggest_win) {
@@ -246,6 +275,26 @@ export const recapItems = (recap, names, established) => {
 
   return items.filter(Boolean);
 };
+
+// "Benched A.J. Brown (7.8) for Romeo Doubs (0)". Nobody started instead
+// when the slot was left empty.
+const swapText = (benched, started) => {
+  const text = `Benched ${playersWithPoints(benched)}`;
+  if (started.length === 0) {
+    return `${text} and left a slot empty`;
+  }
+  return `${text} for ${playersWithPoints(started)}`;
+};
+
+// Every team that lost but would have won with its best lineup, as
+// { key, name, result, swap }
+export const benchBlunders = (recap, names) => (recap.bench_blunders ?? []).map((b) => ({
+  key: b.team_id,
+  name: names[b.team_id],
+  result: `Lost to ${names[b.opponent_id]}, ${score(b.points, b.opponent_points)}. `
+    + `Their best lineup scored ${points(b.best_points)}.`,
+  swap: swapText(b.should_have_started, b.should_have_sat),
+}));
 
 export const homeItems = (items, count = 4) => {
   const leading = HOME_KEYS.map((key) => items.find((item) => item.key === key));

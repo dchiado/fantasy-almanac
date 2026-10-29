@@ -10,6 +10,7 @@ import PlayoffPicture from "../season/PlayoffPicture";
 import { formatPct, formatRecord, formatSigned, oddsName, spots } from "../season/format";
 import { homeItems, recapItems } from "../recap/recapItems";
 import { recapPath } from "../../utils/seasons";
+import { listText } from "../../utils/text";
 
 const DashCard = ({ title, to, linkLabel, sx, children }) => (
   <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, display: 'flex', flexDirection: 'column', minWidth: 0, ...sx }}>
@@ -141,13 +142,13 @@ const ChampionsCard = ({ summary, loading, error }) => (
           </Box>
           {summary.recentChampions.length > 0 &&
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
-              Before that: {summary.recentChampions.map((c) => `${c.name} (${c.year})`).join(', ')}
+              Before that: {listText(summary.recentChampions.map((c) => `${c.name} (${c.year})`))}
             </Typography>
           }
           {summary.mostTitles > 0 &&
             <Typography variant="body2" sx={{ mt: 1 }}>
               <Box component="span" sx={{ color: 'text.secondary' }}>Most titles: </Box>
-              <strong>{summary.titleLeaders.map((o) => o.name).join(', ')}</strong> ({summary.mostTitles})
+              <strong>{listText(summary.titleLeaders.map((o) => o.name))}</strong> ({summary.mostTitles})
             </Typography>
           }
         </>

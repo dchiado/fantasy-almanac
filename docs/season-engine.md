@@ -95,6 +95,19 @@ Biggest single-week rises and drops were tried and dropped: they almost always l
 - `luck(season, through_week)`: per team, all-play record, expected wins (the sum of its weekly all-play win percentage), luck (actual minus expected wins) and close-game record (`CLOSE_GAME_MARGIN` = 5). Across a season, luck sums to zero.
 - `schedule_swap(season, through_week)`: each team's record on every other team's schedule. When B's opponent was A, A plays B instead.
 
+## Lineup efficiency
+
+`engine/lineups.py` compares each team's lineup with the best one it could have started. The weekly recap lists its bench blunders and the most points left on the bench; `GET /lineups` gives the regular-season totals on Standings and the past-season recap.
+
+- **Best lineup:** every starting slot in `rosterSettings.lineupSlotCounts` is filled from that scoring period's roster, by each player's `eligibleSlots`. Slots, not positions, so RB/WR, FLEX, OP (superflex) and IDP slots need no special cases. Every slot that can be filled is, whatever its player scored: a D/ST at −2 starts unless the roster had a better one. IR players are left out. A matchup spanning two scoring periods is the best lineup of each, added up.
+- **Algorithm:** take players by points, highest first, and keep each one if everyone kept so far can still get a slot (an augmenting-path check). The lineups form a transversal matroid, so this greedy choice is optimal, with overlapping flex slots and negative scores. On equal points the actual starter is kept, so a tie is never a swap.
+- **Points left on the bench** = best lineup − actual starters, both from `mRoster`, never the matchup score (see the data check).
+- **Bench blunder:** a team that didn't win, whose score plus its points left beats the opponent's **actual** score. It asks whether a team's own choices cost it the game, so two teams can both blunder in different games, and the "best lineups" records add up to more wins than games. Season records are head-to-head, regular season only, without the top-half bonus.
+- **Hindsight:** lineup locks (Thursday against Monday players) are ignored.
+- **Storage:** like the report, under a hash of the decided regular-season games (`lineups_inputs`). Rosters aren't in it, so a stat correction to a bench player shows once the week or season is final.
+
+Checked on every week of Gridiron 2019–2025 (October 2026): `eligibleSlots` and `lineupSlotCounts` are always there, slot counts never change mid-season, and the best lineup is never below the actual one. Starters' points match the final score in every game but the 2022 championship: the cancelled Bills–Bengals game (Damar Hamlin) is gone from `mRoster` but its partial points are in the matchup scores, which is why points left come from rosters alone. About 30–40 bench blunders a season, 0–6 a week. 2018 and earlier, which need a cookie, aren't checked.
+
 ## Open questions
 
 - Whether the seven-day grace period is long enough for ESPN's stat corrections.

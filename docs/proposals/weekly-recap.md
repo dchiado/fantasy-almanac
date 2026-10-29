@@ -9,6 +9,7 @@
 - **Clinched and eliminated** come from the scenarios (last 3 weeks) or the final standings, never from a simulated 100%.
 - **Playoff weeks** use winners-bracket games only. A matchup spanning two scoring periods adds both.
 - **Week finality** is stateless: final once ESPN is two scoring periods past it.
+- **Bench blunders** were added with [lineup efficiency](../season-engine.md#lineup-efficiency): every team that would have won with its best lineup, and the most points left on the bench.
 
 AI writeups and pick 'em are still stretch goals.
 **Motivating league:** 166975 (Gridiron), which used to get a weekly newsletter, *The Gridiron Gazette*.
@@ -36,12 +37,9 @@ Because a recap is a pure function of the week's final data, there's one for **e
 
 During the playoffs the odds items drop out and the rest still apply.
 
-### Later
-
-- **Bench blunder:** a team that would have won with its best possible lineup. It needs the best-lineup function from [lineup efficiency](lineup-efficiency.md), so build that once and use it in both.
-- **Power rankings movers**, linking to Power rankings. Only possible for the latest week, since `powerRankings` only computes the current week.
-
 ### Left out
+
+- **Power rankings movers:** Power rankings already shows them, and `powerRankings` only computes the current week, so a past week's recap couldn't have them.
 
 - **Live scores and projections** (the Gazette's "after Thursday games" preview): ESPN already shows them, and projections only exist "now" (rule 2).
 - **The full odds table:** it's on Playoff race. The recap shows movers and links there.

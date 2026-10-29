@@ -149,7 +149,7 @@ class RecapTest(unittest.TestCase):
     def test_whole_recap(self):
         s = round_robin()
         report = season_report(s, simulations=200)
-        recap = weekly_recap(s, 3, {}, [], report, [])
+        recap = weekly_recap(s, 3, {}, [], report, [], {})
         self.assertEqual((recap["high_score"], recap["low_score"]),
                          ({"team_id": 1, "points": 125}, {"team_id": 4, "points": 80}))
         self.assertEqual(recap["biggest_win"]["margin"], 45)
@@ -169,11 +169,12 @@ class RostersTest(unittest.TestCase):
     def test_parse(self):
         def entry(player_id, slot, points):
             return {"playerId": player_id, "lineupSlotId": slot, "playerPoolEntry": {"player": {
-                "fullName": f"P{player_id}", "defaultPositionId": 2, "stats": [
+                "fullName": f"P{player_id}", "defaultPositionId": 2, "eligibleSlots": [2, 3, 20], "stats": [
                     {"scoringPeriodId": 5, "statSourceId": 1, "appliedTotal": 99},
                     {"scoringPeriodId": 5, "statSourceId": 0, "appliedTotal": points}]}}}
         week5 = parse_lineups({"teams": [{"id": 1, "roster": {"entries": [entry(7, 2, 12.5), entry(8, 20, 3)]}}]}, 5)
-        self.assertEqual(week5[1][7], {"player_id": 7, "name": "P7", "position": "RB", "starter": True, "points": 12.5})
+        self.assertEqual(week5[1][7], {"player_id": 7, "name": "P7", "position": "RB", "slot": 2,
+                                       "eligible_slots": [2, 3, 20], "starter": True, "points": 12.5})
         self.assertFalse(week5[1][8]["starter"])
 
         both = merge_lineups([week5, {1: {8: {**week5[1][8], "starter": True, "points": 4}}}])

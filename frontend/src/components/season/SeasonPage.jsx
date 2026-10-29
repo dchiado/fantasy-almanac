@@ -5,6 +5,7 @@ import { Link, Redirect, useHistory, useParams } from "react-router-dom";
 import LoadingState from "../ui/LoadingState";
 import PageLayout from "../ui/PageLayout";
 import SectionCard from "../ui/SectionCard";
+import LineupTable from "./LineupTable";
 import { PlayoffOddsOrReason, ScheduleSwap, StandingsTable, useSeasonReport } from "./sections";
 import { latestRecapSeason, recapPath } from "../../utils/seasons";
 
@@ -36,8 +37,8 @@ const WeeklyRecaps = ({ report }) => {
 };
 
 // A past season's recap (History → Past seasons): odds by week with the
-// highlights, links to each week's recap, final standings with luck, and the
-// schedule swap grid
+// highlights, links to each week's recap, final standings with luck, points
+// left on the bench, and the schedule swap grid
 const SeasonPage = ({ setError }) => {
   const leagueInfo = useSelector((state) => state.leagueInfo);
   const { year: yearParam } = useParams();
@@ -81,6 +82,7 @@ const SeasonPage = ({ setError }) => {
             <PlayoffOddsOrReason report={report} names={names} />
             <WeeklyRecaps report={report} />
             <StandingsTable report={report} names={names} />
+            <LineupTable leagueId={leagueInfo.id} year={year} names={names} />
             <ScheduleSwap report={report} names={names} abbrevs={abbrevs} />
           </>
       }

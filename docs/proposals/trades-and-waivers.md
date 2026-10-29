@@ -10,7 +10,7 @@
 
 ## Data
 
-`mTransactions2`: trades, waiver claims (with `bidAmount`), adds and drops. Points after a transaction need weekly player points, the same data as [lineup efficiency](lineup-efficiency.md).
+`mTransactions2`: trades, waiver claims (with `bidAmount`), adds and drops. Points after a transaction need weekly player points, the same data as [lineup efficiency](../season-engine.md#lineup-efficiency).
 
 ## Data check
 

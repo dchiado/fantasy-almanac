@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import LoadingState from "../ui/LoadingState";
 import PageLayout from "../ui/PageLayout";
 import SectionCard from "../ui/SectionCard";
+import LineupTable from "./LineupTable";
 import ThisSeasonTabs from "./ThisSeasonTabs";
 import { PlayoffOddsOrReason, PlayoffPictureSection, ScheduleSwap, StandingsTable, useSeasonReport } from "./sections";
 import { currentSeason, latestRecapSeason, seasonStarted } from "../../utils/seasons";
@@ -13,7 +14,8 @@ const TITLES = { playoffs: 'Playoff race', standings: 'Standings' };
 
 /**
  * One of the current season's pages: "playoffs" (the stretch-run picture and
- * odds by week) or "standings" (standings with luck, and the schedule swap grid).
+ * odds by week) or "standings" (standings with luck, points left on the bench,
+ * and the schedule swap grid).
  */
 const CurrentSeasonPage = ({ section, setError }) => {
   const leagueInfo = useSelector((state) => state.leagueInfo);
@@ -57,6 +59,7 @@ const CurrentSeasonPage = ({ section, setError }) => {
     content = (
       <>
         <StandingsTable report={report} names={names} />
+        <LineupTable leagueId={leagueInfo.id} year={year} names={names} />
         <ScheduleSwap report={report} names={names} abbrevs={abbrevs} />
       </>
     );

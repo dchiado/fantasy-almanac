@@ -45,6 +45,8 @@ derived/{league}/{year}/season-report-v{n}.json        season report (GET /seaso
 derived/{league}/{year}/season-report-v{n}-{inputs}.json   ... for a season in progress, by a hash of its decided games
 derived/{league}/{year}/weeks/{week}/recap-v{n}.json         weekly recap (GET /recap) for a final week
 derived/{league}/{year}/weeks/{week}/recap-v{n}-{inputs}.json   ... for a week not yet final, by a hash of its scores
+derived/{league}/{year}/lineups-v{n}.json              points left on the bench (GET /lineups) for a final season
+derived/{league}/{year}/lineups-v{n}-{inputs}.json     ... for a season in progress, by a hash of its decided games
 power_rankings/league_{league}/{year}/week_{week}/     AI writeups (rankings.md) and their status.json
 ```
 
@@ -62,7 +64,7 @@ Each league's current season is in one phase. `/info` returns it as `phase` (alo
 
 The phase only changes what Home leads with (`CARDS_BY_PHASE` in `LeagueDashboard.jsx`); every page stays reachable. Past seasons show as an end-of-season recap all year.
 
-Navigation is defined once in `frontend/src/utils/seasons.js`. The current season's pages are **Power rankings** (`/power-rankings`), **Playoff race** (`/playoffs`: the stretch-run picture and odds by week) and **Standings** (`/standings`: seed order with playoff odds, all-play, expected wins and luck beside the record), next to **History** (`/history`: past seasons, all-time standings at `/all-time-standings`, head-to-head, records, keepers). On desktop they're the header tabs. On mobile the bottom bar is Home · This season · History · League, and This season has sub-tabs for its three pages. A past season's recap is `/seasons/{year}`, and any week's recap is `/seasons/{year}/weeks/{week}` (linked from Home and from the season recap).
+Navigation is defined once in `frontend/src/utils/seasons.js`. The current season's pages are **Power rankings** (`/power-rankings`), **Playoff race** (`/playoffs`: the stretch-run picture and odds by week) and **Standings** (`/standings`: seed order with playoff odds, all-play, expected wins and luck beside the record, then points left on the bench), next to **History** (`/history`: past seasons, all-time standings at `/all-time-standings`, head-to-head, records, keepers). On desktop they're the header tabs. On mobile the bottom bar is Home · This season · History · League, and This season has sub-tabs for its three pages. A past season's recap is `/seasons/{year}`, and any week's recap is `/seasons/{year}/weeks/{week}` (linked from Home and from the season recap).
 
 ---
 
@@ -73,7 +75,8 @@ lambdas/
   # Football — Python
   leagueInfo/             GET /info
   season/                 GET /season   (season report: playoff odds, scenarios, luck)
-                          GET /recap    (weekly recap: high score, luck, pickups, odds movers)
+                          GET /recap    (weekly recap: high score, luck, pickups, bench blunders, odds movers)
+                          GET /lineups  (points left on the bench over a regular season)
   standings/              GET /standings
   headToHeadForm/         GET /head-to-head-form
   headToHead/             GET /head-to-head
@@ -154,7 +157,11 @@ Don't commit real league responses as test data; they include members' names.
 
 The season pages (Playoff race, Standings, and past-season recaps) all come from one lambda returning one report (`GET /season?leagueId=&year=`, `engine/report.py`): standings, playoff odds by week, highlights (biggest collapse, biggest comeback, the bubble), stretch-run scenarios, luck and the schedule swap grid. Every report is computed on first request and stored: a final season once, a season in progress once per set of decided games (`report_inputs`), so it's recomputed only after a game finishes. That first computation takes about 2 seconds, or about 7 with three weeks of scenarios. Bump `REPORT_VERSION` when the report or a model behind it changes.
 
-The same lambda serves weekly recaps (`GET /recap?leagueId=&year=&week=`, `engine/recap.py`), stored the same way: a final week once, a week not yet final by a hash of its scores. Without `week` it's the latest week whose games are all decided, so a new recap appears as soon as ESPN marks the week's games decided. Computing one loads that week's `mRoster` and `mTransactions2` and every earlier season (for all-time ranks and head-to-head). Bump `RECAP_VERSION` when its output changes. How seeding, odds, scenarios and luck work, and how they were checked, is in [docs/season-engine.md](docs/season-engine.md).
+The same lambda serves weekly recaps (`GET /recap?leagueId=&year=&week=`, `engine/recap.py`), stored the same way: a final week once, a week not yet final by a hash of its scores. Without `week` it's the latest week whose games are all decided, so a new recap appears as soon as ESPN marks the week's games decided. Computing one loads that week's `mRoster` and `mTransactions2` and every earlier season (for all-time ranks and head-to-head). Bump `RECAP_VERSION` when its output changes.
+
+It also serves points left on the bench over a regular season (`GET /lineups?leagueId=&year=`, `engine/lineups.py`), stored like the report under a hash of its decided games. Computing it loads every regular-season week's `mRoster`. Bump `LINEUPS_VERSION` when its output changes. How the best lineup works is in [docs/season-engine.md](docs/season-engine.md#lineup-efficiency).
+
+How seeding, odds, scenarios and luck work, and how they were checked, is in [docs/season-engine.md](docs/season-engine.md).
 
 ### Adding a new lambda
 

@@ -265,6 +265,22 @@ def load_week_views(year, league_id, scoring_periods):
     return loaded
 
 
+def load_rosters(year, league_id, scoring_periods):
+    """mRoster for each scoring period, loaded in parallel.
+
+    Returns:
+        {scoring period: mRoster}
+    """
+    prefetch(league_id, [year], ['mRoster'], weeks=scoring_periods)
+    rosters = {}
+    for period in scoring_periods:
+        roster = load_data(year, 'mRoster', league_id, week=period)
+        if _is_error(roster):
+            raise EspnError(roster["details"][0])
+        rosters[period] = roster
+    return rosters
+
+
 def load_matchups(year, league_id):
     """Call mMatchupScore endpoint and return schedule sub-object"""
     resp = load_data(year, 'mMatchupScore', league_id)

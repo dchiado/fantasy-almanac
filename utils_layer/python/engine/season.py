@@ -2,6 +2,8 @@
 games every season feature works from."""
 from dataclasses import dataclass
 
+from .rosters import BENCH_SLOTS
+
 # Views parse_season needs, in the shape load_data returns them
 VIEWS = ('mSettings', 'mMatchupScore', 'mTeam')
 
@@ -62,6 +64,8 @@ class Settings:
     # Matchup period -> its scoring periods. Usually one each, but a playoff
     # matchup can span two.
     matchup_periods: dict
+    # Starting lineup: ESPN's lineupSlotId -> how many, leaving out bench and IR
+    lineup_slots: dict
 
     @property
     def has_playoffs(self):
@@ -118,6 +122,7 @@ def parse_season(league_id, year, views):
     """Build a Season from raw views, keyed by view name (see VIEWS)."""
     schedule_settings = views['mSettings']['settings']['scheduleSettings']
     scoring_settings = views['mSettings']['settings'].get('scoringSettings', {})
+    roster_settings = views['mSettings']['settings'].get('rosterSettings', {})
     settings = Settings(
         regular_season_weeks=schedule_settings['matchupPeriodCount'],
         playoff_team_count=schedule_settings['playoffTeamCount'],
@@ -126,6 +131,8 @@ def parse_season(league_id, year, views):
         divisions={d['id']: d['name'] for d in schedule_settings.get('divisions', [])},
         matchup_periods={int(w): tuple(periods)
                          for w, periods in schedule_settings.get('matchupPeriods', {}).items()},
+        lineup_slots={int(slot): count for slot, count in roster_settings.get('lineupSlotCounts', {}).items()
+                      if count and int(slot) not in BENCH_SLOTS},
     )
 
     mteam = views['mTeam']

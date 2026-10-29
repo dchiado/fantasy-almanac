@@ -12,7 +12,9 @@ def parse_lineups(mroster, scoring_period):
     """Each team's players for one scoring period.
 
     Returns:
-        team id -> {player id: {"player_id", "name", "position", "starter", "points"}}
+        team id -> {player id: {"player_id", "name", "position", "slot",
+                                "eligible_slots", "starter", "points"}}
+        slot is the lineupSlotId; eligible_slots the lineupSlotIds he can fill.
     """
     lineups = {}
     for team in mroster['teams']:
@@ -26,6 +28,8 @@ def parse_lineups(mroster, scoring_period):
                 "player_id": entry['playerId'],
                 "name": player.get('fullName', ''),
                 "position": POSITIONS.get(player.get('defaultPositionId'), ''),
+                "slot": entry['lineupSlotId'],
+                "eligible_slots": player.get('eligibleSlots', []),
                 "starter": entry['lineupSlotId'] not in BENCH_SLOTS,
                 "points": points,
             }

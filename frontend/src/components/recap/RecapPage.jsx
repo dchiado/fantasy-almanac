@@ -9,7 +9,7 @@ import LoadingState from "../ui/LoadingState";
 import PageLayout from "../ui/PageLayout";
 import SectionCard from "../ui/SectionCard";
 import { currentSeason, recapPath } from "../../utils/seasons";
-import { gameOfTheWeek, recapItems } from "./recapItems";
+import { benchBlunders, gameOfTheWeek, recapItems } from "./recapItems";
 
 export const RecapItemCard = ({ item }) => (
   <Paper variant="outlined" sx={{ p: 2, minWidth: 0 }}>
@@ -51,6 +51,21 @@ const GameOfTheWeek = ({ game }) => (
   </SectionCard>
 );
 
+const BenchBlunders = ({ blunders }) => (
+  <SectionCard title="Bench blunders" sx={{ mb: 3 }}>
+    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+      Lost, but would have won with their best lineup.
+    </Typography>
+    {blunders.map((b) => (
+      <Box key={b.key} sx={{ py: 1.5, borderTop: '1px solid var(--fa-border)' }}>
+        <Typography sx={{ fontWeight: 700, overflowWrap: 'anywhere' }}>{b.name}</Typography>
+        <Typography variant="body2" color="text.secondary">{b.result}</Typography>
+        <Typography variant="body2" sx={{ mt: 0.5 }}>{b.swap}</Typography>
+      </Box>
+    ))}
+  </SectionCard>
+);
+
 const ScoreLine = ({ name, points, won }) => (
   <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
     <Typography sx={{ fontWeight: won ? 700 : 400, minWidth: 0 }} noWrap>{name}</Typography>
@@ -71,8 +86,8 @@ const Scoreboard = ({ recap, names }) => (
   </SectionCard>
 );
 
-// One week's recap: every item, next week's biggest game in the stretch run,
-// and the scoreboard, with links to the weeks either side
+// One week's recap: every item, the bench blunders, next week's biggest game
+// in the stretch run, and the scoreboard, with links to the weeks either side
 const RecapPage = () => {
   const leagueInfo = useSelector((state) => state.leagueInfo);
   const { year: yearParam, week: weekParam } = useParams();
@@ -86,6 +101,7 @@ const RecapPage = () => {
   const names = useMemo(() => Object.fromEntries((recap?.teams ?? []).map((t) => [t.team_id, t.name])), [recap]);
   const items = recap ? recapItems(recap, names, Number(leagueInfo.established)) : [];
   const game = recap ? gameOfTheWeek(recap, names) : null;
+  const blunders = recap ? benchBlunders(recap, names) : [];
 
   const latest = recap?.latest_week ?? 0;
   const weeks = Array.from({ length: latest }, (_, i) => i + 1);
@@ -130,6 +146,8 @@ const RecapPage = () => {
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', md: 'repeat(3, minmax(0, 1fr))' }, gap: 2, mb: 3 }}>
           {items.map((item) => <RecapItemCard key={item.key} item={item} />)}
         </Box>
+
+        {blunders.length > 0 && <BenchBlunders blunders={blunders} />}
 
         {game && <GameOfTheWeek game={game} />}
 

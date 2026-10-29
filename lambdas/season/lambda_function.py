@@ -1,6 +1,7 @@
 import json
 import boto3
 from botocore.exceptions import ClientError
+from engine.lineups import LINEUPS_VERSION, lineup_efficiency, lineup_weeks, lineups_inputs, season_lineups
 from engine.recap import RECAP_VERSION, recap_inputs, weekly_recap
 from engine.report import REPORT_VERSION, report_inputs, season_report
 from engine.rosters import merge_lineups, parse_adds, parse_lineups
@@ -11,6 +12,7 @@ from utils import (
     check_start_year,
     espn_handler,
     load_history,
+    load_rosters,
     load_season,
     load_week_views,
     season_is_final,
@@ -87,13 +89,37 @@ def recap(league_id, start_year, year, week):
 
     def compute():
         loaded = load_week_views(year, league_id, periods)
-        lineups = merge_lineups([parse_lineups(roster, period) for period, roster, _ in loaded])
+        by_period = [parse_lineups(roster, period) for period, roster, _ in loaded]
         adds = [add for _, _, transactions in loaded for add in parse_adds(transactions)]
         history = load_history(league_id, start_year, year)
-        return weekly_recap(season, week, lineups, adds, report(league_id, year, season), history)
+        efficiency = lineup_efficiency(by_period, season.settings.lineup_slots)
+        return weekly_recap(season, week, merge_lineups(by_period), adds,
+                            report(league_id, year, season), history, efficiency)
 
     # The latest week isn't stored with the recap: it moves on every week
     return {**stored(key, compute), "final": final, "latest_week": latest}
+
+
+def lineups(league_id, year):
+    """Each team's points left on the bench and games lost to lineup choices
+    over the regular season (engine/lineups.py). Stored like the report: a
+    final season by LINEUPS_VERSION alone, any other under a hash of its
+    decided games. Not yet stored, it loads every week's rosters."""
+    season = load_season(year, league_id)
+    final = season_is_final(league_id, year)
+    key = f'derived/{league_id}/{year}/lineups-v{LINEUPS_VERSION}.json'
+    if not final:
+        key = f'derived/{league_id}/{year}/lineups-v{LINEUPS_VERSION}-{lineups_inputs(season)}.json'
+
+    def compute():
+        weeks = lineup_weeks(season)
+        rosters = load_rosters(year, league_id, [p for w in weeks for p in season.scoring_periods(w)])
+        slots = season.settings.lineup_slots
+        return season_lineups(season, {
+            w: lineup_efficiency([parse_lineups(rosters[p], p) for p in season.scoring_periods(w)], slots)
+            for w in weeks})
+
+    return {**stored(key, compute), "final": final}
 
 
 @espn_handler
@@ -105,4 +131,6 @@ def lambda_handler(event, context):
         return error
     if event.get("routeKey") == "GET /recap":
         return recap(league_id, start_year, year, params.get("week"))
+    if event.get("routeKey") == "GET /lineups":
+        return lineups(league_id, year)
     return report(league_id, year)

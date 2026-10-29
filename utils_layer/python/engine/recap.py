@@ -1,16 +1,17 @@
 """One week's stories, worked out from the final scores: the high and low
 score, the biggest and closest wins, luck, the best player on a losing team,
-the best pickup, playoff odds movers and next week's biggest game. See
-docs/proposals/weekly-recap.md. Plain dicts and lists, ready to serialize."""
+the best pickup, bench blunders, playoff odds movers and next week's biggest
+game. See docs/proposals/weekly-recap.md. Plain dicts and lists, ready to serialize."""
 import hashlib
 from dataclasses import replace
 
+from .lineups import bench_blunders, most_left
 from .report import REPORT_VERSION
 from .scenarios import SCENARIO_WEEKS, playoff_scenarios
 from .season import CONSOLATION, PLAYOFF, REGULAR
 
 # Bump when the output changes, so stored recaps are recomputed
-RECAP_VERSION = 2
+RECAP_VERSION = 3
 
 # A score gets its all-time rank in the recap only if it's in the top or bottom
 # share of every score in league history. At 10% the week's high score made it
@@ -24,7 +25,7 @@ def week_games(season, week):
             if g.week == week and g.tier in (REGULAR, PLAYOFF) and g.decided]
 
 
-def weekly_recap(season, week, lineups, adds, report, history):
+def weekly_recap(season, week, lineups, adds, report, history, efficiency):
     """The recap for one week whose games are all decided.
 
     Args:
@@ -34,6 +35,7 @@ def weekly_recap(season, week, lineups, adds, report, history):
         adds: the week's pickups, from rosters.parse_adds
         report: the season's report (report.season_report), for playoff odds
         history: earlier seasons, oldest first, for all-time ranks and head-to-head
+        efficiency: team id -> lineup against its best one, from lineups.lineup_efficiency
     """
     games = week_games(season, week)
     scores = sorted(((points, team_id) for g in games
@@ -62,6 +64,8 @@ def weekly_recap(season, week, lineups, adds, report, history):
         **luck_items(games, scores),
         "had_who": had_who(games, lineups),
         "best_pickup": best_pickup(games, lineups, adds),
+        "bench_blunders": bench_blunders(games, efficiency),
+        "most_left": most_left(games, efficiency),
         "odds_movers": odds_movers(season, week, report) if regular else None,
         "game_of_the_week": game_of_the_week(season, week, report, history) if regular else None,
     }
@@ -281,7 +285,8 @@ def recap_inputs(season, week):
     """A short hash of everything weekly_recap reads from the season: games
     through this week, next week's matchups, the teams and settings. A stat
     correction changes a team's score, so it changes the hash too. Rosters and
-    pickups aren't in it; their points add up to the scores."""
+    pickups aren't in it: starters' points add up to the scores, and a
+    correction to a bench player shows once the week is final."""
     games = [g if g.week <= week else replace(g, home_points=0.0, away_points=0.0, decided=False, winner=None)
              for g in season.games if g.week <= week + 1]
     inputs = repr((RECAP_VERSION, REPORT_VERSION, week, season.settings, season.teams, games))
