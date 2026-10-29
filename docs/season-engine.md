@@ -95,6 +95,21 @@ Biggest single-week rises and drops were tried and dropped: they almost always l
 - `luck(season, through_week)`: per team, all-play record, expected wins (the sum of its weekly all-play win percentage), luck (actual minus expected wins) and close-game record (`CLOSE_GAME_MARGIN` = 5). Across a season, luck sums to zero.
 - `schedule_swap(season, through_week)`: each team's record on every other team's schedule. When B's opponent was A, A plays B instead.
 
+## Weekly recap
+
+`engine/recap.py`: one week's stories, for every week of every season. Playoff weeks use winners-bracket games only, and a matchup spanning two scoring periods adds both.
+
+- **High and low score** always show. A score gets its all-time rank only in the top or bottom 5% of league history (`NOTEWORTHY_SHARE`; at 10% the week's high score made it about 72% of weeks), and other scores that week in that 5% are listed too. Ranks count only games up to that week, so a stored recap never goes stale.
+- **Biggest and closest win** by margin.
+- **Luckiest win and unluckiest loss** by place among the week's scores: the lowest-scoring winner if it was in the bottom half, the highest-scoring loser if in the top half. If the top half all won, neither shows.
+- **You had who and still lost:** the highest-scoring starter on a losing team.
+- **Best pickup:** among adds made that week (one `mTransactions2` per week), one that started and outscored the margin of a win "won it for them"; otherwise the highest-scoring add, started or not. The FAAB bid is shown, but there's no points-per-dollar: that's a season-long measure.
+- **Bench blunders and most points left on the bench:** see [Lineup efficiency](#lineup-efficiency).
+- **Odds movers** (regular season): the biggest rise and fall in playoff odds, and who clinched or was eliminated. Clinches come from the scenarios (last 3 weeks) or the final standings, never from a simulated 100%.
+- **Game of the week** (stretch run only): next week's game whose result moves the two teams' odds the most, from the simulation's odds with a win and with a loss, plus the owners' head-to-head record.
+
+Left out: live scores and projections (ESPN shows them, and projections only exist "now"), the full odds table (on Playoff race), power rankings movers (on Power rankings, and only computed for the current week), and AI writeups.
+
 ## Lineup efficiency
 
 `engine/lineups.py` compares each team's lineup with the best one it could have started. The weekly recap lists its bench blunders and the most points left on the bench; `GET /lineups` gives the regular-season totals on Standings and the past-season recap.

@@ -1,7 +1,8 @@
 """One week's stories, worked out from the final scores: the high and low
 score, the biggest and closest wins, luck, the best player on a losing team,
 the best pickup, bench blunders, playoff odds movers and next week's biggest
-game. See docs/proposals/weekly-recap.md. Plain dicts and lists, ready to serialize."""
+game. See "Weekly recap" in docs/season-engine.md. Plain dicts and lists, ready
+to serialize."""
 import hashlib
 from dataclasses import replace
 

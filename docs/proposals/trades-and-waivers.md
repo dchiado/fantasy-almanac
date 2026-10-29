@@ -14,4 +14,4 @@
 
 ## Data check
 
-Done October 2026 for [weekly recap](weekly-recap.md): ESPN keeps full transaction history for past seasons, but only per week (`mTransactions2` with `scoringPeriodId`; without it, a past season returns nothing). Gridiron 2019 has 16–55 transactions a week, with trades, waiver bids, adds and drops. A season is about 17 calls, archived once it's final. 2018 and earlier aren't checked yet.
+Done October 2026 for the [weekly recap](../season-engine.md#weekly-recap): ESPN keeps full transaction history for past seasons, but only per week (`mTransactions2` with `scoringPeriodId`; without it, a past season returns nothing). Gridiron 2019 has 16–55 transactions a week, with trades, waiver bids, adds and drops. A season is about 17 calls, archived once it's final. 2018 and earlier aren't checked yet.
