@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography } from "@mui/material";
+import { Typography, useMediaQuery } from "@mui/material";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import LoadingState from "../ui/LoadingState";
@@ -8,14 +8,13 @@ import SectionCard from "../ui/SectionCard";
 import LineupTable from "./LineupTable";
 import ThisSeasonTabs from "./ThisSeasonTabs";
 import { PlayoffOddsOrReason, PlayoffPictureSection, ScheduleSwap, StandingsTable, useSeasonReport } from "./sections";
-import { currentSeason, latestRecapSeason, leaguePath, seasonStarted } from "../../utils/seasons";
-
-const TITLES = { playoffs: 'Playoff race', standings: 'Standings' };
+import { currentSeason, latestRecapSeason, leaguePath, raceTitle, seasonStarted } from "../../utils/seasons";
 
 /**
  * One of the current season's pages: "playoffs" (the stretch-run picture and
  * odds by week) or "standings" (standings with luck, points left on the bench,
- * and the schedule swap grid).
+ * and the schedule swap grid). Phones have no Playoff race tab, so there
+ * Standings shows the race too, after the rest.
  */
 const CurrentSeasonPage = ({ section, setError }) => {
   const leagueInfo = useSelector((state) => state.leagueInfo);
@@ -29,8 +28,13 @@ const CurrentSeasonPage = ({ section, setError }) => {
     : report.completed_weeks === report.regular_season_weeks ? `${year} season · regular season over`
     : `${year} season · through week ${report.completed_weeks} of ${report.regular_season_weeks}`;
 
-  // A league without playoffs races for first place
-  const title = section === 'playoffs' && leagueInfo.hasPlayoffs === false ? 'Title race' : TITLES[section];
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const showRace = section === 'playoffs' || isMobile;
+
+  let title = 'Standings';
+  if (section === 'playoffs') {
+    title = raceTitle(leagueInfo);
+  }
 
   let content;
   if (!started) {
@@ -61,6 +65,8 @@ const CurrentSeasonPage = ({ section, setError }) => {
         <StandingsTable report={report} names={names} />
         <LineupTable leagueId={leagueInfo.id} year={year} names={names} />
         <ScheduleSwap report={report} names={names} abbrevs={abbrevs} />
+        {showRace && report.scenarios && <PlayoffPictureSection report={report} />}
+        {showRace && <PlayoffOddsOrReason report={report} names={names} />}
       </>
     );
   }

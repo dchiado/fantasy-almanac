@@ -292,7 +292,7 @@ const SeasonRecapCard = ({ leagueId, year }) => {
   const lines = report ? recapLines(report) : [];
 
   return (
-    <DashCard title={`${year} season`} to={`/seasons/${year}`} linkLabel="Recap">
+    <DashCard title={`${year} season`} to={`/seasons/${year}`} linkLabel="Weekly Recap">
       {loading ? <CardSkeleton lines={5} />
         : error || lines.length === 0 ? <Unavailable />
         : lines.map((line) => (

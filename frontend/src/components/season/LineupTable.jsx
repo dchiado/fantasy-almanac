@@ -40,7 +40,7 @@ const LineupTable = ({ leagueId, year, names }) => {
     { key: 'per_week', label: 'Per week', numeric: true, hideBelow: 'md', render: (row) => (row.left / data.weeks).toFixed(1) },
     { key: 'worst_week', label: 'Worst week', align: 'center', hideBelow: 'md',
       render: (row) => (row.worst_week?.left > 0 ? `${row.worst_week.left.toFixed(1)} (wk ${row.worst_week.week})` : '–') },
-    { key: 'blunders', label: 'Cost a win', align: 'center', render: (row) => row.blunders || '–' },
+    { key: 'blunders', label: 'Wins lost', align: 'center', render: (row) => row.blunders || '–' },
     { key: 'record', label: 'Record', align: 'center', hideBelow: 'sm', render: (row) => formatRecord(row.record) },
     { key: 'best_record', label: 'Best lineups', align: 'center', render: (row) => formatRecord(row.best_record) },
   ];

@@ -8,7 +8,8 @@ import useApi from "../../hooks/useApi";
 import LoadingState from "../ui/LoadingState";
 import PageLayout from "../ui/PageLayout";
 import SectionCard from "../ui/SectionCard";
-import { currentSeason, leaguePath, recapPath } from "../../utils/seasons";
+import ThisSeasonTabs from "../season/ThisSeasonTabs";
+import { currentSeason, latestRecapSeason, leaguePath, recapPath, seasonStarted } from "../../utils/seasons";
 import { benchBlunders, gameOfTheWeek, recapItems } from "./recapItems";
 
 export const RecapItemCard = ({ item }) => (
@@ -86,17 +87,33 @@ const Scoreboard = ({ recap, names }) => (
   </SectionCard>
 );
 
+// The /recap API path: one week, or without a week the latest one played
+const apiPath = (leagueId, year, week) => {
+  if (week) {
+    return `/recap?leagueId=${leagueId}&year=${year}&week=${week}`;
+  }
+
+  return `/recap?leagueId=${leagueId}&year=${year}`;
+};
+
 // One week's recap: every item, the bench blunders, next week's biggest game
-// in the stretch run, and the scoreboard, with links to the weeks either side
+// in the stretch run, and the scoreboard, with links to the weeks either side.
+// At /recap, with no year or week in the path, the current season's latest week.
 const RecapPage = () => {
   const leagueInfo = useSelector((state) => state.leagueInfo);
   const { year: yearParam, week: weekParam } = useParams();
   const history = useHistory();
-  const year = Number(yearParam);
-  const week = Number(weekParam);
-  const { data: recap, loading, error } = useApi(
-    leagueInfo.id && year && week ? `/recap?leagueId=${leagueInfo.id}&year=${year}&week=${week}` : null
-  );
+  const latestWeek = !weekParam;
+  const year = Number(yearParam) || currentSeason(leagueInfo);
+  const started = !latestWeek || seasonStarted(leagueInfo);
+
+  let path = null;
+  if (leagueInfo.id && year && started) {
+    path = apiPath(leagueInfo.id, year, Number(weekParam));
+  }
+
+  const { data: recap, loading, error } = useApi(path);
+  const week = Number(weekParam) || recap?.week || 0;
 
   const names = useMemo(() => Object.fromEntries((recap?.teams ?? []).map((t) => [t.team_id, t.name])), [recap]);
   const items = recap ? recapItems(recap, names, Number(leagueInfo.established)) : [];
@@ -136,8 +153,20 @@ const RecapPage = () => {
   );
 
   let content;
-  if (loading) {
+  if (!started) {
+    content = (
+      <Typography color="text.secondary">
+        The {year} season starts after the draft.{' '}
+        <MuiLink component={Link} to={leaguePath(leagueInfo.id, `/seasons/${latestRecapSeason(leagueInfo)}`)}>
+          See the {latestRecapSeason(leagueInfo)} season
+        </MuiLink>
+      </Typography>
+    );
+  } else if (loading) {
     content = <LoadingState inline variant="card" title={false} />;
+  } else if (latestWeek && error) {
+    // Most likely no week has been played yet
+    content = <Typography color="text.secondary">The first recap comes after week 1.</Typography>;
   } else if (error || !recap) {
     content = <Typography color="text.secondary">{error?.message ?? 'No recap for this week.'}</Typography>;
   } else {
@@ -157,7 +186,13 @@ const RecapPage = () => {
   }
 
   return (
-    <PageLayout maxWidth={1000} title={`Week ${week} recap`} subtitle={subtitle} actions={nav}>
+    <PageLayout
+      maxWidth={1000}
+      title={week ? `Week ${week} recap` : 'Weekly recap'}
+      subtitle={subtitle}
+      actions={week > 0 && nav}
+      nav={isCurrent && <ThisSeasonTabs />}
+    >
       {content}
     </PageLayout>
   );

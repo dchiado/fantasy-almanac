@@ -21,38 +21,44 @@ export const latestRecapSeason = (leagueInfo) => {
 // The current season has nothing to show before its draft
 export const seasonStarted = (leagueInfo) => leagueInfo?.phase !== 'preseason';
 
-// The current season's pages: tabs in the desktop header, and sub-tabs under
-// "This season" on mobile
-export const THIS_SEASON_PAGES = [
-  { key: 'rankings', label: 'Power rankings', shortLabel: 'Rankings', to: '/power-rankings' },
-  { key: 'playoffs', label: 'Playoff race', shortLabel: 'Playoff race', to: '/playoffs' },
-  { key: 'standings', label: 'Standings', shortLabel: 'Standings', to: '/standings' },
+// The current season's pages, by path
+const THIS_SEASON_PATHS = [
+  { path: '/recap', key: 'recap' },
+  { path: '/power-rankings', key: 'rankings' },
+  { path: '/standings', key: 'standings' },
+  { path: '/playoffs', key: 'playoffs' },
 ];
 
-// THIS_SEASON_PAGES as named for this league: a league without playoffs races for the title
-export const thisSeasonPages = (leagueInfo) => {
-  if (leagueInfo?.hasPlayoffs !== false) {
-    return THIS_SEASON_PAGES;
+// The current season's page keys
+export const THIS_SEASON_KEYS = THIS_SEASON_PATHS.map((page) => page.key);
+
+// A league without playoffs races for first place
+export const raceTitle = (leagueInfo) => {
+  if (leagueInfo?.hasPlayoffs === false) {
+    return 'Title race';
   }
 
-  return THIS_SEASON_PAGES.map((page) => (
-    page.key === 'playoffs' ? { ...page, label: 'Title race', shortLabel: 'Title race' } : page
-  ));
+  return 'Playoff race';
 };
 
-// Where mobile's "This season" tab opens: the playoff race once it's the story
-export const thisSeasonPath = (leagueInfo) => (
-  ['stretch_run', 'playoffs', 'offseason'].includes(leagueInfo?.phase) ? '/playoffs' : '/power-rankings'
-);
+// The current season's pages: tabs in the desktop header, and sub-tabs under
+// "This season" on mobile. Mobile has no room for a Playoff race tab, so its
+// Standings page carries the race too.
+export const thisSeasonPages = (leagueInfo) => [
+  { key: 'recap', label: 'Weekly Recap', shortLabel: 'Recap', to: '/recap' },
+  { key: 'rankings', label: 'Power rankings', shortLabel: 'Rankings', to: '/power-rankings' },
+  { key: 'standings', label: 'Standings', shortLabel: 'Standings', to: '/standings' },
+  { key: 'playoffs', label: raceTitle(leagueInfo), to: '/playoffs', desktopOnly: true },
+];
 
 const HISTORY_PATHS = ['/history', '/seasons', '/all-time-standings', '/head-to-head', '/records', '/keepers'];
 
 // A week's recap page
 export const recapPath = (year, week) => `/seasons/${year}/weeks/${week}`;
 
-// Which page of the main navigation a path belongs to: 'home', a THIS_SEASON_PAGES
-// key, 'history', 'league' or null. The current season's weekly recaps are led
-// from Home, so they count as Home.
+// Which page of the main navigation a path belongs to: 'home', a THIS_SEASON_KEYS
+// key, 'history', 'league' or null. The current season's week recaps count as
+// the Weekly Recap page.
 export const activePage = (fullPathname, leagueInfo) => {
   const pathname = withinLeague(fullPathname);
 
@@ -62,10 +68,10 @@ export const activePage = (fullPathname, leagueInfo) => {
 
   const year = currentSeason(leagueInfo);
   if (year && pathname.startsWith(`/seasons/${year}/weeks/`)) {
-    return 'home';
+    return 'recap';
   }
 
-  const thisSeason = THIS_SEASON_PAGES.find((page) => pathname.startsWith(page.to));
+  const thisSeason = THIS_SEASON_PATHS.find((page) => pathname.startsWith(page.path));
   if (thisSeason) {
     return thisSeason.key;
   }

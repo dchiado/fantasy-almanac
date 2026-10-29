@@ -205,6 +205,9 @@ const League = ({ setError }) => {
       <Route path={`${path}/standings`}>
         <CurrentSeasonPage section="standings" setError={setError} />
       </Route>
+      <Route path={`${path}/recap`}>
+        <RecapPage />
+      </Route>
       {/* The current season's standings page was briefly called Luck */}
       <Route path={`${path}/luck`}>
         <Redirect to={leaguePath(leagueId, '/standings')} />

@@ -9,14 +9,21 @@ import { activePage, leaguePath, thisSeasonPages } from "../../utils/seasons";
 const ThisSeasonTabs = () => {
   const { pathname } = useLocation();
   const leagueInfo = useSelector((state) => state.leagueInfo);
+  const pages = thisSeasonPages(leagueInfo).filter((page) => !page.desktopOnly);
+
+  // The race is part of Standings here
+  let value = activePage(pathname, leagueInfo);
+  if (value === 'playoffs') {
+    value = 'standings';
+  }
 
   return (
     <Tabs
-      value={activePage(pathname)}
+      value={value}
       variant="fullWidth"
       sx={{ display: { xs: 'flex', md: 'none' }, mb: 2, mt: -1, borderBottom: '1px solid var(--fa-border)' }}
     >
-      {thisSeasonPages(leagueInfo).map((page) => (
+      {pages.map((page) => (
         <Tab key={page.key} value={page.key} label={page.shortLabel} component={Link} to={leaguePath(leagueInfo.id, page.to)} sx={{ minWidth: 0, px: 1 }} />
       ))}
     </Tabs>
