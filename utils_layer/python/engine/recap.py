@@ -12,7 +12,7 @@ from .scenarios import SCENARIO_WEEKS, playoff_scenarios
 from .season import CONSOLATION, PLAYOFF, REGULAR
 
 # Bump when the output changes, so stored recaps are recomputed
-RECAP_VERSION = 3
+RECAP_VERSION = 4
 
 # A score gets its all-time rank in the recap only if it's in the top or bottom
 # share of every score in league history. At 10% the week's high score made it
@@ -56,7 +56,9 @@ def weekly_recap(season, week, lineups, adds, report, history, efficiency):
                    "owner_name": t.owner_name} for t in season.teams.values()],
         "games": [{"home": g.home, "away": g.away, "home_points": g.home_points,
                    "away_points": g.away_points, "winner": g.winner,
-                   "playoff": g.tier == PLAYOFF} for g in games],
+                   "playoff": g.tier == PLAYOFF,
+                   "home_top": top_starter(lineups, g.home), "away_top": top_starter(lineups, g.away)}
+                  for g in games],
         "high_score": {"team_id": scores[0][1], "points": scores[0][0]},
         "low_score": {"team_id": scores[-1][1], "points": scores[-1][0]},
         "all_time": all_time_scores(season, week, scores, history),
@@ -70,6 +72,18 @@ def weekly_recap(season, week, lineups, adds, report, history, efficiency):
         "odds_movers": odds_movers(season, week, report) if regular else None,
         "game_of_the_week": game_of_the_week(season, week, report, history) if regular else None,
     }
+
+
+def top_starter(lineups, team_id):
+    """A team's highest-scoring starter as {"name", "position", "points"}, or
+    None without weekly player points (before 2018 for some leagues)."""
+    starters = [p for p in lineups.get(team_id, {}).values() if p["starter"]]
+    if not starters:
+        return None
+    best = max(starters, key=lambda p: p["points"])
+    if best["points"] <= 0:
+        return None
+    return {"name": best["name"], "position": best["position"], "points": best["points"]}
 
 
 def _result(game):

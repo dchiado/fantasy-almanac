@@ -1,8 +1,10 @@
 import json
+import os
 import boto3
 from botocore.exceptions import ClientError
 from engine.lineups import LINEUPS_VERSION, lineup_efficiency, lineup_weeks, lineups_inputs, season_lineups
 from engine.recap import RECAP_VERSION, recap_inputs, weekly_recap
+from engine.recap_summary import SUMMARY_VERSION, recap_facts, summary_inputs
 from engine.report import REPORT_VERSION, report_inputs, season_report
 from engine.rosters import merge_lineups, parse_adds, parse_lineups
 from engine.season import last_played_week
@@ -18,8 +20,15 @@ from utils import (
     season_is_final,
     week_is_final,
 )
+from utils.writeups import ai_league, invoke_async, writeup
 
 s3 = boto3.client('s3')
+
+WRITER_FUNCTION = os.environ.get('WRITE_RECAP_SUMMARY_FUNCTION', 'writeRecapSummary')
+
+# Most summaries one week gets. A week's facts change with stat corrections,
+# and each change is a new summary; past this, the recap shows none.
+SUMMARY_LIMIT = 3
 
 
 def check_year(league_id, year):
@@ -96,8 +105,41 @@ def recap(league_id, start_year, year, week):
         return weekly_recap(season, week, merge_lineups(by_period), adds,
                             report(league_id, year, season), history, efficiency)
 
+    result = stored(key, compute)
+    championship = result["playoffs"] and week == max(season.settings.matchup_periods, default=None)
+    try:
+        text, status = summary(league_id, year, week, result, championship)
+    except Exception as e:
+        # The recap doesn't depend on the summary; never fail the page over it
+        print(f"Summary failed for {year} week {week}: {e}")
+        text, status = None, 'failed'
+
     # The latest week isn't stored with the recap: it moves on every week
-    return {**stored(key, compute), "final": final, "latest_week": latest}
+    return {**result, "final": final, "latest_week": latest, "summary": text, "summary_status": status}
+
+
+def summary(league_id, year, week, recap, championship):
+    """(text, status) for a few sentences of Claude's at the top of a recap,
+    written from recap_facts (engine/recap_summary.py) and stored under a hash
+    of them, so it's rewritten only if the facts change (utils/writeups.py).
+    Only leagues in AI_LEAGUES get one, and only for a season that isn't final,
+    so opening an old recap never calls Claude."""
+    facts = recap_facts(recap, championship)
+    prefix = f'derived/{league_id}/{year}/weeks/{week}/summary-v{SUMMARY_VERSION}-'
+    key = f'{prefix}{summary_inputs(facts)}'
+    text_key = f'{key}.txt'
+    status_key = f'{key}.status.json'
+
+    def allowed():
+        if not ai_league(league_id) or season_is_final(league_id, year):
+            return False
+        listed = s3.list_objects_v2(Bucket=CACHE_BUCKET, Prefix=prefix).get('Contents', [])
+        return sum(1 for o in listed if o['Key'].endswith('.status.json')) < SUMMARY_LIMIT
+
+    def start():
+        invoke_async(WRITER_FUNCTION, {"facts": facts, "text_key": text_key, "status_key": status_key})
+
+    return writeup(text_key, status_key, allowed, start)
 
 
 def lineups(league_id, year):

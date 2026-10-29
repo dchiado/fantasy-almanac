@@ -9,6 +9,7 @@ import LoadingState from "../ui/LoadingState";
 import PageLayout from "../ui/PageLayout";
 import SectionCard from "../ui/SectionCard";
 import ThisSeasonTabs from "../season/ThisSeasonTabs";
+import RecapSummary, { useRecapSummary } from "./RecapSummary";
 import { currentSeason, latestRecapSeason, leaguePath, recapPath, seasonStarted } from "../../utils/seasons";
 import { benchBlunders, gameOfTheWeek, recapItems } from "./recapItems";
 
@@ -113,6 +114,7 @@ const RecapPage = () => {
   }
 
   const { data: recap, loading, error } = useApi(path);
+  const { summary, status: summaryStatus } = useRecapSummary(path, recap);
   const week = Number(weekParam) || recap?.week || 0;
 
   const names = useMemo(() => Object.fromEntries((recap?.teams ?? []).map((t) => [t.team_id, t.name])), [recap]);
@@ -172,6 +174,8 @@ const RecapPage = () => {
   } else {
     content = (
       <>
+        <RecapSummary summary={summary} status={summaryStatus} sx={{ mb: 3 }} />
+
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', md: 'repeat(3, minmax(0, 1fr))' }, gap: 2, mb: 3 }}>
           {items.map((item) => <RecapItemCard key={item.key} item={item} />)}
         </Box>

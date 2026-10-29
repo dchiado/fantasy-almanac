@@ -325,26 +325,38 @@ const WeeklyRecapCard = ({ leagueId, year, established }) => {
     const lastRowStart = items.length - (items.length % 2 || 2);
 
     content = (
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'repeat(2, minmax(0, 1fr))' }, columnGap: 3 }}>
-        {items.map((item, index) => {
-          const border = '1px solid var(--fa-border)';
-          const borderBottom = {
-            xs: index === items.length - 1 ? 0 : border,
-            md: index >= lastRowStart ? 0 : border,
-          };
+      <>
+        {/* The summary's first few lines; the rest is on the full recap */}
+        {recap.summary &&
+          <Typography
+            variant="body2"
+            sx={{ mb: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+          >
+            {recap.summary}
+          </Typography>
+        }
 
-          return (
-            <Box key={item.key} sx={{ py: 0.75, borderBottom }}>
-              <Typography variant="body2" color="text.secondary">{item.title}</Typography>
-              <Typography sx={{ fontWeight: 600 }}>{item.name}</Typography>
-              {/* An all-time rank or "won it for them" says more than the detail */}
-              {(item.badge || item.detail) &&
-                <Typography variant="body2" color="text.secondary">{item.badge || item.detail}</Typography>
-              }
-            </Box>
-          );
-        })}
-      </Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'repeat(2, minmax(0, 1fr))' }, columnGap: 3 }}>
+          {items.map((item, index) => {
+            const border = '1px solid var(--fa-border)';
+            const borderBottom = {
+              xs: index === items.length - 1 ? 0 : border,
+              md: index >= lastRowStart ? 0 : border,
+            };
+
+            return (
+              <Box key={item.key} sx={{ py: 0.75, borderBottom }}>
+                <Typography variant="body2" color="text.secondary">{item.title}</Typography>
+                <Typography sx={{ fontWeight: 600 }}>{item.name}</Typography>
+                {/* An all-time rank or "won it for them" says more than the detail */}
+                {(item.badge || item.detail) &&
+                  <Typography variant="body2" color="text.secondary">{item.badge || item.detail}</Typography>
+                }
+              </Box>
+            );
+          })}
+        </Box>
+      </>
     );
   }
 

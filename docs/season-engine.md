@@ -102,13 +102,24 @@ Biggest single-week rises and drops were tried and dropped: they almost always l
 - **High and low score** always show. A score gets its all-time rank only in the top or bottom 5% of league history (`NOTEWORTHY_SHARE`; at 10% the week's high score made it about 72% of weeks), and other scores that week in that 5% are listed too. Ranks count only games up to that week, so a stored recap never goes stale.
 - **Biggest and closest win** by margin.
 - **Luckiest win and unluckiest loss** by place among the week's scores: the lowest-scoring winner if it was in the bottom half, the highest-scoring loser if in the top half. If the top half all won, neither shows.
-- **You had who and still lost:** the highest-scoring starter on a losing team.
+- **You had who and still lost:** the highest-scoring starter on a losing team. Each game also carries both sides' top starter, for the summary.
 - **Best pickup:** among adds made that week (one `mTransactions2` per week), one that started and outscored the margin of a win "won it for them"; otherwise the highest-scoring add, started or not. The FAAB bid is shown, but there's no points-per-dollar: that's a season-long measure.
 - **Bench blunders and most points left on the bench:** see [Lineup efficiency](#lineup-efficiency).
 - **Odds movers** (regular season): the biggest rise and fall in playoff odds, and who clinched or was eliminated. Clinches come from the scenarios (last 3 weeks) or the final standings, never from a simulated 100%.
 - **Game of the week** (stretch run only): next week's game whose result moves the two teams' odds the most, from the simulation's odds with a win and with a loss, plus the owners' head-to-head record.
 
-Left out: live scores and projections (ESPN shows them, and projections only exist "now"), the full odds table (on Playoff race), power rankings movers (on Power rankings, and only computed for the current week), and AI writeups.
+Left out: live scores and projections (ESPN shows them, and projections only exist "now"), the full odds table (on Playoff race), and power rankings movers (on Power rankings, and only computed for the current week).
+
+### Weekly recap summary
+
+For leagues in `AI_LEAGUES`, a paragraph by Claude sits above the recap's items. Code works out every fact, and Claude only picks and phrases them:
+
+- `engine/recap_summary.py` `recap_facts` turns a stored recap into plain sentences, calling each manager by first name, with a last initial when two owners share one (`owner_names`): "Bench blunder: Dylan lost to Steve, 99.02 to 102.82, but their best lineup would have scored 117.22 and won." Claude sees only these sentences, never the recap or team names.
+- The summary is stored under a hash of the facts (`summary_inputs`). When a week becomes final and its recap is recomputed with the same facts, the summary carries over. A stat correction that changes them gets a new summary, so it never contradicts the page.
+- `writeRecapSummary` (Claude Haiku 5.5, medium effort) writes one paragraph, at most 150 words, that leads with the week's best story and mentions every game, usually in one sentence each, in a group-chat voice: owners by first name, numbers rounded. Before saving, it checks every number in the text appears in the facts (rounding to a whole number is allowed). One that doesn't was made up or misread, so the summary is marked failed and the page shows none.
+- The recap page shows it under "What you missed", with a skeleton while it's being written: it asks again every 8 seconds, up to 4 times, then says to check back. Home shows its first three lines, once stored.
+
+Guards (allowlist, one call per version of the facts, at most 3 per league-week, current season only) are under "Claude costs" in the README. Bump `SUMMARY_VERSION` when the facts or the prompt change.
 
 ## Lineup efficiency
 

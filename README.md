@@ -45,6 +45,8 @@ derived/{league}/{year}/season-report-v{n}.json        season report (GET /seaso
 derived/{league}/{year}/season-report-v{n}-{inputs}.json   ... for a season in progress, by a hash of its decided games
 derived/{league}/{year}/weeks/{week}/recap-v{n}.json         weekly recap (GET /recap) for a final week
 derived/{league}/{year}/weeks/{week}/recap-v{n}-{inputs}.json   ... for a week not yet final, by a hash of its scores
+derived/{league}/{year}/weeks/{week}/summary-v{n}-{facts}.txt   Claude's recap summary, by a hash of the facts it was written from
+derived/{league}/{year}/weeks/{week}/summary-v{n}-{facts}.status.json   ... and its status marker
 derived/{league}/{year}/lineups-v{n}.json              points left on the bench (GET /lineups) for a final season
 derived/{league}/{year}/lineups-v{n}-{inputs}.json     ... for a season in progress, by a hash of its decided games
 power_rankings/league_{league}/{year}/week_{week}/     AI writeups (rankings.md) and their status.json
@@ -91,6 +93,7 @@ lambdas/
   cache/                  POST /cache
   cacheStatus/            GET /cache/status
   writePowerRankings/        no route — invoked directly, writes AI rankings to S3
+  writeRecapSummary/         no route — invoked directly, writes a recap summary to S3
   # Baseball — JS
   baseballOverallStandings/  GET /baseball/overall-standings
   baseballDailyScores/       no route — daily MLB scores email via SES
@@ -159,7 +162,7 @@ Don't commit real league responses as test data; they include members' names.
 
 The season pages (Standings, Playoff race, and past-season recaps) all come from one lambda returning one report (`GET /season?leagueId=&year=`, `engine/report.py`): standings, playoff odds by week, highlights (biggest collapse, biggest comeback, the bubble), stretch-run scenarios, luck and the schedule swap grid. Every report is computed on first request and stored: a final season once, a season in progress once per set of decided games (`report_inputs`), so it's recomputed only after a game finishes. That first computation takes about 2 seconds, or about 7 with three weeks of scenarios. Bump `REPORT_VERSION` when the report or a model behind it changes.
 
-The same lambda serves weekly recaps (`GET /recap?leagueId=&year=&week=`, `engine/recap.py`), stored the same way: a final week once, a week not yet final by a hash of its scores. Without `week` it's the latest week whose games are all decided, so a new recap appears as soon as ESPN marks the week's games decided. Computing one loads that week's `mRoster` and `mTransactions2` and every earlier season (for all-time ranks and head-to-head). Bump `RECAP_VERSION` when its output changes.
+The same lambda serves weekly recaps (`GET /recap?leagueId=&year=&week=`, `engine/recap.py`), stored the same way: a final week once, a week not yet final by a hash of its scores. Without `week` it's the latest week whose games are all decided, so a new recap appears as soon as ESPN marks the week's games decided. Computing one loads that week's `mRoster` and `mTransactions2` and every earlier season (for all-time ranks and head-to-head). Bump `RECAP_VERSION` when its output changes. For leagues in `AI_LEAGUES`, the response also has `summary`: a paragraph by Claude running through the week's games, written from the recap (see [docs/season-engine.md](docs/season-engine.md#weekly-recap-summary) and "Claude costs" below).
 
 It also serves points left on the bench over a regular season (`GET /lineups?leagueId=&year=`, `engine/lineups.py`), stored like the report under a hash of its decided games. Computing it loads every regular-season week's `mRoster`. Bump `LINEUPS_VERSION` when its output changes. How the best lineup works is in [docs/season-engine.md](docs/season-engine.md#lineup-efficiency).
 
@@ -181,12 +184,14 @@ aws ssm put-parameter --name /ffalmanac/ANTHROPIC_API_KEY --value "sk-..." --typ
 
 ### Claude costs
 
-Any feature that calls Claude follows the power rankings writeup's guards:
+Two features call Claude: the power rankings writeup (`writePowerRankings`) and the weekly recap summary (`writeRecapSummary`). Both follow the same guards:
 
 - **Spend limit:** the Anthropic API key is in its own Console workspace with a low monthly limit. It's the only hard cap; the AWS budget only alerts.
-- **Allowlist:** only leagues in `AI_LEAGUES` (`template.yaml`, comma-separated) get a writeup. Other leagues get the rankings, and the page leaves the writeup card out. The writer's prompt is written for Gridiron, so check it before adding a league.
-- **One call per league-week:** before invoking `writePowerRankings`, `powerRankings` claims `status.json` next to `rankings.md` with a conditional write, so simultaneous page loads make one call. The writer marks it `failed` on any error, and a `pending` marker older than 5 minutes counts as failed. A failed writeup is never retried; delete its `status.json` to try again.
-- **No async retries:** `writePowerRankings` has `MaximumRetryAttempts: 0`.
+- **Allowlist:** only leagues in `AI_LEAGUES` (`template.yaml` globals, comma-separated) get writeups. Other leagues get the pages without them. The power rankings prompt is written for Gridiron, so check it before adding a league; the recap summary prompt is league-neutral.
+- **One call per writeup:** before invoking a writer, the lambda claims the writeup's status marker with a conditional write (`utils/writeups.py`), so simultaneous page loads make one call and reloads read the stored text. The writer marks it `failed` on any error, and a `pending` marker older than 5 minutes counts as failed. A failed writeup is never retried; delete its status marker to try again.
+- **Power rankings:** one writeup per league-week, at `power_rankings/.../status.json` next to `rankings.md`.
+- **Recap summaries:** one per version of a week's facts, so a stat correction that changes them is a new call. At most 3 per league-week (`SUMMARY_LIMIT`), and only for a season that isn't final, so opening an old recap never calls Claude.
+- **No async retries:** both writers have `MaximumRetryAttempts: 0`.
 
 ---
 
@@ -226,5 +231,6 @@ See [docs/espn-api/](docs/espn-api/README.md) for endpoints, views, errors, gotc
 
 ## TODOs
 
+- Points left on the bench are wrong for seasons without weekly player points (Gridiron before 2018; see "Gotchas" in [docs/espn-api/](docs/espn-api/README.md)). Every player scores 0, so the past-season page's bench table shows every team leaving 0 points with every week perfect, and those weeks' recaps lose bench blunders, best pickup and "had who". Fix in `engine/lineups.py`: treat a season as unavailable when starters don't add up to team scores, and have `LineupTable` leave the card out.
 - Audit seasons cached under the old calendar-year rule. Any 2021–2025 season whose `espn-cache/` objects were written before about January 10 of the next year may have been saved mid-final; delete those objects so they're refetched.
 - Lambda reserved concurrency isn't possible while the account's concurrency limit is 10 (AWS requires leaving 10 unreserved). That limit already caps the whole account at 10 concurrent runs. If it's ever raised, set `ReservedConcurrentExecutions` per function (1–2 for Claude callers).

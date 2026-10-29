@@ -1,4 +1,3 @@
-import json
 from utils import (
     espn_handler,
     is_bye_week,
@@ -7,13 +6,9 @@ from utils import (
     number_of_weeks,
     team_mapping
 )
+from utils.writeups import ai_league, invoke_async, writeup as stored_writeup
 import statistics
-import boto3
 import os
-from botocore.exceptions import ClientError
-from datetime import datetime, timedelta, timezone
-
-BUCKET_NAME = 'ffalmanac-data'
 
 
 def update_overall_wins(tm, all_week_pts):
@@ -25,84 +20,21 @@ def update_overall_wins(tm, all_week_pts):
         tm["overall_wins"] += week_overall_wins
 
 
-# Leagues that get a Claude writeup, e.g. "166975,123"; any other league gets
-# rankings only. Cost guard: every new league-week is a Claude call.
-AI_LEAGUES = {x.strip() for x in os.environ.get('AI_LEAGUES', '').split(',') if x.strip()}
-
-# A pending writeup older than this is treated as failed (the writer times out
-# at 60s), so a writer that died silently isn't retried on every page load
-PENDING_TIMEOUT = timedelta(minutes=5)
-
-s3 = boto3.client('s3')
-
-
-def invoke_writeup_lambda(payload):
-    lambda_client = boto3.client('lambda')
-    function_name = os.environ.get('WRITE_POWER_RANKINGS_FUNCTION', 'writePowerRankings')
-    lambda_client.invoke(
-        FunctionName=function_name,
-        InvocationType='Event',
-        Payload=json.dumps(payload)
-    )
+WRITER_FUNCTION = os.environ.get('WRITE_POWER_RANKINGS_FUNCTION', 'writePowerRankings')
 
 
 def writeup_prefix(league_id, year, week):
     return f"power_rankings/league_{league_id}/{year}/week_{week}"
 
 
-def put_status(prefix, status, only_if_new=False):
-    """Write the writeup's status marker. With only_if_new, the write fails with
-    PreconditionFailed if a marker already exists, so only one request claims it."""
-    extra = {'IfNoneMatch': '*'} if only_if_new else {}
-    s3.put_object(Bucket=BUCKET_NAME, Key=f"{prefix}/status.json",
-                  Body=json.dumps({'status': status}), ContentType='application/json', **extra)
-
-
 def writeup(league_id, year, week, teams):
-    """Return (writeup, status) for this week, starting a Claude writeup if needed.
-
-    status is "ready", "pending" (being written), "failed" or "disabled" (league
-    not in AI_LEAGUES). Each league-week gets at most one Claude call: a status
-    marker is claimed before invoking the writer, and a failure is never retried.
-    """
+    """Return (writeup, status) for this week, starting a Claude writeup if
+    needed (utils/writeups.py). Only leagues in AI_LEAGUES get one."""
     prefix = writeup_prefix(league_id, year, week)
-    try:
-        resp = s3.get_object(Bucket=BUCKET_NAME, Key=f"{prefix}/rankings.md")
-        return resp['Body'].read().decode('utf-8'), 'ready'
-    except s3.exceptions.NoSuchKey:
-        pass
-
-    if str(league_id) not in AI_LEAGUES:
-        return None, 'disabled'
-
-    try:
-        resp = s3.get_object(Bucket=BUCKET_NAME, Key=f"{prefix}/status.json")
-        status = json.loads(resp['Body'].read())['status']
-        if status == 'pending' and datetime.now(timezone.utc) - resp['LastModified'] < PENDING_TIMEOUT:
-            return None, 'pending'
-        return None, 'failed'
-    except s3.exceptions.NoSuchKey:
-        pass
-
-    try:
-        put_status(prefix, 'pending', only_if_new=True)
-    except ClientError as e:
-        if e.response['Error']['Code'] in ('PreconditionFailed', 'ConditionalRequestConflict'):
-            return None, 'pending'  # another request claimed it first
-        print(f"Couldn't claim writeup {prefix}: {e}")
-        return None, 'failed'
-    except Exception as e:
-        # Fail closed: without a claimed marker, don't risk a Claude call
-        print(f"Couldn't claim writeup {prefix}: {e}")
-        return None, 'failed'
-
-    try:
-        invoke_writeup_lambda({"year": year, "week": week, "league_id": league_id, "teams": teams})
-    except Exception as e:
-        print(f"Couldn't invoke writer for {prefix}: {e}")
-        put_status(prefix, 'failed')  # if this write fails too, the pending marker times out
-        return None, 'failed'
-    return None, 'pending'
+    payload = {"year": year, "week": week, "league_id": league_id, "teams": teams}
+    return stored_writeup(f"{prefix}/rankings.md", f"{prefix}/status.json",
+                          allowed=lambda: ai_league(league_id),
+                          start=lambda: invoke_async(WRITER_FUNCTION, payload))
 
 
 def current(league_id):

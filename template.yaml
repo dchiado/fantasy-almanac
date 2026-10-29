@@ -23,6 +23,10 @@ Globals:
     Environment:
       Variables:
         STAGE: !Ref Stage
+        # Comma-separated league IDs that get Claude writeups (power rankings,
+        # recap summaries); others get the pages without them. The power rankings
+        # prompt is written for Gridiron, so check it before adding a league.
+        AI_LEAGUES: "166975"
 
 Resources:
 
@@ -60,7 +64,8 @@ Resources:
         "GET /season":
           ThrottlingRateLimit: 2
           ThrottlingBurstLimit: 5
-        # Same lambda; a recap not yet stored fetches a week of rosters and every past season
+        # Same lambda; a recap not yet stored fetches a week of rosters and every past
+        # season, and a summary not yet stored is a Claude call (via writeRecapSummary)
         "GET /recap":
           ThrottlingRateLimit: 2
           ThrottlingBurstLimit: 5
@@ -191,9 +196,6 @@ Resources:
       Environment:
         Variables:
           WRITE_POWER_RANKINGS_FUNCTION: !Ref WritePowerRankingsFunction
-          # Comma-separated league IDs that get a Claude writeup; others get rankings only.
-          # The writer's prompt is written for Gridiron, so check it before adding a league.
-          AI_LEAGUES: "166975"
       Policies:
         - S3CrudPolicy:
             BucketName: ffalmanac-data
@@ -322,6 +324,9 @@ Resources:
       Layers:
         - !Ref UtilsLayer
         - !FindInMap [Layers, !Ref AWS::Region, Dependencies]
+      Environment:
+        Variables:
+          WRITE_RECAP_SUMMARY_FUNCTION: !Ref WriteRecapSummaryFunction
       Policies:
         - S3CrudPolicy:
             BucketName: ffalmanac-data
@@ -329,6 +334,9 @@ Resources:
           - Effect: Allow
             Action: s3:ListBucket
             Resource: arn:aws:s3:::ffalmanac-data
+          - Effect: Allow
+            Action: lambda:InvokeFunction
+            Resource: !GetAtt WriteRecapSummaryFunction.Arn
       Events:
         Route:
           Type: HttpApi
@@ -405,6 +413,25 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambdas/writePowerRankings/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Timeout: 60
+      # Cost guard: AWS retries failed async invocations twice by default,
+      # and each retry is another Claude call
+      EventInvokeConfig:
+        MaximumRetryAttempts: 0
+        MaximumEventAgeInSeconds: 60
+      Policies:
+        - S3WritePolicy:
+            BucketName: ffalmanac-data
+        - SSMParameterReadPolicy:
+            ParameterName: ffalmanac/ANTHROPIC_API_KEY
+
+  # No API route — async-invoked by the season lambda, writes a recap summary to S3
+  WriteRecapSummaryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/writeRecapSummary/
       Handler: index.handler
       Runtime: nodejs22.x
       Timeout: 60

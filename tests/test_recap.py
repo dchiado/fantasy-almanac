@@ -9,7 +9,7 @@ from test_odds_and_luck import round_robin
 
 from engine.recap import (  # noqa: E402
     all_time_scores, best_pickup, game_of_the_week, had_who, head_to_head, luck_items,
-    odds_movers, recap_inputs, week_games, weekly_recap,
+    odds_movers, recap_inputs, top_starter, week_games, weekly_recap,
 )
 from engine.report import season_report  # noqa: E402
 from engine.rosters import merge_lineups, parse_adds, parse_lineups  # noqa: E402
@@ -156,6 +156,13 @@ class RecapTest(unittest.TestCase):
         self.assertEqual(recap["closest_win"]["team_id"], 3)
         self.assertIsNone(recap["all_time"])
         self.assertIsNone(recap["game_of_the_week"])  # no week after the regular season
+        self.assertIsNone(recap["games"][0]["home_top"])  # no lineups, so no player points
+
+    def test_top_starter(self):
+        lineups = {1: {1: player(1, 30.0, starter=False), 2: player(2, 20.0), 3: player(3, 25.0)},
+                   2: {4: player(4, 0.0)}}
+        self.assertEqual(top_starter(lineups, 1), {"name": "Player 3", "position": "RB", "points": 25.0})
+        self.assertIsNone(top_starter(lineups, 2))  # no player points
 
     def test_inputs_change_with_the_week_not_later_weeks(self):
         before = recap_inputs(season([*UPSET_WEEK, matchup(2, 1, 100, 2, 90)]), 1)
