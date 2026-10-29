@@ -15,10 +15,13 @@ export const leagueInfoSlice = createSlice({
     updateLeagueInfo(_state, action) {
       return action.payload
     },
+    clearLeagueInfo() {
+      return initialState
+    },
   },
 })
 
-export const { updateLeagueInfo } = leagueInfoSlice.actions
+export const { updateLeagueInfo, clearLeagueInfo } = leagueInfoSlice.actions
 
 export default leagueInfoSlice.reducer
 

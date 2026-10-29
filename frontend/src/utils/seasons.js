@@ -1,4 +1,12 @@
-// Which season the navigation points at, from leagueInfo (see "Season phases" in the README)
+// Which season the navigation points at, from leagueInfo (see "Season phases" in the README).
+// Paths here are relative to a league: leaguePath makes them absolute.
+
+// Every league page lives under /league/{id}, so links can be shared
+export const leaguePath = (leagueId, path = '') => `/league/${leagueId}${path}`;
+
+// A path with its /league/{id} prefix removed
+const LEAGUE_PREFIX = /^\/league\/\d+/;
+const withinLeague = (pathname) => pathname.replace(LEAGUE_PREFIX, '') || '/';
 
 // The season under way, or about to start in preseason
 export const currentSeason = (leagueInfo) => Number(leagueInfo?.year) || null;
@@ -45,7 +53,9 @@ export const recapPath = (year, week) => `/seasons/${year}/weeks/${week}`;
 // Which page of the main navigation a path belongs to: 'home', a THIS_SEASON_PAGES
 // key, 'history', 'league' or null. The current season's weekly recaps are led
 // from Home, so they count as Home.
-export const activePage = (pathname, leagueInfo) => {
+export const activePage = (fullPathname, leagueInfo) => {
+  const pathname = withinLeague(fullPathname);
+
   if (pathname === '/') {
     return 'home';
   }

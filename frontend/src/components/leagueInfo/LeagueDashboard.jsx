@@ -3,28 +3,34 @@ import { Box, Button, Paper, Skeleton, Typography } from "@mui/material";
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import useApi from "../../hooks/useApi";
 import MovementBadge from "../ui/MovementBadge";
 import { DEFAULT_WEIGHTS, rankWithMovement } from "../../utils/powerRankings";
 import PlayoffPicture from "../season/PlayoffPicture";
 import { formatPct, formatRecord, formatSigned, oddsName, spots } from "../season/format";
 import { homeItems, recapItems } from "../recap/recapItems";
-import { recapPath } from "../../utils/seasons";
+import { leaguePath, recapPath } from "../../utils/seasons";
 import { listText } from "../../utils/text";
 
-const DashCard = ({ title, to, linkLabel, sx, children }) => (
-  <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, display: 'flex', flexDirection: 'column', minWidth: 0, ...sx }}>
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-      <Typography variant="overline" component="h2" color="text.secondary">{title}</Typography>
-      {to &&
-        <Button component={Link} to={to} size="small" endIcon={<ArrowForwardIcon fontSize="small" />} sx={{ mr: -1 }}>
-          {linkLabel}
-        </Button>
-      }
-    </Box>
-    {children}
-  </Paper>
-);
+// `to` is a path within the league, like the rest of the app's links
+const DashCard = ({ title, to, linkLabel, sx, children }) => {
+  const leagueId = useSelector((state) => state.leagueInfo.id);
+
+  return (
+    <Paper variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, display: 'flex', flexDirection: 'column', minWidth: 0, ...sx }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+        <Typography variant="overline" component="h2" color="text.secondary">{title}</Typography>
+        {to &&
+          <Button component={Link} to={leaguePath(leagueId, to)} size="small" endIcon={<ArrowForwardIcon fontSize="small" />} sx={{ mr: -1 }}>
+            {linkLabel}
+          </Button>
+        }
+      </Box>
+      {children}
+    </Paper>
+  );
+};
 
 const CardSkeleton = ({ lines = 4 }) => (
   <Box>

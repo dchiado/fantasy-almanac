@@ -7,10 +7,10 @@ import PageLayout from "../ui/PageLayout";
 import SectionCard from "../ui/SectionCard";
 import LineupTable from "./LineupTable";
 import { PlayoffOddsOrReason, ScheduleSwap, StandingsTable, useSeasonReport } from "./sections";
-import { latestRecapSeason, recapPath } from "../../utils/seasons";
+import { latestRecapSeason, leaguePath, recapPath } from "../../utils/seasons";
 
 // Links to every week's recap, regular season then playoffs
-const WeeklyRecaps = ({ report }) => {
+const WeeklyRecaps = ({ leagueId, report }) => {
   const weeks = Array.from({ length: report.weeks_played ?? 0 }, (_, i) => i + 1);
   if (weeks.length === 0) return null;
   const groups = [
@@ -25,7 +25,7 @@ const WeeklyRecaps = ({ report }) => {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>{label}</Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(48px, 1fr))', gap: 1 }}>
             {group.map((w) => (
-              <Button key={w} component={Link} to={recapPath(report.year, w)} variant="outlined" size="small" sx={{ minWidth: 0 }}>
+              <Button key={w} component={Link} to={leaguePath(leagueId, recapPath(report.year, w))} variant="outlined" size="small" sx={{ minWidth: 0 }}>
                 {w}
               </Button>
             ))}
@@ -51,7 +51,7 @@ const SeasonPage = ({ setError }) => {
 
   if (!year || inProgress) {
     if (!latest) return <LoadingState rows={12} />;
-    return <Redirect to={inProgress ? '/playoffs' : `/seasons/${latest}`} />;
+    return <Redirect to={leaguePath(leagueInfo.id, inProgress ? '/playoffs' : `/seasons/${latest}`)} />;
   }
 
   const firstYear = Number(leagueInfo.established) || null;
@@ -64,7 +64,7 @@ const SeasonPage = ({ setError }) => {
         id="season-year"
         label="Season"
         value={years.includes(year) ? year : ''}
-        onChange={(e) => history.push(`/seasons/${e.target.value}`)}
+        onChange={(e) => history.push(leaguePath(leagueInfo.id, `/seasons/${e.target.value}`))}
       >
         {years.map((y) => <MenuItem value={y} key={y}>{y}</MenuItem>)}
       </Select>
@@ -80,7 +80,7 @@ const SeasonPage = ({ setError }) => {
         ? <LoadingState inline rows={12} title={false} />
         : <>
             <PlayoffOddsOrReason report={report} names={names} />
-            <WeeklyRecaps report={report} />
+            <WeeklyRecaps leagueId={leagueInfo.id} report={report} />
             <StandingsTable report={report} names={names} />
             <LineupTable leagueId={leagueInfo.id} year={year} names={names} />
             <ScheduleSwap report={report} names={names} abbrevs={abbrevs} />

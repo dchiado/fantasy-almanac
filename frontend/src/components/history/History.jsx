@@ -8,6 +8,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import PageLayout from "../ui/PageLayout";
+import { leaguePath } from "../../utils/seasons";
 
 const PAGES = [
   { to: '/seasons', icon: CalendarMonthIcon, title: 'Past seasons', body: "Each season's playoff odds, collapses and final standings" },
@@ -30,7 +31,7 @@ const History = () => {
           <Paper
             key={to}
             component={Link}
-            to={to}
+            to={leaguePath(leagueInfo.id, to)}
             variant="outlined"
             sx={{
               display: 'flex',

@@ -11,7 +11,7 @@ import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import { useSelector } from 'react-redux'
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useCookies } from "react-cookie";
-import { activePage, thisSeasonPages } from "../../utils/seasons";
+import { activePage, leaguePath, thisSeasonPages } from "../../utils/seasons";
 
 const Header = () => {
   const leagueInfo = useSelector((state) => state.leagueInfo)
@@ -30,7 +30,7 @@ const Header = () => {
       <Toolbar sx={{ gap: { xs: 1.5, sm: 3 }, minHeight: { xs: 56, sm: 64 }, px: { xs: 2, sm: 3 } }}>
         <Box
           component={Link}
-          to="/"
+          to={leagueInfo?.name ? leaguePath(leagueInfo.id) : '/'}
           sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.primary', textDecoration: 'none', flexShrink: 0 }}
         >
           <SportsFootballIcon sx={{ color: 'primary.main' }} />
@@ -54,7 +54,7 @@ const Header = () => {
               <Button
                 key={page.key}
                 component={NavLink}
-                to={page.to}
+                to={leaguePath(leagueInfo.id, page.to)}
                 isActive={() => activePage(pathname, leagueInfo) === page.key}
                 sx={{
                   color: 'text.secondary',

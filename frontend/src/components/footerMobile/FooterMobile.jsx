@@ -8,7 +8,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { THIS_SEASON_PAGES, activePage, thisSeasonPath } from '../../utils/seasons';
+import { THIS_SEASON_PAGES, activePage, leaguePath, thisSeasonPath } from '../../utils/seasons';
 import './FooterMobile.css';
 
 // The current season's pages share one tab here; ThisSeasonTabs switches between them
@@ -24,10 +24,10 @@ const FooterMobile = () => {
   return (
     <Paper className='mobile-footer' square elevation={0}>
       <BottomNavigation showLabels value={tabFor(activePage(pathname, leagueInfo))}>
-        <BottomNavigationAction label="Home" value="home" component={Link} to="/" icon={<HomeIcon />} sx={actionSx} />
-        <BottomNavigationAction label="This season" value="this-season" component={Link} to={thisSeasonPath(leagueInfo)} icon={<ScoreboardIcon />} sx={actionSx} />
-        <BottomNavigationAction label="History" value="history" component={Link} to="/history" icon={<MenuBookIcon />} sx={actionSx} />
-        <BottomNavigationAction label="League" value="league" component={Link} to="/league-info-mobile" icon={<EditIcon />} sx={actionSx} />
+        <BottomNavigationAction label="Home" value="home" component={Link} to={leaguePath(leagueInfo.id)} icon={<HomeIcon />} sx={actionSx} />
+        <BottomNavigationAction label="This season" value="this-season" component={Link} to={leaguePath(leagueInfo.id, thisSeasonPath(leagueInfo))} icon={<ScoreboardIcon />} sx={actionSx} />
+        <BottomNavigationAction label="History" value="history" component={Link} to={leaguePath(leagueInfo.id, '/history')} icon={<MenuBookIcon />} sx={actionSx} />
+        <BottomNavigationAction label="League" value="league" component={Link} to={leaguePath(leagueInfo.id, '/league-info-mobile')} icon={<EditIcon />} sx={actionSx} />
       </BottomNavigation>
     </Paper>
   );

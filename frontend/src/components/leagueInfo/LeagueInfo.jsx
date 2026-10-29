@@ -1,18 +1,22 @@
-import React from "react";
-import { useSelector } from 'react-redux'
+import React, { useState } from "react";
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import { useCookies } from "react-cookie";
+import { useHistory } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
 import SectionCard from "../ui/SectionCard";
-import LeagueDashboard from "./LeagueDashboard";
+import { leaguePath } from "../../utils/seasons";
 
-const LeagueInfo = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
-	const leagueInfo = useSelector((state) => state.leagueInfo)
-	const [cookies,,] = useCookies(["league_id"]);
+// The landing page: enter a league ID to open /league/{id}
+const LeagueInfo = () => {
+	const history = useHistory();
+	const [leagueId, setLeagueId] = useState("");
 
-	if (cookies?.league_id && leagueInfo.name) {
-		return <LeagueDashboard leagueInfo={leagueInfo} />;
+	const onSubmit = (event) => {
+		event.preventDefault();
+
+		if (leagueId) {
+			history.push(leaguePath(leagueId));
+		}
 	}
 
 	return (
@@ -23,11 +27,12 @@ const LeagueInfo = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
 			</Typography>
 
 			<SectionCard>
-				<Box component="form" onSubmit={onLeagueInfoSubmit} sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+				<Box component="form" onSubmit={onSubmit} sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
 					<TextField
 						id="league-id"
 						label="ESPN league ID"
-						onChange={onLeagueIdChange}
+						value={leagueId}
+						onChange={(event) => setLeagueId(event.target.value)}
 						onKeyPress={(event) => {
 							// Digits only, but let Enter through so the form still submits
 							if (event.key.length === 1 && !/[0-9]/.test(event.key)) {

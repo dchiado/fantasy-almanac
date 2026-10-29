@@ -8,7 +8,7 @@ import SectionCard from "../ui/SectionCard";
 import LineupTable from "./LineupTable";
 import ThisSeasonTabs from "./ThisSeasonTabs";
 import { PlayoffOddsOrReason, PlayoffPictureSection, ScheduleSwap, StandingsTable, useSeasonReport } from "./sections";
-import { currentSeason, latestRecapSeason, seasonStarted } from "../../utils/seasons";
+import { currentSeason, latestRecapSeason, leaguePath, seasonStarted } from "../../utils/seasons";
 
 const TITLES = { playoffs: 'Playoff race', standings: 'Standings' };
 
@@ -38,7 +38,7 @@ const CurrentSeasonPage = ({ section, setError }) => {
       <SectionCard>
         <Typography color="text.secondary">
           The {year} season starts after the draft.{' '}
-          <Link to={`/seasons/${latestRecapSeason(leagueInfo)}`} style={{ color: 'var(--fa-primary)' }}>
+          <Link to={leaguePath(leagueInfo.id, `/seasons/${latestRecapSeason(leagueInfo)}`)} style={{ color: 'var(--fa-primary)' }}>
             See the {latestRecapSeason(leagueInfo)} season
           </Link>
         </Typography>

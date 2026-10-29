@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import "./LeagueInfoMobile.css";
 
-const LeagueInfoMobile = ({ onLeagueIdChange, onLeagueInfoSubmit }) => {
+const LeagueInfoMobile = () => {
   const leagueInfo = useSelector((state) => state.leagueInfo)
 	const [,, removeCookie] = useCookies(["league_id"]);
 

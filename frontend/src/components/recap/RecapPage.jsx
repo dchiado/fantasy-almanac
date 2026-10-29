@@ -8,7 +8,7 @@ import useApi from "../../hooks/useApi";
 import LoadingState from "../ui/LoadingState";
 import PageLayout from "../ui/PageLayout";
 import SectionCard from "../ui/SectionCard";
-import { currentSeason, recapPath } from "../../utils/seasons";
+import { currentSeason, leaguePath, recapPath } from "../../utils/seasons";
 import { benchBlunders, gameOfTheWeek, recapItems } from "./recapItems";
 
 export const RecapItemCard = ({ item }) => (
@@ -107,7 +107,7 @@ const RecapPage = () => {
   const weeks = Array.from({ length: latest }, (_, i) => i + 1);
   const nav = (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <Button component={Link} to={recapPath(year, week - 1)} disabled={week <= 1} startIcon={<ChevronLeftIcon />} sx={{ flexShrink: 0 }}>
+      <Button component={Link} to={leaguePath(leagueInfo.id, recapPath(year, week - 1))} disabled={week <= 1} startIcon={<ChevronLeftIcon />} sx={{ flexShrink: 0 }}>
         Prev
       </Button>
       {/* No floating label: every option already says "Week N" */}
@@ -116,12 +116,12 @@ const RecapPage = () => {
           id="recap-week"
           inputProps={{ 'aria-label': 'Week' }}
           value={weeks.includes(week) ? week : ''}
-          onChange={(e) => history.push(recapPath(year, e.target.value))}
+          onChange={(e) => history.push(leaguePath(leagueInfo.id, recapPath(year, e.target.value)))}
         >
           {weeks.map((w) => <MenuItem value={w} key={w}>Week {w}</MenuItem>)}
         </Select>
       </FormControl>
-      <Button component={Link} to={recapPath(year, week + 1)} disabled={week >= latest} endIcon={<ChevronRightIcon />} sx={{ flexShrink: 0 }}>
+      <Button component={Link} to={leaguePath(leagueInfo.id, recapPath(year, week + 1))} disabled={week >= latest} endIcon={<ChevronRightIcon />} sx={{ flexShrink: 0 }}>
         Next
       </Button>
     </Box>
@@ -131,7 +131,7 @@ const RecapPage = () => {
   const subtitle = (
     <>
       {year} season{recap?.playoffs ? ' · Playoffs' : ''}
-      {!isCurrent && <> · <MuiLink component={Link} to={`/seasons/${year}`}>Season recap</MuiLink></>}
+      {!isCurrent && <> · <MuiLink component={Link} to={leaguePath(leagueInfo.id, `/seasons/${year}`)}>Season recap</MuiLink></>}
     </>
   );
 

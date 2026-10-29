@@ -64,6 +64,8 @@ Each league's current season is in one phase. `/info` returns it as `phase` (alo
 
 The phase only changes what Home leads with (`CARDS_BY_PHASE` in `LeagueDashboard.jsx`); every page stays reachable. Past seasons show as an end-of-season recap all year.
 
+Every league page lives under `/league/{leagueId}`, so any link can be shared, and the paths below are relative to it (`leaguePath` in `frontend/src/utils/seasons.js` adds the prefix). `/` opens the last league opened in this browser (the `league_id` cookie), or Gridiron on `gridiron.ffalmanac.com`, else asks for an ID. `/{leagueId}` is a short link to the same place, and the old unprefixed paths redirect to the default league. `League.jsx` loads the league the URL names and asks for `espn_s2` there if it's private, on any page.
+
 Navigation is defined once in `frontend/src/utils/seasons.js`. The current season's pages are **Power rankings** (`/power-rankings`), **Playoff race** (`/playoffs`: the stretch-run picture and odds by week) and **Standings** (`/standings`: seed order with playoff odds, all-play, expected wins and luck beside the record, then points left on the bench), next to **History** (`/history`: past seasons, all-time standings at `/all-time-standings`, head-to-head, records, keepers). On desktop they're the header tabs. On mobile the bottom bar is Home · This season · History · League, and This season has sub-tabs for its three pages. A past season's recap is `/seasons/{year}`, and any week's recap is `/seasons/{year}/weeks/{week}` (linked from Home and from the season recap).
 
 ---
