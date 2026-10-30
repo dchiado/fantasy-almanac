@@ -82,6 +82,10 @@ const League = ({ setError }) => {
             setError(msg);
             setFailed(true);
           }
+        } else if (!res.ok) {
+          // A crashed lambda has no league in its response, so don't load one
+          setError(`Error retrieving data: ${data.message}`);
+          setFailed(true);
         } else {
           setError();
           if (s2) {

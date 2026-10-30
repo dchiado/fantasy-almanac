@@ -32,6 +32,7 @@ const statsThroughWeek = (teams, throughWeek) => {
   return teams.map((t) => {
     const played = t.matchups.filter((m) => m.week <= throughWeek).length;
     const games = t.games.slice(0, played);
+    const bonusWins = t.matchups.slice(0, played).filter((m) => m.bonus === 'win').length;
     const scores = t.scores.slice(0, played);
     const overallWins = t.matchups.slice(0, played).reduce(
       (accu, m, i) => accu + weekScores[m.week].filter((s) => s < scores[i]).length, 0
@@ -39,7 +40,7 @@ const statsThroughWeek = (teams, throughWeek) => {
 
     return {
       ...t,
-      wins: games.filter(Boolean).length,
+      wins: games.filter(Boolean).length + bonusWins,
       l5: games.slice(-5).filter(Boolean).length,
       points: round2(scores.reduce((a, b) => a + b, 0)),
       consistency: round2(pstdev(scores)),

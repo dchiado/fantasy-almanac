@@ -187,7 +187,7 @@ aws ssm put-parameter --name /ffalmanac/ANTHROPIC_API_KEY --value "sk-..." --typ
 Two features call Claude: the power rankings writeup (`writePowerRankings`) and the weekly recap summary (`writeRecapSummary`). Both follow the same guards:
 
 - **Spend limit:** the Anthropic API key is in its own Console workspace with a low monthly limit. It's the only hard cap; the AWS budget only alerts.
-- **Allowlist:** only leagues in `AI_LEAGUES` (`template.yaml` globals, comma-separated) get writeups. Other leagues get the pages without them. The power rankings prompt is written for Gridiron, so check it before adding a league; the recap summary prompt is league-neutral.
+- **Allowlist:** only leagues in `AI_LEAGUES` (`template.yaml` globals, comma-separated) get writeups. Other leagues get the pages without them. The power rankings prompt takes each league's name and background from `LEAGUES` in `writePowerRankings`, so add a league there too; the recap summary prompt is league-neutral.
 - **One call per writeup:** before invoking a writer, the lambda claims the writeup's status marker with a conditional write (`utils/writeups.py`), so simultaneous page loads make one call and reloads read the stored text. The writer marks it `failed` on any error, and a `pending` marker older than 5 minutes counts as failed. A failed writeup is never retried; delete its status marker to try again.
 - **Power rankings:** one writeup per league-week, at `power_rankings/.../status.json` next to `rankings.md`.
 - **Recap summaries:** one per version of a week's facts, so a stat correction that changes them is a new call. At most 3 per league-week (`SUMMARY_LIMIT`), and only for a season that isn't final, so opening an old recap never calls Claude.

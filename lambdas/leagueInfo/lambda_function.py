@@ -1,4 +1,4 @@
-from utils import load_data, season_phase, espn_handler
+from utils import check_start_year, load_data, season_phase, espn_handler
 import boto3
 
 s3 = boto3.client('s3')
@@ -15,7 +15,7 @@ def summary(league_id):
     details = load_data(year, 'mNav', league_id)
 
     name = details["settings"]["name"]
-    est = details["status"]["previousSeasons"][0]
+    est = check_start_year(None, league_id)
     teams = details["status"]["teamsJoined"]
     week = details["status"]["currentMatchupPeriod"]
 

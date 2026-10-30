@@ -24,9 +24,9 @@ Globals:
       Variables:
         STAGE: !Ref Stage
         # Comma-separated league IDs that get Claude writeups (power rankings,
-        # recap summaries); others get the pages without them. The power rankings
-        # prompt is written for Gridiron, so check it before adding a league.
-        AI_LEAGUES: "166975"
+        # recap summaries); others get the pages without them. Give a new league
+        # its background in LEAGUES in writePowerRankings.
+        AI_LEAGUES: "166975,1637874931"
 
 Resources:
 

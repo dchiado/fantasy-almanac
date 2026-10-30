@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Slider, Typography, useMediaQuery } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Skeleton, Slider, Typography, useMediaQuery } from "@mui/material";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -12,6 +12,11 @@ import StatTable from "../ui/StatTable";
 import { DEFAULT_WEIGHTS, rankWithMovement } from "../../utils/powerRankings";
 import './PowerRankings.css';
 import { fetchApi } from "../../api";
+
+// A writeup still being written is asked for again this often, this many times.
+// Together they outlast the writer's 60s timeout.
+const RETRY_MS = 8000;
+const RETRIES = 8;
 
 const columns = [
 	{
@@ -42,6 +47,14 @@ const weightFields = [
 	{ key: 'consistency', label: 'Consistency' },
 	{ key: 'lastFive', label: 'Last five' },
 ];
+
+const WriteupSkeleton = () => (
+	<Box aria-label="Writing this week's power rankings">
+		{[100, 92, 96, 70, 100, 88, 94, 60].map((width, i) => (
+			<Skeleton key={i} variant="text" width={`${width}%`} />
+		))}
+	</Box>
+);
 
 const PowerRankings = ({ setError }) => {
 	const leagueId = useSelector((state) => state.leagueInfo.id)
@@ -74,6 +87,47 @@ const PowerRankings = ({ setError }) => {
 			});
 		}
 	}, [rankingsData, leagueId, setError]);
+
+	// Asks for a pending writeup again, without touching the rankings already showing
+	useEffect(() => {
+		if (!leagueId || writeupStatus !== 'pending') {
+			return undefined;
+		}
+
+		let cancelled = false;
+		let timer;
+		let tries = 0;
+
+		const check = () => {
+			tries += 1;
+			fetchApi(`/power-rankings?leagueId=${leagueId}`)
+				.then((data) => {
+					if (cancelled) {
+						return;
+					}
+
+					if (data.writeup_status !== 'pending') {
+						setWriteup(data.writeup || null);
+						setWriteupStatus(data.writeup_status || null);
+					} else if (tries < RETRIES) {
+						timer = setTimeout(check, RETRY_MS);
+					} else {
+						setWriteupStatus('late');
+					}
+				})
+				.catch(() => {
+					if (!cancelled) {
+						setWriteupStatus('failed'); // the rankings are already showing; just no writeup
+					}
+				});
+		};
+		timer = setTimeout(check, RETRY_MS);
+
+		return () => {
+			cancelled = true;
+			clearTimeout(timer);
+		};
+	}, [leagueId, writeupStatus]);
 
 	// Only offer "read more" when the collapsed writeup actually cuts text off
 	useLayoutEffect(() => {
@@ -118,26 +172,34 @@ const PowerRankings = ({ setError }) => {
 		return <LoadingState rows={12} />;
 	}
 
+	let writeupContent = null;
+	if (writeup) {
+		writeupContent = (
+			<>
+				<Box ref={writeupRef} className={`pr-writeup${writeupExpanded ? '' : ' collapsed'}${!writeupExpanded && writeupOverflows ? ' faded' : ''}`}>
+					<ReactMarkdown>{writeup}</ReactMarkdown>
+				</Box>
+				{(writeupOverflows || writeupExpanded) &&
+					<Button size="small" onClick={() => setWriteupExpanded((v) => !v)} sx={{ mt: 1, ml: -1 }}>
+						{writeupExpanded ? 'Show less' : 'Read the full writeup'}
+					</Button>
+				}
+			</>
+		);
+	} else if (writeupStatus === 'pending') {
+		writeupContent = <WriteupSkeleton />;
+	} else if (writeupStatus === 'late') {
+		writeupContent = <Typography variant="body2" color="text.secondary">Still being written. Check back in a minute.</Typography>;
+	}
+
 	return (
 		<PageLayout maxWidth={1300} title="Power Rankings" subtitle="Arrows show movement since last week." nav={<ThisSeasonTabs />}>
 			{parsedRankings.length > 0 &&
 				<Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 4 } }}>
 					{/* Only leagues in AI_LEAGUES get a writeup; for the rest, and for failed ones, the card is left out */}
-					{(writeup || writeupStatus === 'pending') &&
+					{writeupContent &&
 					<SectionCard title="This week's writeup">
-						{writeup
-							? <>
-									<Box ref={writeupRef} className={`pr-writeup${writeupExpanded ? '' : ' collapsed'}${!writeupExpanded && writeupOverflows ? ' faded' : ''}`}>
-										<ReactMarkdown>{writeup}</ReactMarkdown>
-									</Box>
-									{(writeupOverflows || writeupExpanded) &&
-										<Button size="small" onClick={() => setWriteupExpanded((v) => !v)} sx={{ mt: 1, ml: -1 }}>
-											{writeupExpanded ? 'Show less' : 'Read the full writeup'}
-										</Button>
-									}
-								</>
-							: <Typography color="text.secondary">Check back later for the power rankings writeup.</Typography>
-						}
+						{writeupContent}
 					</SectionCard>
 					}
 

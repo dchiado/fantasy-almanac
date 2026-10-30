@@ -74,7 +74,7 @@ const PowerRankingsCard = ({ leagueId }) => {
                 place={idx + 1}
                 name={team.name}
                 extra={<MovementBadge movement={team.movement} />}
-                value={`${team.wins}-${team.games ? team.games.length - team.wins : '?'}`}
+                value={`${team.wins}-${team.losses}`}
               />
             ))}
             {intro &&

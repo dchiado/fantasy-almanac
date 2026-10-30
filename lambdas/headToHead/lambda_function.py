@@ -1,5 +1,6 @@
 import json
 from utils import (
+    check_start_year,
     prefetch,
     espn_handler,
     is_bye_week,
@@ -124,7 +125,7 @@ def all_time(owner_id_1, owner_id_2, league_id):
 
     end_year = latest_season(league_id)
     current_info = load_data(end_year, 'mNav', league_id)
-    start_year = current_info["status"]["previousSeasons"][0]
+    start_year = check_start_year(None, league_id)
     winners = []
 
     prefetch(league_id, range(start_year, end_year + 1), ['mSettings', 'mMatchupScore', 'mNav'])

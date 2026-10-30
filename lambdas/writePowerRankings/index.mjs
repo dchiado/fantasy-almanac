@@ -18,6 +18,24 @@ async function getApiKey() {
 
 const prefix = ({ year, week, league_id }) => `power_rankings/league_${league_id}/${year}/week_${week}`;
 
+// What the prompt knows about each league in AI_LEAGUES: a name for the title
+// and its background. Other leagues get neither.
+const LEAGUES = {
+  '166975': {
+    name: 'Gridiron',
+    context: `- League context. Don't overdo it with these, but just for reference:
+  * This league has been around for 20 years
+  * It is old friends from high school that are now mid 30s guys that live all over the country
+  * There is a rule that if someone loses by 50, they have to shotgun a beer. If you do reference this, be subtle and don't overdo it.`,
+  },
+  '1637874931': {
+    context: `- League context. Don't overdo it with these, but just for reference:
+  * The league is coworkers at a SaaS company
+  * Generic office and SaaS jokes are fine (churn, roadmaps, standups), but don't overdo it
+  * Keep the trash talk about fantasy teams, lineups and results. Nothing about anyone's actual job, performance at work, personal life or appearance.`,
+  },
+};
+
 // Marks the week's writeup as failed, so powerRankings stops showing it as
 // pending and never retries it (every retry would be another Claude call)
 async function markFailed(event) {
@@ -47,13 +65,21 @@ async function writeRankings(data) {
   console.log('Got data: ');
   console.log(data);
 
+  const league = LEAGUES[data.league_id] ?? {};
+  const title = league.name ? `Week <week> ${league.name} Power Rankings` : 'Week <week> Power Rankings';
+
+  const winBonusRule = data.has_win_bonus
+    ? `  * This league has a weekly bonus: each team also gets a win for scoring in the top half of the league that week, and a loss otherwise. A team's record includes those, so always use "wins" for its record. Don't work out a record from "games" or "matchups".
+`
+    : '';
+
   const prompt = `
 You are a fantasy sports analyst writing weekly power rankings for a fantasy league. 
 Use the following dataset of teams (wins, recent form, points, booms/busts, consistency, matchups).
 
 Instructions:
 - Ranked list: The teams are already sorted from best to worst. Do NOT change the order.
-- Format: Use a "Week <week> Gridiron Power Rankings" at the top. Put the team names as headings. Bold key stats.
+- Format: Use a "${title}" at the top. Put the team names as headings. Bold key stats.
 - Tone: Funny, snarky, conversational, not too cheesy. Poke fun at teams and players where appropriate. Reference current sports events or pop culture if relevant.
 - Content: For each team, write 3–4 sentences summarizing:
   * Overall performance and record
@@ -64,17 +90,17 @@ Instructions:
 - Rules:
   * Don't mention standard deviations, the actually consistency number value, or other overly-statistical details in the writeup
   * If you mention booms and busts, explain what that is. Boom is a 140+ week, and bust is a <90 week.
-- League context. Don't overdo it with these, but just for reference:
-  * This league has been around for 20 years
-  * It is old friends from high school that are now mid 30s guys that live all over the country
-  * There is a rule that if someone loses by 50, they have to shotgun a beer. If you do reference this, be subtle and don't overdo it.
+${winBonusRule}${league.context ?? ''}
 - Stat definitions:
   "scores": their weekly scores
   "against": the weekly scores against them
-  "games": whether they won or lost each week
+  "games": whether they won or lost their head-to-head matchup each week
   "matchups": details about their matchups each week
-  "wins": total wins
-  "wins_last_5": wins in the last 5 matchups
+  "wins": total wins, including any weekly bonus wins
+  "losses": total losses, including any weekly bonus losses
+  "h2h_wins": wins in head-to-head matchups
+  "bonus_wins": weekly bonus wins
+  "wins_last_5": head-to-head wins in the last 5 matchups
   "points": total points
   "avg_score": average weekly score
   "avg_against": average weekly score against them

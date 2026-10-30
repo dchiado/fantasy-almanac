@@ -1,5 +1,5 @@
 import json
-from utils import load_data, latest_season, espn_handler, prefetch
+from utils import check_start_year, load_data, latest_season, espn_handler, prefetch, season_phase
 
 def list(league_id):
     """Calculate league standings by year and overall for all years.
@@ -35,9 +35,12 @@ def list(league_id):
     }
 
     end_year = latest_season(league_id)
-    details = load_data(end_year, 'mNav', league_id)
-    start_year = details["status"]["previousSeasons"][0]
+    start_year = check_start_year(None, league_id)
     print('Start year: ', start_year)
+
+    # Nobody has won the regular season while it's still being played
+    phase = season_phase(league_id)
+    undecided_year = phase["season"] if phase["phase"] in ("regular_season", "stretch_run") else None
 
     prefetch(league_id, range(int(start_year), int(end_year) + 1), ['mTeam'])
     for year in range(int(start_year), int(end_year) + 1):
@@ -83,7 +86,7 @@ def list(league_id):
                 "wins": season_wins,
                 "losses": season_losses,
                 "ties": season_ties,
-                "reg_season_champ": reg_season_place == 1,
+                "reg_season_champ": reg_season_place == 1 and year != undecided_year,
                 "playoff_champ": playoff_place == 1,
                 "toilet_bowl": reg_season_place == total_teams
             }

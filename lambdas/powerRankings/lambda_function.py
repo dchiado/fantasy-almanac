@@ -7,6 +7,7 @@ from utils import (
     team_mapping
 )
 from utils.writeups import ai_league, invoke_async, writeup as stored_writeup
+from engine.season import TOP_HALF_BONUS, top_half_bonus
 import statistics
 import os
 
@@ -20,6 +21,17 @@ def update_overall_wins(tm, all_week_pts):
         tm["overall_wins"] += week_overall_wins
 
 
+def bonus_results(teams, unfinished_weeks):
+    """Each finished week's bonus results: week -> team id -> "win" | "loss" | "tie"."""
+    week_scores = {}
+    for tm in teams:
+        for m in tm["matchups"]:
+            week_scores.setdefault(m["week"], {})[tm["team_id"]] = m["score"]
+
+    return {week: top_half_bonus(scores) for week, scores in week_scores.items()
+            if week not in unfinished_weeks}
+
+
 WRITER_FUNCTION = os.environ.get('WRITE_POWER_RANKINGS_FUNCTION', 'writePowerRankings')
 
 
@@ -27,11 +39,12 @@ def writeup_prefix(league_id, year, week):
     return f"power_rankings/league_{league_id}/{year}/week_{week}"
 
 
-def writeup(league_id, year, week, teams):
+def writeup(league_id, year, week, teams, has_win_bonus):
     """Return (writeup, status) for this week, starting a Claude writeup if
     needed (utils/writeups.py). Only leagues in AI_LEAGUES get one."""
     prefix = writeup_prefix(league_id, year, week)
-    payload = {"year": year, "week": week, "league_id": league_id, "teams": teams}
+    payload = {"year": year, "week": week, "league_id": league_id, "teams": teams,
+               "has_win_bonus": has_win_bonus}
     return stored_writeup(f"{prefix}/rankings.md", f"{prefix}/status.json",
                           allowed=lambda: ai_league(league_id),
                           start=lambda: invoke_async(WRITER_FUNCTION, payload))
@@ -41,7 +54,10 @@ def current(league_id):
     """Calculate current power rankings.
 
     The return object is a list of the teams objects definedbelow.
-    The "games" list has True for a win, False for a loss.
+    The "games" list has True for a win, False for a loss, head-to-head only.
+    "wins" and "losses" include the league's weekly bonus results, if it has them,
+    to match ESPN's standings. "bonus" is None until a week is finished, and in
+    leagues without the bonus.
 
     Returns:
         teams (object) -- OrderedDict of power ranking details
@@ -55,10 +71,14 @@ def current(league_id):
                     "score": <my score>,
                     "opponent_score": <their score>,
                     "opponent": <their team name>,
-                    "result": "w" | "l"
+                    "result": "w" | "l",
+                    "bonus": "win" | "loss" | "tie" | None
                 },
                 "games": [True, True],
-                "wins": 2,
+                "wins": 3,
+                "losses": 1,
+                "h2h_wins": 2,
+                "bonus_wins": 1,
                 "l5": 2,
                 "points": 309.06,
                 "consistency": 4.37,
@@ -80,7 +100,11 @@ def current(league_id):
 
     team_names = team_mapping(year, league_id)
 
+    settings = load_data(year, 'mSettings', league_id)["settings"]
+    has_win_bonus = settings.get("scoringSettings", {}).get("scoringEnhancementType") == TOP_HALF_BONUS
+
     all_week_pts = {}
+    unfinished_weeks = set()
     # loop through all matchups in the regular season
     for matchup in matchups:
         week = matchup["matchupPeriodId"]
@@ -92,6 +116,9 @@ def current(league_id):
 
         if week not in all_week_pts:
             all_week_pts[week] = []
+
+        if matchup["winner"] == "UNDECIDED":
+            unfinished_weeks.add(week)
 
         # add team's score and win/loss to teams obj
         for t in ["home", "away"]:
@@ -129,6 +156,8 @@ def current(league_id):
                 team_obj["against"].append(against)
                 team_obj["matchups"].append(matchup_obj)
 
+    bonus = bonus_results(teams, unfinished_weeks) if has_win_bonus else {}
+
     all_wins = []
     all_overall_wins = []
     all_l5 = []
@@ -143,7 +172,14 @@ def current(league_id):
     # loop through teams object and add sum values
     # to teams object and all_ lists
     for tm in teams:
-        tm["wins"] = sum(tm["games"])
+        for m in tm["matchups"]:
+            m["bonus"] = bonus.get(m["week"], {}).get(tm["team_id"])
+        bonus_counts = [m["bonus"] for m in tm["matchups"]]
+
+        tm["h2h_wins"] = sum(tm["games"])
+        tm["bonus_wins"] = bonus_counts.count("win")
+        tm["wins"] = tm["h2h_wins"] + tm["bonus_wins"]
+        tm["losses"] = len(tm["games"]) - tm["h2h_wins"] + bonus_counts.count("loss")
         all_wins.append(tm["wins"])
 
         tm["l5"] = sum(tm["games"][-5:])
@@ -198,7 +234,7 @@ def current(league_id):
     teams = sorted(teams, key=lambda x: x["pr_score"])
 
     try:
-        text, status = writeup(league_id, year, current_week, teams)
+        text, status = writeup(league_id, year, current_week, teams, has_win_bonus)
     except Exception as e:
         # The rankings don't depend on the writeup; never fail the page over it
         print(f"Writeup lookup failed: {e}")
